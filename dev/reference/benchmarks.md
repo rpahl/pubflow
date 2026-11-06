@@ -114,6 +114,25 @@ the versions alternating (machine busy, load ~2.5-3 of 4 cores):
 => No slowdown; the DOCX gap is within the noise of the busy machine (the pandoc
 step itself is the same).
 
+## R15 on the public repository (2026-11-06)
+
+Version 0.0.0.9045, R 4.5.3, pandoc 3.13, xelatex (TeX Live 2026), typst
+0.15.1, machine idle (load ~0.3 of 4 cores), one run each, scripts in
+`inst/bench/`:
+
+| Render | Cold (new cache) | Warm | Target |
+|---|---|---|---|
+| HTML `pub_html()` (`html.R`) | 12.0 s | 114 ms | warm < 500 ms |
+| DOCX (`docx.R`, 2.8 MB) | 18.3 s | 4.1 s | warm < 5 s |
+| PDF xelatex (`pdf.R`, 3.0 MB, 85 pages) | 30.2 s | 22.6 s | none |
+| PDF Typst (`pdf.R`, 4.8 MB, 65 pages) | 12.3 s | 7.2 s | none |
+
+Warm DOCX parts: `pub_markdown()` 0.87 s, pandoc 1.97 s, section breaks
+0.10 s, header/footer 0.16 s, lock 0.24 s. HTML without cache: tables 0.79 s,
+texts 17 ms. The cold times include the first call of the session (package
+and font loading) and the 45 figures; the Typst warm time is dominated by
+`huxtable::to_typst()` (`pub_markdown()` 4.3 s, see PLAN.md, Parked).
+
 ## Outputs that reach their pipeline (D20)
 
 Measured 2026-10-23, R 4.5.3, ggplot2 4.0.3, pipeflow 0.5.0.9012. A

@@ -41,7 +41,7 @@ are stamped by its output hook and steps are added with `pip_add()`
 (D38); pipeflow 0.5.0.9025 fails mapped steps per key (D21); vignettes
 v01-v06 (D2); accessible param UI (D50).
 
-- [ ] Benchmarks recorded (R15 HTML/DOCX/PDF).
+Benchmarks of R15 are recorded in `reference/benchmarks.md`.
 
 Acceptance:
 - end-to-end test: demo pipeline -> layout step -> `pub_render()` for html,
