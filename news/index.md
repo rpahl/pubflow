@@ -1,8 +1,9 @@
 # Changelog
 
-## pubflow 0.0.0.9045
+## pubflow 0.0.0.9046
 
-First public version, under development towards v0.1.
+First public version, under development towards v0.1. \* R15 benchmarks
+recorded (`dev/reference/benchmarks.md`).
 
 - Parameters: self-describing param objects with validity checks,
   collected into the config of a pipeline.
