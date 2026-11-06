@@ -47,7 +47,14 @@ Acceptance:
 - end-to-end test: demo pipeline -> layout step -> `pub_render()` for html,
   docx, pdf (engines permitting), md (done: `test-report-app.R`, with the
   report app's downloads and the serialized size of its documents, D20);
-- R CMD check 0/0/0; tag `v0.1.0` after review.
+- R CMD check 0/0/0 (done at 0.0.0.9045); tag `v0.1.0` only with the
+  release checklist below.
+
+Release checklist (v0.1.0, first CRAN version):
+- [ ] pubflow validated in a real project; findings fixed.
+- [ ] pipeflow 0.5.0.9028 (or later) on CRAN; `Remotes` and the pin removed.
+- [ ] R CMD check 0/0/0, version 0.1.0 with a NEWS heading, tag `v0.1.0`,
+  GitHub release, CRAN submission.
 
 ---
 
