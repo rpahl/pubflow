@@ -1,0 +1,26 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+check/
+*.Rcheck/
+pubflow_*.tar.gz
+
+# Claude Code configuration (no shared settings are committed)
+.claude/
+
+# Placeholders the Claude Code sandbox creates in the working directory
+.bash_profile
+.bashrc
+.gitconfig
+.gitmodules
+.idea
+.mcp.json
+.profile
+.ripgreprc
+.vscode
+.zprofile
+.zshrc
+
+# pkgdown site
+docs/

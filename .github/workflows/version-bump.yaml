@@ -1,0 +1,38 @@
+# Fails a pull request whose DESCRIPTION version is not higher than the one
+# on the base branch: every milestone PR bumps the development version
+# (dev/PLAN.md, definition of done). Label a PR "no-version-bump" to skip the
+# check, e.g. for changes to documentation or CI only.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+name: version-bump.yaml
+
+permissions: read-all
+
+jobs:
+  version-bump:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'no-version-bump') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check that the version is higher than on the base branch
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          # R versions may use "-" as separator (1.2-3): compare as 1.2.3
+          version() { sed -n 's/^Version:[[:space:]]*//p' | tr '-' '.'; }
+          git fetch --quiet --depth=1 origin "$BASE_REF"
+          base=$(git show FETCH_HEAD:DESCRIPTION | version)
+          head=$(version < DESCRIPTION)
+          echo "Version on $BASE_REF: $base; in this pull request: $head"
+          highest=$(printf '%s\n%s\n' "$base" "$head" | sort -V | tail -n 1)
+          if [ "$head" = "$base" ] || [ "$highest" != "$head" ]; then
+            echo "::error file=DESCRIPTION::Version $head is not higher" \
+              "than $base on $BASE_REF. Bump the development version" \
+              "(dev/PLAN.md, definition of done) or label the pull request" \
+              "'no-version-bump'."
+            exit 1
+          fi

@@ -1,0 +1,334 @@
+---
+title: "Get started with pubflow"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+description: >
+  Start here: from a pipeline with parameters to a document, a report file
+  and a Shiny app.
+vignette: >
+  %\VignetteIndexEntry{Get started with pubflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r knitr-setup, include = FALSE}
+knitr::opts_chunk$set(
+    comment = "#",
+    prompt = FALSE,
+    tidy = FALSE,
+    cache = FALSE,
+    collapse = TRUE
+)
+
+old <- options(width = 100L)
+```
+
+{pipeflow} computes the results of an analysis in pipeline steps. {pubflow}
+adds what you need to *publish* these results:
+
+* **parameters** that describe themselves (label, limits, description) and
+  check their values;
+* **outputs** for documents: tables, figures and text;
+* **documents** that steps of the pipeline build from these outputs;
+* **reports** in HTML, Word and PDF format;
+* **Shiny modules** for a parameter UI and a document viewer.
+
+This vignette goes through all of them with one small example. It assumes
+that you know how to build and run a pipeline; if not, read pipeflow's
+[Get started](https://cran.r-project.org/package=pipeflow/vignettes/v01-get-started.html)
+first.
+
+## The example
+
+We use the example of pipeflow's Get started vignette: a pipeline that
+adds a temperature column in degrees Celsius to base R's `airquality` data,
+fits a linear model of the ozone concentration and plots the fit.
+
+```{r pipeline}
+library(pipeflow)
+
+pip <- pip_new("my-pip") |>
+    pip_add("data", function(data = airquality) data) |>
+    pip_add("prep", function(df = ~data) {
+        df[, "Temp.Celsius"] <- (df[, "Temp"] - 32) * 5 / 9
+        df
+    }) |>
+    pip_add("fit", function(data = ~prep, xVar = "Temp.Celsius") {
+        lm(paste("Ozone ~", xVar), data = data)
+    })
+```
+
+To publish the results, we add three things: params that describe the
+pipeline's parameters, steps that turn the results into a table, a figure and
+a text, and a step that arranges them into a document.
+
+## Parameters
+
+A pipeflow parameter is a plain R value, the default of a step function's
+argument. A pubflow parameter (a *param*) is a value with attributes that
+describe it: a label, limits, a description, and so on. A *param config*
+collects the params of an analysis:
+
+```{r config}
+library(pubflow)
+
+config <- param_config(
+    xVar = choice_param(
+        "Temp.Celsius",
+        choices = c("Temp.Celsius", "Wind", "Solar.R"),
+        label = "Predictor",
+        source = "user",
+        description = "Variable that explains the ozone concentration"
+    ),
+    level = numeric_param(
+        0.95,
+        label = "Confidence level",
+        min = 0.5,
+        max = 0.999,
+        source = "user"
+    ),
+    title = param(
+        "Ozone in New York",
+        label = "Report title",
+        source = "user"
+    )
+)
+config
+```
+
+Each kind of param checks its values: `choice_param()` allows only one of
+its `choices` (its value is a factor), `numeric_param()` only a number
+between `min` and `max`. `source = "user"` marks the params that the user
+sets, so that an app or a report can pick them out.
+
+## Outputs
+
+The next steps turn the results into outputs that a document can show:
+`pub_table()` makes a table with column labels and the number of decimal
+places, `pub_figure()` a figure with a caption, and `pub_text()` a text in
+Markdown.
+
+```{r output-functions}
+library(ggplot2)
+
+coef_table <- function(model, level) {
+    ci <- confint(model, level = level)
+    coefs <- data.frame(
+        term = rownames(ci),
+        estimate = coef(model),
+        lower = ci[, 1L],
+        upper = ci[, 2L]
+    )
+    pub_table(
+        coefs,
+        caption = sprintf("Coefficients with %g%% confidence limits", 100 * level),
+        labels = c(
+            term = "Term",
+            estimate = "Estimate",
+            lower = "Lower",
+            upper = "Upper"
+        ),
+        digits = c(estimate = 3L, lower = 3L, upper = 3L)
+    )
+}
+
+fit_figure <- function(model, data, xVar) {
+    coefs <- coef(model)
+    p <- ggplot(data, aes(.data[[xVar]], .data$Ozone)) +
+        geom_point(na.rm = TRUE) +
+        geom_abline(intercept = coefs[[1L]], slope = coefs[[2L]])
+    pub_figure(p, caption = "Linear model fit", width = 6, height = 3.5)
+}
+```
+
+```{r output-steps}
+pip |>
+    pip_add("coef_table", function(model = ~fit, level = 0.95) {
+        coef_table(model, level)
+    }) |>
+    pip_add("plot", function(model = ~fit, data = ~prep, xVar = "Temp.Celsius") {
+        fit_figure(model, data, as.character(xVar))
+    }) |>
+    pip_add("summary", function(model = ~fit) {
+        r2 <- summary(model)$r.squared
+        pub_text(sprintf(
+            "The model explains **%.0f%%** of the variance of the ozone concentration.",
+            100 * r2
+        ))
+    })
+```
+
+The table and the figure are made by functions defined outside the pipeline
+(here `coef_table()` and `fit_figure()`). This matters for figures: a ggplot
+keeps the environment it was made in, so a plot made inside the pipeline's
+code would keep the pipeline alive in every copy of the figure.
+
+## A document
+
+The last step is a *layout step*: it takes the outputs of other steps and
+arranges them into a document with `pub_doc()` and `pub_section()`.
+
+```{r layout-step}
+pip |>
+    pip_add(
+        "report",
+        function(
+            title = "",
+            summary = ~summary,
+            table = ~coef_table,
+            plot = ~plot
+        ) {
+            pub_doc(
+                pub_section("Results", summary, table, plot),
+                title = title
+            )
+        }
+    )
+```
+
+Finally, we set the params of the config in the pipeline. Each param goes to
+every step that has an argument of its name, here `xVar` to the steps `fit`
+and `plot`:
+
+```{r set-params}
+pip_set_params(pip, config)
+pip
+```
+
+The steps still get plain values: `coef_table` gets `level = 0.95`, not the
+param object. `pub_get_params()` reads the params back from the pipeline:
+
+```{r get-params}
+names(pub_get_params(pip))
+```
+
+## Run and view
+
+We run the pipeline and take the document from the output of the layout step:
+
+```{r run}
+pip_run(pip, lgr = NULL)
+doc <- pip[["report", "out"]]
+doc
+```
+
+`pub_html()` renders the document to HTML. In an R Markdown document like this
+vignette, the HTML is shown in place:
+
+```{r html, eval = FALSE}
+pub_html(doc)
+```
+
+```{r html-framed, echo = FALSE}
+# The same, framed to set it apart from the vignette's own text, and with
+# its headings left out of the table of contents of the pkgdown site
+html <- pub_html(doc)
+htmltools::div(
+    style = "border: 1px solid #ccc; border-radius: 4px; padding: 0 1em;",
+    htmltools::attachDependencies(
+        htmltools::HTML(gsub("<h([1-6])", "<h\\1 data-toc-skip", html)),
+        htmltools::htmlDependencies(html)
+    )
+)
+```
+
+## Change a param
+
+Params are set with pipeflow's `pip_set_params()`. pubflow checks the new
+value against the param's rules before it is set:
+
+```{r set-valid}
+pip_set_params(pip, list(xVar = "Solar.R"))
+pip_run(pip, lgr = NULL)
+pip[["coef_table", "out"]]
+```
+
+An invalid value is an error, and nothing is set:
+
+```{r set-invalid, error = TRUE}
+pip_set_params(pip, list(xVar = "Height"))
+pip_set_params(pip, list(level = 1.5))
+```
+
+## A report file
+
+`pub_render()` writes the document to a file with pandoc: a Word document, a
+PDF (via LaTeX or Typst) or Markdown. The metadata given at render time
+appear in the document, e.g. the author:
+
+```{r render-docx}
+file <- pub_render(doc, "docx", meta = list(author = "Jane Doe"))
+basename(file)
+```
+
+By default, the file goes to R's temporary directory, and its name is made of
+the render time and the title. A PDF needs a LaTeX installation (xelatex) or
+typst:
+
+```{r render-pdf, eval = FALSE}
+pub_render(doc, "pdf", file = "ozone.pdf")
+pub_render(doc, "pdf", file = "ozone.pdf", pdf_engine = "typst")
+```
+
+`pub_report_spec()` sets up the format of a report: page size and margins, a
+title page, a Word template, and more.
+
+## A Shiny app
+
+Two Shiny modules turn the pipeline into an app: `pub_params_ui()` with
+`pub_pipeline_params_server()` shows an input for every param of the pipeline
+and sets the values that the user enters in the pipeline, and `pub_viewer_ui()`
+with `pub_viewer_server()` shows the document.
+
+```{r shiny, eval = FALSE}
+library(shiny)
+
+ui <- fluidPage(
+    fluidRow(
+        column(4, pub_params_ui("params")),
+        column(8, pub_viewer_ui("viewer", height = "90vh"))
+    )
+)
+
+server <- function(input, output, session) {
+    pip <- pip_clone(pip) # every session gets its own pipeline
+    params <- pub_pipeline_params_server("params", pip)
+    doc <- reactive({
+        params$revision() # run again after every change of a param
+        pip_run(pip, lgr = NULL)
+        pip[["report", "out"]]
+    })
+    pub_viewer_server("viewer", doc)
+}
+
+shinyApp(ui, server)
+```
+
+An invalid input is marked and the last valid value is restored, so the
+pipeline only ever gets valid values. A pipeline is a reference object, so
+`server()` starts with a copy (`pip_clone()`): otherwise a change of a param
+in one session would also change the pipeline of every other session.
+
+The report app that comes with pubflow shows more: grouped params, two
+reports from one pipeline, failed steps in the document and the download of
+the report. Run it with
+
+```{r report-app, eval = FALSE}
+shiny::runApp(system.file("examples", "report-app", package = "pubflow"))
+```
+
+## Where next
+
+The help pages of the functions used here describe them in detail:
+
+* params: `?param`, `?param_config`, `?param_validity`, `?pub_get_params`;
+* outputs: `?pub_table`, `?pub_figure`, `?pub_text`;
+* documents: `?pub_doc`, `?pub_layout_inputs`;
+* rendering and reports: `?pub_html`, `?pub_render`, `?pub_report_spec`;
+* Shiny: `?pub_params_ui`, `?pub_viewer_ui`.
+
+```{r cleanup, include = FALSE}
+options(old)
+```

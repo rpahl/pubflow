@@ -1,0 +1,407 @@
+---
+title: "Reports"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+description: >
+  A report is a document written to a Word, PDF, HTML or Markdown file. Render-time
+  metadata, the trace stamp and file names, report specs for each format, error
+  items, the Word header, footer and locks, Word reference documents, and the
+  setup of LaTeX and Typst.
+vignette: >
+  %\VignetteIndexEntry{Reports}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r knitr-setup, include = FALSE}
+knitr::opts_chunk$set(
+    comment = "#",
+    prompt = FALSE,
+    tidy = FALSE,
+    cache = FALSE,
+    collapse = TRUE
+)
+
+old <- options(width = 100L)
+```
+
+[Documents and layout steps](v04-documents.html) built documents; this vignette
+turns them into report files. A report is a document that is written to a file:
+Word (DOCX), PDF, HTML or Markdown. The file says who made it and when, it
+looks the same whoever opens it, and pubflow refuses to write it if it has a hole
+in it. This vignette goes through
+
+* what is added at render time and what is not part of the pipeline;
+* the report spec, which sets up a format;
+* failed steps in a report;
+* the extras of Word files: header, footer, locks and the reference document;
+* the setup of PDF output.
+
+It builds on pipeflow's vignette
+[Error handling](https://rpahl.github.io/pipeflow/articles/v05c-error-handling.html)
+for failed steps.
+
+## The example
+
+The document of the previous vignettes: a table and a figure of a linear model
+of the ozone concentration. Its header and footer lines have the token
+`{trace}`, which becomes the trace stamp of the report.
+
+```{r doc}
+library(pipeflow)
+library(pubflow)
+library(ggplot2)
+
+fit <- lm(Ozone ~ Temp, data = airquality)
+coefs <- data.frame(term = names(coef(fit)), estimate = unname(coef(fit)))
+
+doc <- pub_doc(
+    pub_section(
+        "Results",
+        pub_text(sprintf(
+            "The model explains **%.0f%%** of the variance.",
+            100 * summary(fit)$r.squared
+        )),
+        pub_table(
+            coefs,
+            caption = "Coefficients of the linear model",
+            digits = c(estimate = 3L)
+        ),
+        pub_figure(
+            ggplot(airquality, aes(Temp, Ozone)) + geom_point(na.rm = TRUE),
+            caption = "Ozone by temperature",
+            width = 6,
+            height = 3.5
+        )
+    ),
+    title = "Ozone in New York",
+    meta = list(
+        header = c(left = "Ozone study", right = "Draft"),
+        footer = c(left = "{trace}")
+    )
+)
+```
+
+## Render-time metadata
+
+Who rendered a report, when and with which application are facts about the act
+of rendering. They are not part of the pipeline: if they were params of the
+layout step, every render would outdate it. They are passed to `pub_render()`
+instead, where they are merged over the metadata of the document:
+
+```{r render}
+file <- pub_render(
+    doc,
+    "docx",
+    meta = list(author = "Jane Doe", app = "ozone-app", version = "1.2.0")
+)
+basename(file)
+```
+
+* The entries of `meta` win over those of the document, and `NULL` removes one.
+* `time` is the render time, unless the document or `meta` sets one.
+* The file name, the title block, the trace stamp, the front matter and the
+  post-processors (below) all see the merged result.
+* `pub_markdown()` and `pub_html()`, which the viewer uses, only see the
+  metadata of the document, so what you see in the viewer doesn't change from
+  one second to the next.
+
+In an app, `meta` is where the user and the version go, e.g.
+`list(author = session$user, app = "ozone-app", version = "1.2.0")`.
+
+### Trace stamp
+
+`pub_trace_stamp()` makes the line that `{trace}` stands for. It is an error
+without an author, since pubflow doesn't guess it: on a server, the system user
+is only the service account. Times are always UTC, with English month names:
+
+```{r trace}
+meta <- list(
+    author = "Jane Doe",
+    app = "ozone-app",
+    version = "1.2.0",
+    time = as.POSIXct("2026-11-02 09:30:00", tz = "UTC")
+)
+pub_trace_stamp(meta)
+pub_trace_stamp(meta[c("author", "time")])
+```
+
+```{r trace-error, error = TRUE}
+pub_trace_stamp(list(app = "ozone-app"))
+```
+
+### File names
+
+Without `file`, the report goes to R's temporary directory under the name that
+`pub_output_filename()` makes, the render time (UTC) and the title:
+
+```{r filename}
+pub_output_filename(list(title = "Ozone in New York", time = meta$time), "docx")
+```
+
+Call it yourself for a download name, e.g. in the `filename` of a Shiny
+`downloadHandler()`.
+
+## Report specs
+
+A report spec sets up the report of one format, and `pub_render()` takes it as
+`spec`. Without it, `pub_report_spec(format)` is used: all defaults. Printing a
+spec shows what it uses:
+
+```{r spec-print}
+pub_report_spec("docx")
+```
+
+Every field acts in every format that can show it. A field that the format
+can't use is an error, so a setting is never silently ignored:
+
+```{r spec-error, error = TRUE}
+pub_report_spec("docx", placeholder_color = "#0083c0")
+```
+
+The fields in short (`?pub_report_spec` has the details):
+
+| Field | What it sets |
+|---|---|
+| `reference_docx`, `latex_preamble`, `typst_template` | The template of DOCX, of PDF via LaTeX, of PDF via Typst |
+| `front_matter` | A function that returns what replaces the title block, e.g. a title page |
+| `toc`, `toc_depth` | A table of contents after the front matter, and its depth |
+| `number_sections` | Number the headings or not |
+| `labels` | The words before the caption numbers |
+| `page` | Paper size, orientation and margins (`pub_page()`) of DOCX and PDF |
+| `figure` | Image format and resolution of figures |
+| `placeholder_color` | Colour of placeholders in HTML and PDF |
+| `lock` | Lock tables, figures, header and footer of DOCX files |
+| `error_items` | Refuse or show failed steps |
+| `post_process` | Functions that change the finished file |
+| `pandoc_args` | Extra pandoc arguments |
+
+### Title page, contents and page
+
+The front matter replaces the title block. It is a function of the document
+(with the render-time metadata) and the format that returns what a document can
+hold: sections, outputs and lists of them. Its sections are not numbered, so the
+numbers of the body start at 1. End it with a page break to start the contents
+on a new page:
+
+```{r spec-front}
+title_page <- function(doc, format) {
+    list(
+        pub_text(paste("Prepared by", doc$meta$author)),
+        pub_pagebreak()
+    )
+}
+
+spec <- pub_report_spec(
+    "pdf",
+    front_matter = title_page,
+    toc_depth = 2L,
+    page = pub_page("letter", margins = c(left = 3)),
+    labels = list(table = "Tab.", figure = "Fig.")
+)
+spec
+```
+
+A document that places `pub_toc()` itself (`what = "sections"`) gets no second
+table of contents. Lists of figures and tables (`pub_toc(what = "figures")`)
+don't count: to have only those, set `toc = FALSE` in the spec.
+
+A spec is a plain list that is checked when it is used. To have one spec for
+every format, write a function that builds them, so the front matter and the
+labels are in one place:
+
+```{r spec-variants}
+my_spec <- function(format) {
+    pub_report_spec(
+        format,
+        front_matter = title_page,
+        labels = list(table = "Tab.", figure = "Fig.")
+    )
+}
+spec_docx <- my_spec("docx")
+```
+
+Markdown shows the effect of a spec without any tool; the table caption now
+starts with "Tab.":
+
+```{r spec-md}
+path <- pub_render(
+    doc,
+    "md",
+    file = tempfile(fileext = ".md"),
+    spec = my_spec("md"),
+    meta = list(author = "Jane Doe")
+)
+grep("Tab\\.", readLines(path), value = TRUE)
+```
+
+## Failed steps in a report
+
+A report has no holes: `pub_render()` refuses a document with error items and
+lists the failed steps (see [Documents and layout steps](v04-documents.html)).
+Run the pipeline of a report with the default `on_error = "stop"`, and a failed
+step stops it before any document exists.
+
+For a draft, run with `on_error = "continue"` and let the spec show the error
+items instead:
+
+```{r error-items}
+pip <- pip_new("draft") |>
+    pip_add("table", function() pub_table(head(airquality), caption = "Data")) |>
+    pip_add("fit", function(data = airquality) lm(Ozone ~ Height, data = data)) |>
+    pip_add(
+        "report",
+        function(table = ~ try(table), fit = ~ try(fit)) {
+            pub_doc(pub_section("Results", table, fit), title = "Draft")
+        }
+    )
+suppressWarnings(pip_run(pip, on_error = "continue", lgr = NULL))
+draft <- pip[["report", "out"]]
+```
+
+```{r error-refuse, error = TRUE}
+pub_render(draft, "md", file = tempfile(fileext = ".md"))
+```
+
+```{r error-show}
+spec <- pub_report_spec("md", error_items = "show")
+withCallingHandlers(
+    pub_render(draft, "md", file = tempfile(fileext = ".md"), spec = spec),
+    pubflow_render_warning = function(w) {
+        cat("Warning:", conditionMessage(w), "\n")
+        invokeRestart("muffleWarning")
+    }
+) |>
+    invisible()
+```
+
+The file has an error box where the model of the failed step would be, and the
+warning names the failed step. Use this for drafts only.
+
+## Word files
+
+### Header, footer and locks
+
+The Word file of the example above shows the header and footer lines of the
+document, with `{trace}` expanded. They go into the header and footer part of
+the reference document. A look into the file shows them:
+
+```{r docx-text}
+docx_text <- function(file, part) {
+    dir <- tempfile()
+    on.exit(unlink(dir, recursive = TRUE))
+    utils::unzip(file, files = paste0("word/", part), exdir = dir)
+    xml <- xml2::read_xml(file.path(dir, "word", part))
+    xml2::xml_text(xml2::xml_find_all(xml, "//w:t"))
+}
+docx_text(file, "header1.xml")
+docx_text(file, "footer1.xml")
+```
+
+The footer line at the left is the trace stamp, and "Page 1 / 1" is the
+reference document's own page number. A footer line at the *right* replaces the
+page number, as in PDF.
+
+With `lock = TRUE` in the spec, the file also protects itself from accidental
+editing: tables and figures are content controls that can't be deleted or
+changed, and so are the whole header and the whole footer. An item opts out with
+`pub_set_meta(locked = FALSE)`. By default, only the tables and figures with
+`pub_set_meta(locked = TRUE)` are locked, and `lock = FALSE` locks nothing. The locks guard against
+slips only, since Word lets users remove a lock in the control's properties. The
+report you can rely on is the PDF.
+
+### Post-processors
+
+Two post-processors do the work above, `pub_pp_docx_header_footer()` and
+`pub_pp_docx_lock()`. `pub_render()` adds the first to every DOCX report, the
+second with `lock = TRUE`. Add them to the spec's `post_process` yourself to
+give them arguments, e.g. other header lines than the document's, or a
+different place in the order. Listing `pub_pp_docx_lock()` without `lock =
+TRUE` locks the header and footer, but only the tables and figures with
+`pub_set_meta(locked = TRUE)`.
+
+Your own functions have the form `function(path, doc, spec)`. They change the
+finished file in place, are called in order, and a failing one stops the render,
+so no file is written. This one adds a note to a Markdown report:
+
+```{r post-process}
+add_note <- function(path, doc, spec) {
+    writeLines(c(readLines(path), "", "<!-- checked -->"), path)
+}
+spec <- pub_report_spec("md", post_process = list(add_note))
+path <- pub_render(doc, "md", file = tempfile(fileext = ".md"), spec = spec)
+tail(readLines(path), 1L)
+```
+
+### The reference document
+
+The look of a Word file comes from its reference document, pubflow's own
+`system.file("templates", "reference.docx", package = "pubflow")` unless the
+spec says `reference_docx`: A4, numbered headings, and a header and footer with
+bookmarks for the lines. Start your own from a copy of it and change the
+styles and the page in Word. The document must keep
+
+* the styles in the table below (pandoc finds them by name; a missing one is
+  added unformatted);
+* the bookmarks of the header and footer lines that you use: `header_left`,
+  `header_center`, `header_right`, `footer_left`, `footer_center` and
+  `footer_right` (the last one surrounds "Page x / N"). A line without its
+  bookmark is an error, so a stamp is never dropped unnoticed.
+
+| Style | Type | Used for |
+|---|---|---|
+| Heading 1 - Heading 5 | paragraph | numbered section headings (the numbering belongs to the styles) |
+| Heading 1 Unnumbered - Heading 5 Unnumbered | paragraph | unnumbered sections (they keep the outline level, so they appear in the table of contents) |
+| Item Title | paragraph | title line above an item |
+| Table Caption, Image Caption | paragraph | numbered captions (before tables, after figures) |
+| Figure | paragraph | the paragraph that holds an image |
+| Placeholder | character | `[text]{.placeholder}` spans |
+| Error | paragraph | error items (failed steps) |
+| Title, Subtitle, Author, Date | paragraph | pandoc's title block |
+
+The page setup, header and footer of the reference document apply to every
+section, also to landscape pages. An explicit `page` in the spec overrides the
+page of the reference document.
+
+## PDF output
+
+pubflow calls pandoc directly, so a PDF needs the tools that pandoc uses. Two
+engines are available:
+
+```{r pdf, eval = FALSE}
+pub_render(doc, "pdf", file = "ozone.pdf", meta = meta) # xelatex
+pub_render(doc, "pdf", file = "ozone.pdf", meta = meta, pdf_engine = "typst")
+```
+
+* **pandoc** (3.6 or later) is found via the environment variable
+  `PUBFLOW_PANDOC`, then `RSTUDIO_PANDOC`, then the `PATH`.
+* **xelatex** is found on the `PATH` by pandoc. Tables need the LaTeX packages
+  of huxtable (`huxtable::install_latex_dependencies()`), and pubflow itself
+  needs pdflscape, fancyhdr, lastpage, float and newunicodechar. With TinyTeX:
+  `tinytex::tlmgr_install(c("pdflscape", "fancyhdr", "lastpage", "float",
+  "newunicodechar"))`.
+* **typst** is found via the environment variable `PUBFLOW_TYPST` (the
+  executable or its directory), then the `PATH`, then the typst that comes with
+  Quarto.
+
+To change the look of a PDF, use `latex_preamble` (a file that is included after
+pubflow's own header, so it can load packages and change the page style) or
+`typst_template` (start from `system.file("templates", "pubflow.typ", package =
+"pubflow")`). A custom Typst template must write `$header-includes$` and the
+title block, and take the lines of the header and footer from `$header-left$`
+to `$footer-right$`.
+
+## Where next
+
+* [Documents and layout steps](v04-documents.html) builds the documents that
+  reports are made of, [Parameter UI and viewer in Shiny](v05-shiny.html) shows
+  them in an app with a download button.
+* The help pages describe the options in detail: `?pub_render`,
+  `?pub_report_spec`, `?pub_trace_stamp`, `?pub_pp_docx_header_footer`,
+  `?pub_pp_docx_lock`.
+
+```{r cleanup, include = FALSE}
+options(old)
+```

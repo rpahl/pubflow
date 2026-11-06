@@ -1,0 +1,118 @@
+url: https://rpahl.github.io/pubflow/
+
+template:
+  bootstrap: 5
+  bootswatch: united
+  bslib:
+    # the frame of the logo
+    primary: "#1d5f8a"
+    navbar-bg: "#1d5f8a"
+
+navbar:
+  structure:
+    left: [home, getStarted, reference, news, articles]
+    right: [search, github]
+  components:
+    home:
+      icon: fa-home fa-lg
+      href: index.html
+      aria-label: home
+    getStarted:
+      text: "Get Started"
+      href: articles/v01-get-started.html
+
+articles:
+  - title: Get started
+    navbar: ~
+    contents:
+      - v01-get-started
+  - title: Building documents
+    desc: Params, outputs and layout steps that build a document.
+    navbar: Building documents
+    contents:
+      - v02-parameters
+      - v03-tables-figures-text
+      - v04-documents
+  - title: Shiny
+    desc: Parameter UI and document viewer in an app.
+    navbar: Publishing
+    contents:
+      - v05-shiny
+  - title: Reports
+    desc: Report files in Word, PDF, HTML and Markdown.
+    contents:
+      - v06-reports
+
+reference:
+  - title: "Params: constructors"
+    desc: Create parameter objects and collect them into the config of a pipeline.
+    contents:
+      - param
+      - param_config
+      - print.param_config
+  - title: "Params: access"
+    desc: Test, read and set params.
+    contents:
+      - is_param
+      - param_value
+      - param_attr
+      - print.param
+  - title: "Params: validity"
+    desc: Check param values and add validity rules.
+    contents:
+      - param_validity
+  - title: "Params: pipelines"
+    desc: Read the params of a pipeline and list them in a report.
+    contents:
+      - pub_get_params
+      - pub_params_table
+  - title: Shiny
+    desc: Shiny modules for the parameter UI and the document viewer.
+    contents:
+      - pub_param_input
+      - pub_params_ui
+      - pub_viewer_ui
+  - title: Document structure
+    desc: Arrange step outputs into documents in layout steps.
+    contents:
+      - pub_doc
+      - pub_layout_inputs
+      - pub_out
+      - pub_pagebreak
+      - pub_session_info
+  - title: Outputs
+    desc: Step outputs that documents show.
+    contents:
+      - pub_text
+      - pub_figure
+      - pub_type
+      - as_pub_output
+  - title: Metadata
+    desc: Read and set the metadata of step outputs.
+    contents:
+      - pub_meta
+  - title: Tables
+    desc: Build, style and display tables.
+    contents:
+      - pub_table
+      - pub_table_theme
+      - pub_cell_text
+      - pub_strikeout
+  - title: Number formatting
+    desc: Round and format numbers as GMP reports require.
+    contents:
+      - pub_round
+  - title: Rendering
+    desc: Render documents to HTML, Markdown and report files.
+    contents:
+      - pub_html
+      - pub_markdown
+      - pub_render
+      - pub_cache
+  - title: Report
+    desc: Formats, pages, post-processors and traceability of reports.
+    contents:
+      - pub_report_spec
+      - pub_pp_docx
+      - pub_trace_stamp
+      - pub_output_filename

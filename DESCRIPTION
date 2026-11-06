@@ -1,0 +1,50 @@
+Package: pubflow
+Title: Publish 'pipeflow' Pipelines: Parameter UIs, Result Viewers and Reports
+Version: 0.0.0.9045
+Authors@R: c(
+    person("Roman", "Pahl", , "roman.pahl@gmail.com", role = c("aut", "cre", "cph"))
+    )
+Description: Companion of 'pipeflow' that covers everything needed to
+    publish the results of a pipeline: self-describing parameter objects
+    with validity checks, a 'shiny' module that builds parameter inputs from
+    a pipeline, conventions for step outputs (tables, figures, text),
+    layout steps that arrange pipeline outputs into documents, a 'shiny'
+    result viewer, and reports in HTML, 'Word' and PDF format rendered
+    with 'pandoc'.
+License: MIT + file LICENSE
+URL: https://rpahl.github.io/pubflow/, https://github.com/rpahl/pubflow
+BugReports: https://github.com/rpahl/pubflow/issues
+Depends:
+    R (>= 4.3.0)
+Imports:
+    base64enc,
+    commonmark,
+    htmltools,
+    huxtable (>= 6.0.0),
+    pipeflow (>= 0.5.0.9028),
+    ragg,
+    rlang,
+    shiny (>= 1.8.1),
+    shinyWidgets,
+    xml2,
+    zip
+Suggests:
+    bslib,
+    ggplot2,
+    knitr,
+    mockery,
+    pdftools,
+    rmarkdown,
+    svglite,
+    testthat (>= 3.0.0),
+    withr
+Remotes:
+    rpahl/pipeflow@a3bbe8210cdc607303bca52e156c7cedd758f326
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Encoding: UTF-8
+Language: en-US
+Roxygen: list(markdown = TRUE)
+SystemRequirements: pandoc (>= 3.6); optional: xelatex (PDF via LaTeX),
+    typst (PDF via Typst)
+Config/roxygen2/version: 8.1.0

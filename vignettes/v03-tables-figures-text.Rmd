@@ -1,0 +1,429 @@
+---
+title: "Tables, figures and text"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+description: >
+  The outputs of a document: tables with pub_table() and huxtable, struck-through
+  cells, rounding half away from zero, figures, Markdown texts, metadata and
+  cross-references.
+vignette: >
+  %\VignetteIndexEntry{Tables, figures and text}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r knitr-setup, include = FALSE}
+knitr::opts_chunk$set(
+    comment = "#",
+    prompt = FALSE,
+    tidy = FALSE,
+    cache = FALSE,
+    collapse = TRUE
+)
+
+old <- options(width = 100L)
+```
+
+```{r library}
+library(pubflow)
+library(ggplot2)
+```
+
+[Get started](v01-get-started.html) built a table, a figure and a text in three
+steps of a pipeline. This vignette looks at these outputs in turn: what they are,
+how you set them up and how the pieces of a document refer to each other. The
+steps that return them are ordinary pipeflow steps (see pipeflow's
+[Get started](https://cran.r-project.org/package=pipeflow/vignettes/v01-get-started.html));
+the vignette on documents and layout steps shows how to arrange the
+outputs into a document.
+
+An output is a plain R object with *metadata*: a table is a huxtable, a figure a
+ggplot or a recorded plot, a text a character string. Functions that read the
+object, e.g. `print()` or `summary()`, work as on the object without the metadata.
+
+The examples show outputs one at a time, each as a small document rendered to
+HTML. They use this helper:
+
+```{r show-doc, eval = FALSE}
+show_doc <- function(...) pub_html(pub_doc(...))
+```
+
+```{r show-doc-framed, echo = FALSE}
+# The same as show_doc() above, but framed to set the outputs apart from the
+# vignette's own text, and with their headings left out of the table of contents
+# of the pkgdown site
+show_doc <- function(...) {
+    html <- pub_html(pub_doc(...))
+    htmltools::div(
+        style = "border: 1px solid #ccc; border-radius: 4px; padding: 0 1em;",
+        htmltools::attachDependencies(
+            htmltools::HTML(gsub("<h([1-6])", "<h\\1 data-toc-skip", html)),
+            htmltools::htmlDependencies(html)
+        )
+    )
+}
+```
+
+## Tables
+
+`pub_table()` builds a table from a data.frame. We summarise the ozone
+concentration of New York in `airquality` by month:
+
+```{r monthly}
+monthly <- aggregate(Ozone ~ Month, data = airquality, FUN = function(x) {
+    c(n = length(x), mean = mean(x), sd = sd(x))
+}) |>
+    do.call(what = data.frame)
+names(monthly) <- c("month", "n", "mean", "sd")
+monthly$n <- as.integer(monthly$n)
+monthly$month <- month.name[monthly$month]
+monthly
+```
+
+A table gets a caption, readable column labels and the number of decimal places
+of the numeric columns:
+
+```{r table}
+tab <- pub_table(
+    monthly,
+    caption = "Ozone concentration by month",
+    labels = c(month = "Month", n = "N", mean = "Mean (ppb)", sd = "SD (ppb)"),
+    digits = c(mean = 1L, sd = 1L)
+)
+show_doc(tab)
+```
+
+Columns without `digits` get the number format of the table theme (four decimal
+places by default), and whole numbers like `n` get none.
+
+The result is a [huxtable](https://hughjonesd.github.io/huxtable/) and can be
+used as such. `pub_table()` only sets it up: a header and body, a theme and the
+number formats. The cells keep the values and are formatted when the table is
+rendered, by the same code for every format (HTML, Word, PDF), so that a table shows the
+same text everywhere. `pub_cell_text()` returns this text:
+
+```{r cell-text}
+pub_cell_text(tab)
+```
+
+### Headers, footnotes and merged cells
+
+More arguments structure the table: `header` puts a spanner above columns with
+equal labels, `footnotes` adds numbered footnotes below the table, `merge` joins
+consecutive equal cells of a column and `na` is the text for missing values. Here
+the data are the coefficients of a linear model of the ozone concentration, one
+fit per month:
+
+```{r structure}
+fits <- do.call(rbind, lapply(split(airquality, airquality$Month), function(d) {
+    fit <- lm(Ozone ~ Temp, data = d)
+    ci <- confint(fit)
+    data.frame(
+        month = month.name[d$Month[1L]],
+        term = c("Intercept", "Temp"),
+        estimate = coef(fit),
+        lower = ci[, 1L],
+        upper = ci[, 2L]
+    )
+}))
+fits <- fits[fits$month %in% c("May", "June"), ]
+
+pub_table(
+    fits,
+    caption = "Linear model of ozone by temperature",
+    labels = c(
+        month = "Month",
+        term = "Term",
+        estimate = "Estimate",
+        lower = "Lower",
+        upper = "Upper"
+    ),
+    digits = c(estimate = 2L, lower = 2L, upper = 2L),
+    header = c(lower = "95% CI", upper = "95% CI"),
+    footnotes = c(estimate = "Least squares fit, one per month."),
+    merge = "month"
+) |>
+    show_doc()
+```
+
+`?pub_table` lists the other arguments: alignment, column widths, font size and
+the table `theme`. A theme sets font size, borders and the default number format
+for all tables. Use `options(pubflow.table_theme = pub_table_theme(...))` to
+change it for the whole session.
+
+### Style cells with huxtable
+
+pubflow has no functions of its own to style cells, use
+[huxtable's](https://hughjonesd.github.io/huxtable/reference/index.html), e.g.
+`set_bold()`, `set_text_color()` or the mapping functions like `map_text_color()`.
+Two things to keep in mind:
+
+* The rows of huxtable's functions include the header rows, so the body row `i`
+  is the table row `sum(huxtable::header_rows(tab)) + i`.
+* Give rows as integer indices (or names), not as a logical vector:
+  huxtable recycles a short logical vector, also into the footnote rows.
+
+Here the months with a mean above 40 ppb are set in bold red:
+
+```{r style}
+nHeader <- sum(huxtable::header_rows(tab))
+high <- which(monthly$mean > 40)
+
+tab |>
+    huxtable::set_bold(nHeader + high, huxtable::everywhere) |>
+    huxtable::set_text_color(nHeader + high, huxtable::everywhere, "darkred") |>
+    show_doc()
+```
+
+Call huxtable's functions with the `huxtable::` prefix, as other packages
+(flextable) mask some of their names.
+
+### Struck-through cells
+
+`pub_strikeout()` strikes cells through, e.g. for excluded measurements. It shows
+the text of the cells as they are formatted, so strike through *last*, after all
+number formats are set:
+
+```{r strikeout}
+runs <- data.frame(
+    sample = c("S1", "S2", "S3"),
+    result = c(0.8, 12.25, 0.95),
+    excluded = c(FALSE, TRUE, FALSE)
+)
+tabRuns <- pub_table(
+    runs[, c("sample", "result")],
+    caption = "Assay results",
+    digits = c(result = 2L)
+)
+rows <- sum(huxtable::header_rows(tabRuns)) + which(runs$excluded)
+tabRuns |>
+    huxtable::set_text_color(rows, huxtable::everywhere, "grey50") |>
+    pub_strikeout(rows) |>
+    show_doc()
+```
+
+Word, PDF and HTML all show the cells struck through. There is no underline.
+
+### Combining tables
+
+Combine the *data* and build the table once, rather than gluing finished tables
+together: bind the data of several batches with `rbind()` and give
+`pub_table(merge = "batch")`, or subset the data to get one table per batch.
+
+If you do combine finished tables with huxtable's `rbind()`, `cbind()` or `[`,
+the cell styles are kept, but the pieces are bound by position, each keeps its
+own borders and the metadata of the table (see below) get lost, except for
+`rbind()`, which keeps those of the first table. Finish the result with
+`pub_table()` again and set the footnotes, widths and metadata on the final table.
+
+## Rounding
+
+Numbers in tables are rounded *half away from zero* on their decimal text, as in
+the USP General Notices (7.20) and SAS's `ROUND()`: if the first dropped digit is
+5 or more, the last digit goes up. R's `round()`, `sprintf()` and `formatC()`
+round the binary value instead and send exact ties to the even digit:
+
+```{r round}
+x <- c(0.125, 2.675, -2.675, 9.995)
+round(x, 2)
+pub_round(x, 2)
+```
+
+Use the same rules wherever a number appears outside a table. `pub_round()`
+returns the rounded numbers, e.g. to compare a result with a limit that is
+specified with a number of decimal places. `pub_format_num()` returns the text that
+a table cell would show, so you can quote a number in a text and it matches the
+table:
+
+```{r format-num}
+pub_format_num(x, 2)
+pub_format_num(mean(c(98.25, 99.1)), "Mean assay: %.2f %%")
+```
+
+A format is a number of decimal places or a `sprintf()` format with exactly one
+`%.nf`, `%.ne` or `%.ng` conversion (`?pub_round`). The `number_format` of a
+table theme accepts the same; `digits` of `pub_table()` takes decimal places
+only.
+
+## Figures
+
+A plot is a figure without further ado: a ggplot or a recorded base plot
+(`grDevices::recordPlot()`) in a document is shown as a figure. `pub_figure()`
+adds a caption, a size or other metadata. Image files need it, as otherwise their
+paths would be taken as text:
+
+```{r figure}
+trend_plot <- function(data) {
+    p <- ggplot(data, aes(.data$Temp, .data$Ozone)) +
+        geom_point(na.rm = TRUE) +
+        geom_smooth(method = "lm", formula = y ~ x, na.rm = TRUE)
+    pub_figure(
+        p,
+        caption = "Ozone concentration by temperature",
+        width = 6,
+        height = 3.5
+    )
+}
+fig <- trend_plot(airquality)
+show_doc(fig)
+```
+
+The size is in inches (default 8 x 6) and sets the proportions of the plot in the
+document; `out_width = "60%"` shrinks the figure relative to the text width.
+
+As in Get started, the function that makes the plot is defined outside the
+pipeline: a ggplot keeps the environment it was made in, so a plot made by code
+inside a pipeline's constructor would hold the whole pipeline in every copy.
+
+Image files, e.g. made by another program, are figures too. Give one file, or
+several files of the same plot, e.g. a png and a pdf. Each output format takes
+the file that suits it: HTML and Word show the png (or jpg), a PDF made with LaTeX
+can use the vector file (see `?pub_figure`).
+
+```{r figure-file, eval = FALSE}
+pub_figure(c("trend.png", "trend.pdf"), caption = "Trend")
+```
+
+### Figures rendered in the step
+
+Usually a plot is drawn when the document is rendered. With `render = TRUE`,
+`pub_figure()` draws it right away, at its size and 200 dpi, and returns the png
+image with the metadata:
+
+```{r figure-render}
+png <- pub_figure(fig, render = TRUE)
+png
+pub_type(png)
+```
+
+Use it in steps that run in other R processes (workers) and for pipelines that
+are saved with `saveRDS()`. A ggplot holds environments, so a copy of it is no
+longer identical to the original, and the document draws it again although nothing
+changed. The image survives copying unchanged, so the document uses it as it is:
+
+```{r figure-copy}
+identical(fig, unserialize(serialize(fig, NULL)))
+identical(png, unserialize(serialize(png, NULL)))
+```
+
+Recorded base plots need it too, as they can't be replayed in another R session.
+The price: the image can't be changed by later steps, so the step that renders
+it should be the last that touches the figure, and its size is fixed (use
+`out_width` to scale it in the document). A report with vector figures
+(`figure = list(device = "pdf")`) still shows the png. Caption, `id` and other
+metadata can be set as for any figure:
+
+```{r figure-render-show}
+show_doc(pub_figure(png, caption = "Ozone concentration by temperature (rendered)"))
+```
+
+## Texts
+
+A text is a character vector in Markdown. `pub_text()` joins the lines and
+checks the Markdown:
+
+```{r text}
+txt <- pub_text(
+    c(
+        "The model explains **49%** of the variance ($R^2 = 0.49$).",
+        "",
+        "- the data are from May to September 1973",
+        "- missing ozone values are left out",
+        "",
+        "Complete the discussion: [<insert text>]{.placeholder}"
+    ),
+    title = "Summary"
+)
+show_doc(txt)
+```
+
+The supported Markdown is the same in all formats: paragraphs, emphasis, code,
+links, bullet and numbered lists, line breaks, inline and display math and code
+blocks. A *placeholder* (`[<insert text>]{.placeholder}`) marks a gap that someone
+fills in by hand, e.g. in the Word report. It is highlighted in every format. A
+heading is an error, as the structure of a document comes from its sections
+(see the vignette on documents and layout steps):
+
+```{r text-heading, error = TRUE}
+pub_text(c("# Results", "Some text"))
+```
+
+Format numbers in a text with `pub_format_num()` (see above), so that they agree
+with the tables. A step can also return a plain character vector, which is
+checked in the same way when it is put into a document.
+
+## Metadata
+
+Each output carries metadata, a named list in the attribute `pubflow`.
+`pub_table()`, `pub_figure()` and `pub_text()` set it for you, and
+`pub_meta()` reads it:
+
+```{r meta}
+pub_type(fig)
+pub_meta(fig)
+pub_meta(tab, "caption")
+```
+
+`pub_type()` tells what a document makes of an object: a table, figure, text or
+a few other types. `pub_set_meta()` sets or removes single entries, e.g. a `title`
+that is shown above the item, `landscape = TRUE` to place it on landscape pages
+(Word and PDF) or `locked = TRUE` to lock it in Word against accidental edits.
+Keys that pubflow doesn't know are kept, so you can add your own.
+
+```{r set-meta}
+tab <- pub_set_meta(tab, title = "Monthly summary", id = "monthly")
+pub_meta(tab)
+```
+
+The metadata of a huxtable are kept by `rbind()`, but not by `[` and `cbind()`,
+see [Combining tables](#combining-tables). `?pub_meta` lists the keys.
+
+## Cross-references
+
+A text can refer to a table or figure: `@tab:<id>` and `@fig:<id>` stand for
+"Table 1" or "Figure 2" and link to the item with that `id` in its metadata. The
+item needs a caption, as only captions are numbered, and its `id` must be unique in
+the document. The ids start with a letter, end with a letter or digit and
+contain only letters, digits, `_` and `-`:
+
+```{r crossref}
+fig <- pub_set_meta(fig, id = "trend")
+
+txt <- pub_text(c(
+    "@tab:monthly lists the ozone concentration by month, @fig:trend shows",
+    "how it depends on the temperature."
+))
+show_doc(txt, tab, fig)
+```
+
+In a Word report these are cross-reference fields, in LaTeX and Typst
+references, in HTML links, and the numbering is the engine's own. So the numbers
+stay right when someone moves a figure in Word and updates the fields. The word
+before the number ("Table", "Figure") comes from the `labels` of the report
+spec (see `?pub_report_spec`). Only texts contain references; captions, titles
+and table cells show `@fig:x` as it is. Text in code, math, placeholders and links
+is left alone, as are `\@fig:x` and `a@fig:x`.
+
+A reference that can't be resolved (unknown id, missing caption, a duplicate id)
+is an error when you write a report with `pub_render()`, listing all problems, so
+that a broken reference never goes unnoticed. `pub_html()` and the viewer only warn
+and show the reference as marked text, so that a draft still displays:
+
+```{r crossref-broken}
+broken <- pub_text("See @fig:missing.")
+html <- pub_html(pub_doc(broken))
+```
+
+## Where next
+
+* [Get started](v01-get-started.html) puts a table, figure and text into one
+  document, and the vignette on documents and layout steps shows how
+  to arrange them.
+* The help pages describe the details: `?pub_table`, `?pub_strikeout`,
+  `?pub_table_theme`, `?pub_round`, `?pub_figure`, `?pub_text`, `?pub_meta`.
+
+```{r cleanup, include = FALSE}
+options(old)
+```

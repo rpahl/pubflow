@@ -1,0 +1,2 @@
+# Formatting-only and move-only commits, skipped by `git blame` (GitHub reads this
+# file; locally: git config blame.ignoreRevsFile .git-blame-ignore-revs)

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  pubflow hex sticker. Source of man/figures/logo.png and the pkgdown
+  favicons. Same frame, font and layout as the pipeflow sticker; the
+  pipe's drop lands on a report page in front of an app window.
+  Re-export the PNGs with logo/export.sh.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 462" width="400" height="462">
+  <title>pubflow</title>
+  <defs>
+    <linearGradient id="pipe" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6a35c"/>
+      <stop offset="0.35" stop-color="#e8741f"/>
+      <stop offset="1" stop-color="#9c3f08"/>
+    </linearGradient>
+    <linearGradient id="flange" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7b072"/>
+      <stop offset="1" stop-color="#b24a0b"/>
+    </linearGradient>
+    <radialGradient id="drop" cx="0.38" cy="0.62" r="0.7">
+      <stop offset="0" stop-color="#e9f6ff"/>
+      <stop offset="0.6" stop-color="#8fcbec"/>
+      <stop offset="1" stop-color="#2f86b8"/>
+    </radialGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e4e9ee"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- outer hexagon = border -->
+  <polygon points="200,0 400,115.5 400,346.5 200,462 0,346.5 0,115.5" fill="#1d5f8a"/>
+  <!-- inner hexagon, inset by 14 -->
+  <polygon points="200,16.2 386,123.6 386,338.4 200,445.8 14,338.4 14,123.6" fill="#f3f3f3"/>
+
+  <!-- short pipe segment, its open end tilted towards the page -->
+  <g transform="translate(142 146) rotate(24)" filter="url(#shadow)">
+    <rect x="-82" y="-25" width="70" height="50" fill="url(#pipe)"/>
+    <rect x="-82" y="-18" width="70" height="7" fill="#fff" opacity="0.35"/>
+    <ellipse cx="-82" cy="0" rx="8" ry="25" fill="#c65d12"/>
+    <!-- flange -->
+    <rect x="-16" y="-33" width="16" height="66" rx="4" fill="url(#flange)"/>
+    <circle cx="-8" cy="-27" r="2.5" fill="#8a3606"/>
+    <circle cx="-8" cy="27" r="2.5" fill="#8a3606"/>
+    <!-- opening -->
+    <ellipse cx="0" cy="0" rx="9" ry="30" fill="url(#flange)"/>
+    <ellipse cx="1" cy="0" rx="6" ry="24" fill="#3b1a06"/>
+  </g>
+
+  <g transform="translate(-6 -42) scale(1.1)">
+  <!-- back page: app window -->
+  <g transform="rotate(6 270 200)" filter="url(#shadow)">
+    <rect x="215" y="120" width="112" height="140" rx="5" fill="url(#paper)" stroke="#9fb3c3" stroke-width="1.5"/>
+    <rect x="215" y="120" width="112" height="16" rx="5" fill="#1d5f8a"/>
+    <rect x="215" y="130" width="112" height="6" fill="#1d5f8a"/>
+    <circle cx="224" cy="128" r="2.5" fill="#f3f3f3"/>
+    <circle cx="232" cy="128" r="2.5" fill="#f3f3f3"/>
+    <!-- slider + inputs -->
+    <rect x="290" y="148" width="28" height="6" rx="3" fill="#c9d5df"/>
+    <rect x="290" y="162" width="28" height="6" rx="3" fill="#c9d5df"/>
+    <rect x="290" y="176" width="28" height="6" rx="3" fill="#c9d5df"/>
+  </g>
+
+  <!-- front page: report -->
+  <g transform="rotate(-4 220 220)" filter="url(#shadow)">
+    <path d="M160 150 h92 l20 20 v118 h-112 z" fill="url(#paper)" stroke="#9fb3c3" stroke-width="1.5"/>
+    <path d="M252 150 v20 h20 z" fill="#c9d5df" stroke="#9fb3c3" stroke-width="1.5" stroke-linejoin="round"/>
+    <!-- title -->
+    <rect x="172" y="162" width="62" height="7" rx="2" fill="#1d5f8a"/>
+    <rect x="172" y="174" width="40" height="4" rx="2" fill="#9fb3c3"/>
+    <!-- bar chart -->
+    <line x1="172" y1="232" x2="260" y2="232" stroke="#6b7f8f" stroke-width="1.5"/>
+    <rect x="176" y="214" width="9" height="18" fill="#2f86b8"/>
+    <rect x="189" y="200" width="9" height="32" fill="#2f86b8"/>
+    <rect x="202" y="207" width="9" height="25" fill="#2f86b8"/>
+    <rect x="215" y="190" width="9" height="42" fill="#e8741f"/>
+    <rect x="228" y="203" width="9" height="29" fill="#2f86b8"/>
+    <rect x="241" y="196" width="9" height="36" fill="#2f86b8"/>
+    <!-- table -->
+    <rect x="172" y="242" width="88" height="7" fill="#d6e4ee"/>
+    <line x1="172" y1="256" x2="260" y2="256" stroke="#c9d5df" stroke-width="1.2"/>
+    <line x1="172" y1="265" x2="260" y2="265" stroke="#c9d5df" stroke-width="1.2"/>
+    <line x1="172" y1="274" x2="260" y2="274" stroke="#c9d5df" stroke-width="1.2"/>
+    <line x1="203" y1="242" x2="203" y2="278" stroke="#c9d5df" stroke-width="1.2"/>
+    <line x1="232" y1="242" x2="232" y2="278" stroke="#c9d5df" stroke-width="1.2"/>
+  </g>
+
+  </g>
+
+  <!-- drop falling from the pipe onto the page -->
+  <g filter="url(#shadow)">
+    <path d="M160 178 C160 178 143 200 143 212 a17 17 0 0 0 34 0 C177 200 160 178 160 178 z"
+          fill="url(#drop)" stroke="#2f86b8" stroke-width="1.2"/>
+    <path d="M151 208 a9 9 0 0 0 5 12" fill="none" stroke="#fff" stroke-width="2.5"
+          stroke-linecap="round" opacity="0.9"/>
+  </g>
+
+  <text x="200" y="336" text-anchor="middle" fill="#1d5f8a"
+        font-family="'DejaVu Sans', Verdana, Helvetica, Arial, sans-serif"
+        font-size="64" font-weight="bold" letter-spacing="1">pubflow</text>
+</svg>

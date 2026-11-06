@@ -1,0 +1,108 @@
+/* pubflow document viewer (pub_viewer_ui()): a table of
+   contents next to the document. It stays visible while the page scrolls
+   (height NULL) or the viewer scrolls itself (fixed height). Independent
+   of Bootstrap; sizes in em, because Bootstrap 3 sets the root font size
+   to 10px (rem would shrink the table of contents). */
+
+.pubflow-viewer {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5em;
+}
+.pubflow-viewer-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.pubflow-viewer-toc {
+  flex: 0 0 15em;
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 0.5em 0;
+  font-size: 0.875em;
+  line-height: 1.4;
+}
+
+/* Fixed height: content and table of contents scroll on their own */
+.pubflow-viewer-fixed {
+  align-items: stretch;
+  overflow: hidden;
+}
+.pubflow-viewer-fixed .pubflow-viewer-content,
+.pubflow-viewer-fixed .pubflow-viewer-toc {
+  overflow-y: auto;
+  max-height: none;
+}
+.pubflow-viewer-fixed .pubflow-viewer-content {
+  padding-right: 0.5em;
+}
+
+/* Table of contents */
+.pubflow-viewer-toc ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 0.75em;
+}
+.pubflow-viewer-toc nav > ul {
+  padding-left: 0;
+}
+.pubflow-viewer-toc a {
+  display: block;
+  padding: 0.15em 0.5em;
+  border-left: 2px solid transparent;
+  color: inherit;
+  text-decoration: none;
+}
+.pubflow-viewer-toc a:hover,
+.pubflow-viewer-toc a:focus {
+  background: rgba(0, 0, 0, 0.04);
+  text-decoration: none;
+}
+.pubflow-viewer-toc a.pubflow-active {
+  border-left-color: #0077b0;
+  color: #0077b0;
+  font-weight: 600;
+}
+.pubflow-viewer-toc .pubflow-section-number {
+  margin-right: 0.25em;
+}
+
+/* Math of an updated document while MathJax typesets it (the class
+   pubflow-viewer-mathjax is set once MathJax works; pubflow-viewer.js) */
+.pubflow-viewer-mathjax .pubflow-doc:not(.pubflow-typeset) .pubflow-math {
+  visibility: hidden;
+}
+
+/* No document yet */
+.pubflow-viewer-empty {
+  padding: 2em;
+  color: #6c757d;
+  text-align: center;
+}
+
+/* Narrow screens: table of contents above the document */
+@media (max-width: 767px) {
+  .pubflow-viewer {
+    display: block;
+  }
+  .pubflow-viewer-toc {
+    position: static;
+    max-height: none;
+    margin-bottom: 1em;
+  }
+  /* a fixed-height viewer scrolls as a whole */
+  .pubflow-viewer-fixed {
+    overflow-y: auto;
+  }
+  .pubflow-viewer-fixed .pubflow-viewer-content,
+  .pubflow-viewer-fixed .pubflow-viewer-toc {
+    overflow-y: visible;
+  }
+}
+
+@media print {
+  .pubflow-viewer-toc {
+    display: none;
+  }
+}

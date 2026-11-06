@@ -1,0 +1,250 @@
+/*
+ * pubflow parameter UI: validation styles and the compact parameter table
+ * (12px font, 20px inputs). Bootstrap 3 and 5.
+ */
+
+/* Compact parameter table ------------------------------------------------ */
+
+.pubflow-params table.pubflow-params-rows {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.pubflow-params .pubflow-params-rows td {
+  padding: 5px 10px 0 0;
+  vertical-align: top;
+  font-size: 12px;
+}
+
+.pubflow-params .pubflow-params-rows td.pubflow-param-label-cell {
+  width: 50%;
+}
+
+/* Long labels end with an ellipsis; the full label is the title. */
+.pubflow-params .pubflow-param-label {
+  display: block;
+  width: 100%;
+  margin: 0;
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pubflow-params .shiny-input-container,
+.pubflow-params .form-group {
+  margin-bottom: 0;
+}
+
+.pubflow-tooltip-wrapper {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.pubflow-params .form-control {
+  font-size: 12px;
+  height: 20px;
+  min-height: 0;
+  padding: 0 2px;
+}
+
+/* Selectize controls need explicit styling to match the compact inputs. */
+.pubflow-params .selectize-control .selectize-input {
+  min-height: 0;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 0 2px;
+}
+
+.pubflow-params .selectize-control.single .selectize-input {
+  height: 20px;
+}
+
+.pubflow-params .selectize-control .selectize-input input {
+  min-height: 0;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.pubflow-params .selectize-control.multi .selectize-input {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.pubflow-params .selectize-control.multi .selectize-input > div {
+  margin: 1px 2px 1px 0;
+  padding: 0 4px;
+  line-height: 16px;
+}
+
+.pubflow-params .selectize-control.multi .selectize-input input {
+  margin: 0;
+  line-height: 16px;
+}
+
+.pubflow-params .selectize-control.single .selectize-input:after {
+  right: 5px;
+}
+
+.pubflow-params .selectize-dropdown {
+  font-size: 12px;
+}
+
+/* Extra-small button groups (on/off params) look alike in Bootstrap 3, 5. */
+.pubflow-params .btn-group-xs > .btn {
+  padding: 1px 5px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.pubflow-params .irs {
+  font-size: 12px;
+}
+
+/* Labels for screen readers only (the children of param groups) */
+.pubflow-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Children of a param group side by side */
+.pubflow-param-group {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* The children share the width of the group equally and may shrink */
+.pubflow-param-group > .pubflow-param-item {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.pubflow-param-group .pubflow-param-item .form-group {
+  margin-bottom: 0;
+}
+
+/* Sections of params: a fieldset with its legend as heading */
+.pubflow-params .pubflow-params-section {
+  min-width: 0;
+  margin: 10px 0 0 0;
+  padding: 0;
+  border: 0;
+}
+
+/* (the section has the top margin: Chrome ignores that of a legend) */
+.pubflow-params .pubflow-params-heading {
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+.pubflow-params .pubflow-params-advanced {
+  margin-top: 5px;
+}
+
+/* Bootstrap 3 sets `summary {display: block}`, which hides the marker */
+.pubflow-params .pubflow-params-advanced > summary {
+  display: list-item;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Locked params: disabled inputs in a disabled fieldset. Disabled controls
+   get no mouse events, so the fieldset passes them on to the wrapper, which
+   holds the tooltip. */
+.pubflow-param-locked {
+  cursor: not-allowed;
+}
+
+.pubflow-param-locked > fieldset.pubflow-param-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  pointer-events: none;
+}
+
+.pubflow-params .pubflow-param-label-locked {
+  color: #6c757d;
+}
+
+.pubflow-params .pubflow-params-reset {
+  margin-top: 8px;
+}
+
+
+/* Validation ------------------------------------------------------------- */
+
+/* Glow class used to highlight input fields with bad values */
+.pubflow-warn-glow {
+  animation: pubflow-warn-glow 1s ease-in-out;
+  animation-iteration-count: 3;
+}
+
+@keyframes pubflow-warn-glow {
+  0%   { box-shadow: 0 0 5px #f58833; }
+  50%  { box-shadow: 0 0 20px #f36633; }
+  100% { box-shadow: 0 0 5px #f58833; }
+}
+
+/* Inputs that keep an invalid value (on_invalid = "keep") */
+.pubflow-params .form-control[aria-invalid="true"],
+.pubflow-params .selectize-input[aria-invalid="true"],
+.pubflow-params .btn-group[aria-invalid="true"] {
+  border-color: #f36633;
+  box-shadow: 0 0 3px #f58833;
+}
+
+
+/* Custom tooltip styling for inline parameter validation messages */
+.tooltip.pubflow-input-inline-tooltip {
+  z-index: 1050;
+  --bs-tooltip-bg: #f58833;       /* Bootstrap 5: arrow colour */
+  --bs-tooltip-opacity: 1;
+}
+
+.tooltip.pubflow-input-inline-tooltip .tooltip-inner {
+  max-width: 28ch;
+  padding: 6px 8px;
+  border: 1px solid #f58833;
+  background: #fff6ec;
+  color: #8a3f12;
+  text-align: left;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+/* Bootstrap 3 arrows */
+.tooltip.pubflow-input-inline-tooltip.top .tooltip-arrow {
+  border-top-color: #f58833;
+}
+
+.tooltip.pubflow-input-inline-tooltip.right .tooltip-arrow {
+  border-right-color: #f58833;
+}
+
+.tooltip.pubflow-input-inline-tooltip.bottom .tooltip-arrow {
+  border-bottom-color: #f58833;
+}
+
+.tooltip.pubflow-input-inline-tooltip.left .tooltip-arrow {
+  border-left-color: #f58833;
+}

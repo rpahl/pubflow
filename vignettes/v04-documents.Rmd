@@ -1,0 +1,657 @@
+---
+title: "Documents and layout steps"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+description: >
+  Build documents in pipeline steps: failed inputs, selecting the steps of a
+  report by tags, layouts that change with the data, documents across
+  pipelines and how to test layout steps.
+vignette: >
+  %\VignetteIndexEntry{Documents and layout steps}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r knitr-setup, include = FALSE}
+knitr::opts_chunk$set(
+    comment = "#",
+    prompt = FALSE,
+    tidy = FALSE,
+    cache = FALSE,
+    collapse = TRUE
+)
+
+old <- options(width = 100L)
+```
+
+[Get started](v01-get-started.html) built a document with one *layout step*:
+a step that takes the outputs of other steps and arranges them with
+`pub_doc()` and `pub_section()`. This vignette is about what comes with real
+reports: inputs that fail, reports that show only some of the steps, a
+number of sections that depends on the data, a report over several pipelines,
+and how to test all of this. It builds on pipeflow's vignettes
+[Pipeline views](https://cran.r-project.org/package=pipeflow/vignettes/v03b-pipeline-views.html),
+[Error handling](https://cran.r-project.org/package=pipeflow/vignettes/v05c-error-handling.html)
+and
+[Split, map and reduce](https://cran.r-project.org/package=pipeflow/vignettes/v05a-split-map-reduce.html).
+
+```{r library}
+library(pipeflow)
+library(pubflow)
+library(ggplot2)
+```
+
+```{r show, include = FALSE}
+# Shows a document in place, framed to set it apart from the vignette's own
+# text, with its headings left out of the table of contents of the pkgdown site
+show <- function(doc) {
+    html <- pub_html(doc)
+    htmltools::div(
+        style = "border: 1px solid #ccc; border-radius: 4px; padding: 0 1em;",
+        htmltools::attachDependencies(
+            htmltools::HTML(gsub("<h([1-6])", "<h\\1 data-toc-skip", html)),
+            htmltools::htmlDependencies(html)
+        )
+    )
+}
+```
+
+## The example
+
+The pipeline of Get started again: `airquality` data, a linear model of the
+ozone concentration and a table, a figure and a text made from the model.
+The figure is made by a function defined outside the pipeline, which matters
+for [the last section](#steps-that-make-figures).
+
+```{r outputs}
+coef_table <- function(model) {
+    ci <- confint(model)
+    coefs <- data.frame(
+        term = rownames(ci),
+        estimate = coef(model),
+        lower = ci[, 1L],
+        upper = ci[, 2L]
+    )
+    pub_table(
+        coefs,
+        caption = "Coefficients with 95% confidence limits",
+        labels = c(
+            term = "Term",
+            estimate = "Estimate",
+            lower = "Lower",
+            upper = "Upper"
+        ),
+        digits = c(estimate = 3L, lower = 3L, upper = 3L)
+    )
+}
+
+fit_figure <- function(model, data, xVar) {
+    coefs <- coef(model)
+    p <- ggplot(data, aes(.data[[xVar]], .data$Ozone)) +
+        geom_point(na.rm = TRUE) +
+        geom_abline(intercept = coefs[[1L]], slope = coefs[[2L]])
+    pub_figure(p, caption = "Linear model fit", width = 6, height = 3.5)
+}
+```
+
+```{r pipeline}
+pip <- pip_new("ozone") |>
+    pip_add("data", function(data = airquality) data) |>
+    pip_add("prep", function(df = ~data) {
+        df[, "Temp.Celsius"] <- (df[, "Temp"] - 32) * 5 / 9
+        df
+    }) |>
+    pip_add("data_table", function(data = ~prep) {
+        pub_table(
+            head(data, 5L),
+            caption = "The first rows of the data",
+            digits = c(Temp.Celsius = 1L)
+        )
+    }) |>
+    pip_add("fit", function(data = ~prep, xVar = "Temp.Celsius") {
+        lm(paste("Ozone ~", xVar), data = data)
+    }) |>
+    pip_add("coef_table", coef_table, params = list(model = ~fit)) |>
+    pip_add("plot", function(model = ~fit, data = ~prep, xVar = "Temp.Celsius") {
+        fit_figure(model, data, xVar)
+    }) |>
+    pip_add("summary", function(model = ~fit) {
+        pub_text(sprintf(
+            "The model explains **%.0f%%** of the variance of the ozone concentration.",
+            100 * summary(model)$r.squared
+        ))
+    })
+```
+
+`coef_table` is a function defined outside the pipeline and given to
+`pip_add()` as it is. A function can't say `~fit` in its own signature, so
+`params` connects its argument `model` to the step `fit`. The step `plot` shows the other way: an
+inline function that only calls the outside one.
+
+## Failures in a document
+
+If a step fails, the steps that depend on it can't run. A report should still
+show what is there, and say what is missing. That is the job of
+`~try(step)` in a layout step: instead of skipping the layout step, pipeflow
+hands it the *failure* of the input, and pubflow places it in the document as
+an error box.
+
+```{r layout-try}
+pip |>
+    pip_add(
+        "report",
+        function(
+            table = ~ try(data_table),
+            coefs = ~ try(coef_table),
+            plot = ~ try(plot),
+            summary = ~ try(summary)
+        ) {
+            pub_doc(
+                pub_section("Data", table),
+                pub_section("Results", summary, coefs, plot),
+                title = "Ozone in New York"
+            )
+        }
+    )
+```
+
+Make `fit` fail by asking for a variable that the data doesn't have. With
+`on_error = "continue"` the run goes on with the steps that don't depend on
+`fit`:
+
+```{r failure-run}
+pip_set_params(pip, list(xVar = "Height"))
+tryCatch(
+    pip_run(pip, on_error = "continue", lgr = NULL),
+    warning = function(w) cat(conditionMessage(w), "\n")
+)
+pip
+```
+
+The run warns (class `pipeflow_run_failed`), but the document is there. The
+steps `coef_table`, `plot` and `summary` didn't run either, and each shows as
+an error box that names the cause:
+
+```{r failure-doc}
+doc <- pip[["report", "out"]]
+show(doc)
+```
+
+A Shiny app can show such a document while the user fixes a param. The viewer
+(`pub_viewer_server()`) only renders the document that its `doc` reactive
+returns; it never runs a pipeline. The app does that: it calls
+`pip_run(on_error = "continue")` and passes the output of the layout step. A
+few rules go with it:
+
+* Write `~try()` for **every** input of a layout step that may arrive failed.
+  If you forget it for one input, pipeflow skips the layout step after a
+  failure of that input, and there is no document at all.
+* Computation steps choose `~try()` per argument, as in any pipeline. Normally
+  they take a plain `~step`, so they never see a failure object.
+* A report file is different: `pub_render()` refuses a document with error
+  items, so that a report with a hole in it is never published by accident.
+  (The report spec of `pub_report_spec()` can allow them.) Run the pipeline
+  of a report with the default `on_error = "stop"`; the failed step then
+  stops the run and there is no document.
+
+```{r render-refused, error = TRUE}
+pub_render(doc, "docx")
+```
+
+Set the param back and the next run repairs the steps that failed:
+
+```{r failure-repair}
+pip_set_params(pip, list(xVar = "Temp.Celsius"))
+pip_run(pip, lgr = NULL)
+pip
+```
+
+## Select the steps of a report by tags
+
+A pipeline often has more outputs than one report shows. Tag the steps with
+pipeflow's tags, then let the tags decide which steps a layout step uses.
+`pub_layout_inputs()` returns the `~try(step)` references of a pipeline or of
+a view on it, for a layout step whose function takes `...`:
+
+```{r tags}
+tagged <- pip_reset(pip_clone(pip))
+pip_tag(pip_view(tagged, step = c("summary", "coef_table")), c("short", "long"))
+pip_tag(pip_view(tagged, step = c("data_table", "plot")), "long")
+```
+
+Each report is a layout step with its own tag. Add them last, because the
+steps are read when `pub_layout_inputs()` is called:
+
+```{r tags-reports}
+tagged |>
+    pip_add(
+        "short",
+        \(...) pub_doc(list(...), title = "Short report"),
+        params = pub_layout_inputs(pip_view(tagged, tags = "short"))
+    ) |>
+    pip_add(
+        "long",
+        \(...) pub_doc(list(...), title = "Long report"),
+        params = pub_layout_inputs(pip_view(tagged, tags = "long"))
+    )
+```
+
+`list(...)` is a named list, which becomes one section per step, titled by
+the step's name. `unname(list(...))` places the outputs one after the other,
+without sections. The reports share the steps, and a run of a view computes
+just what its report needs:
+
+```{r tags-run}
+pip_run(pip_view(tagged, step = "short"), lgr = NULL)
+tagged
+show(tagged[["short", "out"]])
+```
+
+The steps `plot` and `data_table` are only needed by the long report and
+did not run.
+
+Tags are one way to select; every view works, e.g. one on the steps that directly
+depend on `fit`: `pub_layout_inputs(pip_view(tagged, depends = "fit"))`.
+(A view that contains partitioned steps, see below, and other steps needs
+`exec = "reduce"` for the layout step; otherwise the layout step runs once per
+partition.)
+
+## Layouts that change with the data
+
+The structure of a document often depends on the data: one section per batch,
+per site, per month. Choose among three ways, from the simplest.
+
+### A step that returns a named list
+
+The step `monthly` returns one table for every month in the data. A named list
+becomes one section per name when it is placed in a document, so the layout
+step needs no code for the months. If the data change, the sections change
+with them:
+
+```{r named-list}
+monthly_tables <- function(data) {
+    months <- split(data, data$Month)
+    names(months) <- month.name[as.integer(names(months))]
+    lapply(months, \(d) {
+        pub_table(
+            data.frame(
+                Variable = c("Ozone (ppb)", "Temperature (°C)"),
+                Mean = c(mean(d$Ozone, na.rm = TRUE), mean(d$Temp.Celsius))
+            ),
+            caption = sprintf("Means in %s", month.name[d$Month[[1L]]]),
+            digits = c(Mean = 1L)
+        )
+    })
+}
+
+p2 <- pip_clone(pip) |>
+    pip_add("monthly", monthly_tables, params = list(data = ~prep)) |>
+    pip_add("by_month", function(tables = ~ try(monthly)) {
+        pub_doc(tables, title = "Means by month")
+    })
+
+pip_run(p2, lgr = NULL)
+```
+
+```{r named-list-show}
+show(p2[["by_month", "out"]])
+```
+
+This is the right tool when the content of a section is a few outputs made
+in one step. A step that returns a list is one step: if it fails, all
+sections fail together, and the pipeline can't cache or re-run a single
+section.
+
+### Split steps: one partition per batch
+
+If each batch needs its own chain of steps (a fit, a table and a figure per
+batch), use pipeflow's split steps: a step with `exec = "split"` returns a
+list, and every step downstream runs once per element, the *partitions*,
+until a step with `exec = "reduce"` takes them all. A layout step downstream
+of a split step runs once per partition and returns the section of that
+partition. The step doesn't get the key of its partition, so the title comes
+from the data:
+
+```{r split}
+ps <- pip_new("by-month") |>
+    pip_add("data", function(data = airquality) {
+        data$Temp.Celsius <- (data$Temp - 32) * 5 / 9
+        data
+    }) |>
+    pip_add(
+        "months",
+        function(data = ~data) split(data, data$Month),
+        exec = "split"
+    ) |>
+    pip_add("fit", function(data = ~months) lm(Ozone ~ Temp.Celsius, data = data)) |>
+    pip_add("table", coef_table, params = list(model = ~fit)) |>
+    pip_add("plot", function(model = ~fit, data = ~months) {
+        fit_figure(model, data, "Temp.Celsius")
+    }) |>
+    pip_add("section", function(
+        data = ~ try(months),
+        table = ~ try(table),
+        plot = ~ try(plot)
+    ) {
+        pub_section(month.name[data$Month[[1L]]], table, plot)
+    })
+```
+
+A last step with `exec = "reduce"` gets the sections of all partitions as one
+partitioned output and builds the document. `unname()` places the sections one
+after the other; without it each partition becomes a sub-section titled by
+its key, around the section the step returned:
+
+```{r split-doc}
+ps <- pip_add(
+    ps,
+    "doc",
+    function(sections = ~ try(section)) {
+        pub_doc(
+            pub_section("Months", unname(sections)),
+            title = "Ozone by month"
+        )
+    },
+    exec = "reduce"
+)
+pip_run(ps, lgr = NULL)
+ps
+```
+
+```{r split-show, echo = FALSE}
+show(ps[["doc", "out"]])
+```
+
+Pipeflow's split steps fail per partition. If the table of one month fails,
+its section shows an error box and the other months are complete. A failed
+batch is also the only one that runs again in the next run, as long as the
+failed step's params, exec mode and inputs are unchanged, no input ran again
+and the run is not forced. Note that a param change outdates a whole step: all
+its partitions run again, not only some.
+
+Choose between the two like this: the named list is easiest if the content of
+a section is made in one step. Split steps pay off when the chain per batch is
+long, when it can fail, or when its results are expensive to recompute after a
+failure. A
+third way, *nested pipelines* (a pipeline that is a step function through
+`as.function()`), is for batches that share one param set but are computed by
+a pipeline of their own; see pipeflow's vignette
+[Nested pipelines](https://cran.r-project.org/package=pipeflow/vignettes/v05b-nested-pipeline.html).
+
+### What does not work: add steps while running
+
+A step that adds steps to the pipeline in the course of a run (a step
+function that calls `pip_add(.self, ...)` for every batch it finds) does not
+work for documents: the layout step can't name a step that does not exist when
+it is added, because `pip_add()` rejects unknown `~step` references, and
+`pub_layout_inputs()` lists the steps present at that moment. Use a named
+list or a split step instead; both have as many outputs as there are batches.
+
+```{r unknown-reference, error = TRUE}
+pip_new("tmp") |>
+    pip_add("report", function(table = ~ try(batch_a_table)) pub_doc(table))
+```
+
+## Documents across pipelines
+
+Groups that have their own params, their own inputs or their own runs are
+better as *independent pipelines* made by one constructor than as one
+pipeline with partitions. A study can have one pipeline per test (assay,
+water content, ...), each with its own specification limits, its own parameter
+tab and its own run, possibly in a parallel worker. The report puts the parts
+together.
+
+A constructor for a group's pipeline. The layout step `content` makes the
+part of the report for this group. It takes a plain `~table`, so it is skipped
+when the table fails: the failure is handled where the parts are collected:
+
+```{r group-constructor}
+month_pipeline <- function(name, month) {
+    pip_new(name) |>
+        pip_add("data", function(data = airquality, month = 5L) {
+            data[data$Month == month, ]
+        }) |>
+        pip_add("mean", function(data = ~data, limit = 40) {
+            m <- mean(data$Ozone, na.rm = TRUE)
+            if (is.nan(m)) stop("no ozone values")
+            c(mean = m, limit = limit)
+        }) |>
+        pip_add("table", function(res = ~mean) {
+            pub_table(
+                data.frame(
+                    Quantity = c("Mean ozone", "Limit"),
+                    Value = unname(res)
+                ),
+                caption = "Ozone (ppb)",
+                digits = c(Value = 1L)
+            )
+        }) |>
+        pip_add("content", function(table = ~table) list(table)) |>
+        pip_set_params(list(month = month))
+}
+
+pips <- list(
+    May = month_pipeline("May", 5L),
+    June = month_pipeline("June", 6L),
+    July = month_pipeline("July", 7L)
+)
+```
+
+Each group is run on its own. Here a loop runs them; an app can run each in a
+parallel worker, which does the same and returns the pipeline:
+
+```{r group-run}
+for (p in pips) {
+    pip_run(p, on_error = "continue", lgr = NULL)
+}
+pips$May
+```
+
+### Read the parts with `pub_out()`
+
+The report takes the output of a group's layout step with `pub_out()`. It
+differs from `p[["content", "out"]]` in one respect: it returns the output
+only if the step is `done`. After a failed run a step keeps its *earlier*
+output, so `p[[step, "out"]]` could silently put old results into a report.
+
+```{r pub-out}
+pub_out(pips$May, "content")
+```
+
+If the step is not done, `pub_out()` signals an error that names the pipeline
+and the failed steps. With `on_error = "item"` it returns an error item
+instead, which a document shows as an error box:
+
+```{r pub-out-failed, error = TRUE}
+pip_set_params(pips$June, list(month = 13L))
+suppressWarnings(pip_run(pips$June, on_error = "continue", lgr = NULL))
+
+pub_out(pips$June, "content")
+```
+
+### A report pipeline
+
+A **report pipeline** puts the parts together. Its input step receives the
+parts as a param value, a layout step builds the document, and the rest of
+the report (cross-group tables, a summary of all groups) are ordinary steps of
+this pipeline. pipeflow skips a param value that is `identical()` to the old
+one, so parts that did not change don't outdate anything:
+
+```{r report-pipeline}
+report <- pip_new("report") |>
+    pip_add("parts", function(parts = list()) parts) |>
+    pip_add("doc", function(parts = ~ try(parts)) {
+        pub_doc(pub_section("Ozone by month", parts), title = "Study report")
+    })
+```
+
+The parts are a named list, so each group becomes a section titled by its
+name. A group whose pipeline failed is shown as an error box in its section,
+and the other groups' results are in the document:
+
+```{r report-run}
+parts <- lapply(pips, pub_out, step = "content", on_error = "item")
+pip_set_params(report, list(parts = parts))
+pip_run(report, lgr = NULL)
+show(report[["doc", "out"]])
+```
+
+Repair the group and run the report pipeline again. The group's own run
+re-runs only the steps that the param outdated, and the report pipeline
+gets the new part:
+
+```{r report-repair}
+pip_set_params(pips$June, list(month = 6L))
+pip_run(pips$June, lgr = NULL)
+parts <- lapply(pips, pub_out, step = "content", on_error = "item")
+pip_set_params(report, list(parts = parts))
+pip_run(report, lgr = NULL)
+report
+```
+
+Two things to know when a worker runs the group's pipeline:
+
+* A pipeline survives `saveRDS()`, so a worker returns the *run pipeline* and
+  the app keeps all states: the next run of that pipeline re-runs only outdated
+  steps. The returned pipeline holds copies of its outputs, in which ggplots
+  get new cache keys, so make figures in such steps with
+  `pub_figure(render = TRUE)`: the step then returns the picture, not the plot.
+* Computations across groups (e.g. a table of all minima) are steps of the
+  report pipeline. Give them the groups' data as parts read with `pub_out()`,
+  too.
+
+## Test layout steps
+
+A layout step is a function, and it is easy to test, with two kinds of tests.
+Both work on small data, so they run fast.
+
+**The structure.** A layout step references the steps by their names, and
+`pip_add()` already rejects a name that does not exist (see above). Run the
+pipeline on a small data set and check the document:
+
+```{r test-small, eval = FALSE}
+library(testthat)
+
+test_that("the report has the sections and a figure", {
+    pip <- report_pipeline() # your constructor
+    pip_set_params(pip, list(data = airquality[1:30, ]))
+    pip_run(pip, lgr = NULL)
+
+    doc <- pip[["report", "out"]]
+    expect_s3_class(doc, "pub_doc")
+    expect_match(as.character(pub_html(doc)), "Coefficients with 95%")
+})
+```
+
+**The failures.** A forgotten `~try()` is not an error: it makes the layout
+step skip, so the viewer shows no document after a failure. Make a step fail
+with a bad param, run on `on_error = "continue"`, and check that the document
+is still there and reports the failure:
+
+```{r test-failure}
+broken <- pip_clone(pip)
+pip_set_params(broken, list(xVar = "Height"))
+suppressWarnings(pip_run(broken, on_error = "continue", lgr = NULL))
+
+doc <- broken[["report", "out"]]
+class(doc)
+grepl("Step 'fit' failed", as.character(pub_html(doc)), fixed = TRUE)
+```
+
+As a test:
+
+```{r test-failure-expect, eval = FALSE}
+test_that("the report survives a failed fit", {
+    pip <- report_pipeline()
+    pip_set_params(pip, list(xVar = "Height"))
+    suppressWarnings(pip_run(pip, on_error = "continue", lgr = NULL))
+
+    doc <- pip[["report", "out"]]
+    expect_s3_class(doc, "pub_doc")
+    expect_match(as.character(pub_html(doc)), "Step 'fit' failed", fixed = TRUE)
+})
+```
+
+For a report that must never be published with a hole in it, test the other
+direction: the run with the default `on_error = "stop"` stops, and
+`pub_render()` refuses a document with error items:
+
+```{r test-refuse, eval = FALSE}
+test_that("a failed step stops the report run", {
+    pip <- report_pipeline()
+    pip_set_params(pip, list(xVar = "Height"))
+    expect_error(pip_run(pip, lgr = NULL), class = "pipeflow_step_error")
+})
+
+test_that("pub_render() refuses error items", {
+    pip <- report_pipeline()
+    pip_set_params(pip, list(xVar = "Height"))
+    suppressWarnings(pip_run(pip, on_error = "continue", lgr = NULL))
+
+    expect_error(
+        pub_render(pip[["report", "out"]], "docx"),
+        class = "pubflow_render_error"
+    )
+})
+```
+
+## Steps that make figures
+
+A ggplot keeps the environment in which it was made: the `aes()` mappings
+are quosures that point to the frame of the step, and that frame points to
+where the step function was defined. If that is a pipeline constructor, a
+figure carries the pipeline and everything the constructor holds, e.g. the
+data. As long as the figure stays in the pipeline, nobody notices. It costs as
+soon as it travels or lives without its pipeline: a document sent to a worker,
+saved with `saveRDS()` or kept by a viewer.
+
+pubflow doesn't check this at run time; the remedy is a habit:
+
+* Write steps that make figures, fits or closures as **top-level functions**
+  (in your package or script). Given to `pip_add()` directly (with `params`
+  for the `~step` references, as for `coef_table`), neither the figure nor the
+  stored step function encloses the constructor. An inline wrapper that only
+  calls a top-level helper, as `plot` above, keeps the *figure* free of the
+  constructor, but pipeflow stores the wrapper as given, so the saved
+  pipeline still holds the constructor's frame.
+* Keep step functions out of a function that also holds large data. If a
+  constructor takes the data as an argument, steps defined inside it enclose
+  that data.
+* Let an app test the serialized size of its real documents. The example makes
+  the cost visible: a constructor holds 16 MB of data (`big`, used by another
+  step) that the figure doesn't show. The same figure is made by a function
+  written inline in the constructor and by the top-level `small_plot()`:
+
+```{r size}
+small_plot <- function(data) {
+    pub_figure(
+        ggplot(data, aes(.data$Temp, .data$Ozone)) + geom_point(na.rm = TRUE),
+        caption = "Ozone by temperature"
+    )
+}
+
+make_pipeline <- function(big) {
+    pip_new("sizes") |>
+        pip_add("data", function(data = airquality) data) |>
+        pip_add("other", function(x = big) mean(x)) |>
+        pip_add("inline", function(data = ~data) {
+            pub_figure(
+                ggplot(data, aes(.data$Temp, .data$Ozone)) +
+                    geom_point(na.rm = TRUE),
+                caption = "Ozone by temperature"
+            )
+        }) |>
+        pip_add("top_level", small_plot, params = list(data = ~data))
+}
+
+sizes <- make_pipeline(big = rnorm(2e6))
+pip_run(sizes, lgr = NULL)
+figures <- sizes[["out"]][c("inline", "top_level")]
+round(vapply(figures, \(f) length(serialize(f, NULL)) / 1e6, numeric(1L)), 2) # MB
+```
+
+```{r cleanup, include = FALSE}
+options(old)
+```
