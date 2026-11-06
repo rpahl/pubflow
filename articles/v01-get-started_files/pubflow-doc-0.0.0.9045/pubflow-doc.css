@@ -1,0 +1,214 @@
+/* pubflow documents (pub_html(), viewer, HTML files).
+   Every rule is scoped to .pubflow-doc, so the stylesheet works inside
+   Bootstrap 3 and 5 apps without changing them, and standalone. */
+
+.pubflow-doc {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #212529;
+}
+
+/* Header and headings */
+.pubflow-doc .pubflow-doc-header {
+  margin-bottom: 1.5em;
+}
+.pubflow-doc .pubflow-title {
+  font-size: 2em;
+  font-weight: 600;
+  margin: 0 0 0.25em;
+}
+.pubflow-doc .pubflow-subtitle {
+  font-size: 1.25em;
+  color: #495057;
+  margin: 0 0 0.25em;
+}
+.pubflow-doc .pubflow-doc-meta {
+  font-size: 0.875em;
+  color: #6c757d;
+  margin: 0;
+}
+.pubflow-doc h2,
+.pubflow-doc h3,
+.pubflow-doc h4,
+.pubflow-doc h5,
+.pubflow-doc h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 1.5em 0 0.5em;
+}
+.pubflow-doc h2 { font-size: 1.6em; }
+.pubflow-doc h3 { font-size: 1.3em; }
+.pubflow-doc h4 { font-size: 1.15em; }
+.pubflow-doc h5,
+.pubflow-doc h6 { font-size: 1em; }
+.pubflow-doc .pubflow-section-number {
+  margin-right: 0.25em;
+}
+
+/* Table of contents */
+.pubflow-doc nav.pubflow-toc {
+  margin: 0 0 1.5em;
+  font-size: 0.95em;
+}
+.pubflow-doc nav.pubflow-toc ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 1.25em;
+}
+.pubflow-doc nav.pubflow-toc > ul {
+  padding-left: 0;
+}
+.pubflow-doc nav.pubflow-toc a {
+  text-decoration: none;
+}
+
+/* Items */
+.pubflow-doc .pubflow-item {
+  margin: 0 0 1em;
+}
+.pubflow-doc .pubflow-item-title {
+  font-weight: 600;
+  margin-bottom: 0.25em;
+}
+.pubflow-doc .pubflow-text p {
+  margin: 0 0 0.75em;
+}
+.pubflow-doc .pubflow-text p:last-child {
+  margin-bottom: 0;
+}
+.pubflow-doc .pubflow-text pre {
+  font-size: 0.85em;
+  padding: 0.5em 0.75em;
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 3px;
+  overflow-x: auto;
+}
+.pubflow-doc .pubflow-placeholder {
+  /* #0083c0 (the reports' placeholder colour) has a contrast of 4.19:1 on
+     white, below WCAG AA (4.5:1); this shade has 4.92:1 */
+  color: #0077b0;
+  font-weight: 600;
+}
+.pubflow-doc .pubflow-ref-unresolved {
+  /* a cross-reference that doesn't resolve (pub_html() warns) */
+  color: #b00020;
+  background: #fdecea;
+}
+.pubflow-doc .pubflow-math-display {
+  display: block;
+  text-align: center;
+}
+.pubflow-doc .huxtable caption,
+.pubflow-doc figcaption {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: inherit;
+  margin: 0.25em 0;
+  padding: 0;
+}
+.pubflow-doc .huxtable caption {
+  caption-side: top;
+  text-align: center;
+}
+
+/* Figures */
+.pubflow-doc figure {
+  margin: 0;
+  text-align: center;
+}
+.pubflow-doc figure img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Tables: the rules of huxtable's own <style> block (removed from each
+   table), compact */
+.pubflow-doc .pubflow-table {
+  overflow-x: auto;
+}
+.pubflow-doc .huxtable {
+  border-collapse: collapse;
+  border: 0;
+  margin: 0.5em auto 0;
+  background: transparent;
+}
+.pubflow-doc .huxtable-cell {
+  vertical-align: top;
+  text-align: left;
+  white-space: normal;
+  border-style: solid;
+  border-width: 0;
+  padding: 3pt 6pt;
+  font-weight: normal;
+  line-height: 1.3;
+}
+.pubflow-doc .huxtable-header {
+  font-weight: bold;
+}
+.pubflow-doc .huxtable-note {
+  border: 0;
+  padding-bottom: 2pt;
+  padding-top: 2pt;
+  text-align: left;
+}
+.pubflow-doc .huxtable tr {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+/* Markdown cells (struck-through text) are paragraphs */
+.pubflow-doc .huxtable-cell p {
+  margin: 0;
+}
+
+/* Error items (failed steps) */
+.pubflow-doc .pubflow-error {
+  border: 1px solid #dc3545;
+  border-left-width: 4px;
+  border-radius: 3px;
+  background: #fbe9eb;
+  color: #842029;
+  padding: 0.5em 0.75em;
+}
+.pubflow-doc .pubflow-error-title {
+  font-weight: 600;
+}
+.pubflow-doc .pubflow-error-message {
+  white-space: pre-wrap;
+  font-family: SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85em;
+}
+.pubflow-doc .pubflow-error-detail {
+  font-size: 0.875em;
+}
+
+/* Standalone HTML files (pub_render()) */
+.pubflow-page {
+  max-width: 60rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
+}
+
+@media print {
+  .pubflow-page {
+    max-width: none;
+    margin: 0;
+  }
+  .pubflow-doc nav.pubflow-toc {
+    display: none;
+  }
+  .pubflow-doc figure,
+  .pubflow-doc .pubflow-table,
+  .pubflow-doc .pubflow-error {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .pubflow-doc h2,
+  .pubflow-doc h3,
+  .pubflow-doc h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}

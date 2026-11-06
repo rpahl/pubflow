@@ -1,0 +1,14 @@
+pandoc: '3.13'
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  v01-get-started: v01-get-started.html
+  v02-parameters: v02-parameters.html
+  v03-tables-figures-text: v03-tables-figures-text.html
+  v04-documents: v04-documents.html
+  v05-shiny: v05-shiny.html
+  v06-reports: v06-reports.html
+last_built: 2026-11-06T14:59Z
+urls:
+  reference: https://rpahl.github.io/pubflow/reference
+  article: https://rpahl.github.io/pubflow/articles
