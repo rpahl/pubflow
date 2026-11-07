@@ -5,20 +5,26 @@
 [![lint](https://github.com/rpahl/pubflow/actions/workflows/lint.yaml/badge.svg)](https://github.com/rpahl/pubflow/actions/workflows/lint.yaml)
 <!-- badges: end -->
 
-pubflow ("publishing workflow") is the companion package of
-[pipeflow](https://github.com/rpahl/pipeflow) (>= 0.5.0.9028).
-pipeflow computes; pubflow covers everything around a pipeline that is
-needed to *publish* its results:
+{pubflow} ("publishing workflow") is the companion package of
+[pipeflow](https://github.com/rpahl/pipeflow): it takes the results a
+pipeline computes and covers what is needed to *publish* them.
 
-- **Parameters**: self-describing parameter objects with validity checks
-  and configs;
-- **Parameter UI**: a Shiny module that builds inputs from a pipeline's
-  parameters, with per-field validation;
-- **Outputs and documents**: conventions for step outputs (tables, figures,
-  Markdown text) and layout steps that arrange them into documents;
-- **Viewer**: a Shiny module that shows a document as one scrollable page;
-- **Reports**: HTML, Word (DOCX) and PDF via Pandoc, with traceability and
-  DOCX post-processing.
+## Why pubflow?
+
+Unlike knitr, rmarkdown and Quarto, a pubflow document is not a source file
+to knit: the pipeline builds it, so it can update in place and feed a viewer
+or a report.
+
+- **Parameter UI for free**: Shiny inputs and validation built from a
+  pipeline's params
+- **Live preview**: see a change in the viewer without re-knitting the
+  document
+- **Only what changed**: documents are pipeline steps, so pipeflow re-runs
+  just what a change affects
+- **Same document, every format**: the same tables, figures and text in
+  HTML, Word, PDF and Markdown
+- **Traceable by design**: deterministic output with trace stamps and
+  session info
 
 ## Status
 
