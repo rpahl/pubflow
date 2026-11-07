@@ -264,8 +264,9 @@ basename(file)
 ```
 
 By default, the file goes to R's temporary directory, and its name is made of
-the render time and the title. A PDF needs a LaTeX installation (xelatex) or
-typst:
+the render time and the title. Word and PDF need pandoc (>= 3.6); a PDF also
+needs a LaTeX installation (xelatex) or Typst (see the
+[Reports vignette](v06-reports.html)):
 
 ```{r render-pdf, eval = FALSE}
 pub_render(doc, "pdf", file = "ozone.pdf")

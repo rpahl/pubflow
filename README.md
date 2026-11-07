@@ -31,10 +31,18 @@ or a report.
 Under development towards v0.1. The design is in [dev/DESIGN.md](dev/DESIGN.md),
 the open work in [dev/PLAN.md](dev/PLAN.md).
 
-## Example
+## Installation
+
+```r
+# Install development version from GitHub
+# install.packages("pak")
+pak::pak("rpahl/pubflow")
+```
+
+## Usage
 
 A step returns a table, a layout step arranges it into a document, and
-`pub_render()` writes the document to a Word file:
+`pub_render()` writes the document to a file:
 
 ```r
 library(pipeflow)
@@ -46,52 +54,42 @@ pip <- pip_new("my-pip") |>
         data.frame(term = names(coefs), estimate = unname(coefs))
     }) |>
     pip_add("table", function(fit = ~fit) {
-        pub_table(fit, caption = "Linear model of the ozone concentration",
-                  digits = c(estimate = 3L))
+        pub_table(fit, caption = "Linear model of the ozone concentration")
     }) |>
     pip_add("report", function(table = ~table) {
         pub_doc(pub_section("Results", table), title = "Ozone in New York")
     })
 pip_run(pip)
-pub_render(pip[["report", "out"]], "docx")
+pub_render(pip[["report", "out"]], "html")
+pub_render(pip[["report", "out"]], "md")
 ```
 
-The vignette `vignette("v01-get-started", package = "pubflow")` goes through
-the whole flow: params, outputs, documents, report files and a Shiny app.
+## Learning pubflow
 
-## Installation
+If you are new to pubflow, read the vignettes in the order they are listed
+below. They build one example up from a pipeline with params to a report file
+and a Shiny app.
 
-```r
-# install.packages("pak")
-pak::pak("rpahl/pubflow")
-```
+### Getting started
 
-System requirements: pandoc >= 3.6; for PDF output xelatex (default) or
-typst. pubflow finds pandoc via the environment variable `PUBFLOW_PANDOC`,
-then `RSTUDIO_PANDOC`, then the PATH; typst via `PUBFLOW_TYPST`, then the
-PATH, then the typst bundled with Quarto. PDF via xelatex needs the LaTeX
-packages of huxtable (`huxtable::install_latex_dependencies()`) and
-pdflscape, fancyhdr, lastpage, float and newunicodechar (TinyTeX:
-`tinytex::tlmgr_install(c("pdflscape", "fancyhdr", "lastpage", "float",
-"newunicodechar"))`); pandoc finds xelatex on the PATH.
+- [Get started with pubflow](https://rpahl.github.io/pubflow/articles/v01-get-started.html):
+  the whole flow, from params and outputs to a document, a report file and a
+  Shiny app.
 
-## Word reference documents
+### Building documents
 
-DOCX output uses pubflow's reference document
-(`inst/templates/reference.docx`, built by `data-raw/reference_docx.R`). Its
-styles and the bookmarks of the header and footer lines that your own
-reference document must provide are listed in
-`vignette("v06-reports", package = "pubflow")`.
+- [Parameters](https://rpahl.github.io/pubflow/articles/v02-parameters.html):
+  self-describing params, validity rules, groups, configs and locked params.
+- [Tables, figures and text](https://rpahl.github.io/pubflow/articles/v03-tables-figures-text.html):
+  the outputs a document shows, their metadata and cross-references.
+- [Documents and layout steps](https://rpahl.github.io/pubflow/articles/v04-documents.html):
+  arrange outputs into documents, handle failed steps and test layout steps.
 
-## Development
+### Publishing
 
-The development library is managed with [renv](https://rstudio.github.io/renv/)
-for R 4.5.3; start R in the repository root and run `renv::restore()` once.
-R >= 4.3 is supported and checked on CI.
+- [Parameter UI and viewer in Shiny](https://rpahl.github.io/pubflow/articles/v05-shiny.html):
+  params and the document in an app, with validation and a live preview.
+- [Reports](https://rpahl.github.io/pubflow/articles/v06-reports.html):
+  Word, PDF, HTML and Markdown files, trace stamps, reference documents and
+  the tools each format needs.
 
-```bash
-R -q -e "devtools::document()"
-R -q -e "devtools::test()"
-R -q -e "pkgload::load_all(quiet = TRUE); lintr::lint_package()"
-R -q -e "rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'warning', check_dir = 'check')"
-```
