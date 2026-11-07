@@ -13,11 +13,41 @@ goes through
 - failed steps in a report;
 - the extras of Word files: header, footer, locks and the reference
   document;
-- the setup of PDF output.
+- what each format needs, and the setup of PDF output.
 
 It builds on pipeflow’s vignette [Error
 handling](https://rpahl.github.io/pipeflow/articles/v05c-error-handling.html)
 for failed steps.
+
+## Requirements
+
+pubflow calls pandoc directly, so Word and PDF need the tools that
+pandoc and its writers use. Which tools
+[`pub_render()`](https://rpahl.github.io/pubflow/reference/pub_render.md)
+needs depends on the format:
+
+| Format         | Needs                                     |
+|----------------|-------------------------------------------|
+| HTML, Markdown | nothing                                   |
+| Word (DOCX)    | pandoc (\>= 3.6)                          |
+| PDF            | pandoc and xelatex (the default) or Typst |
+
+**pandoc** is found via the environment variable `PUBFLOW_PANDOC`, then
+`RSTUDIO_PANDOC`, then the `PATH`.
+
+**xelatex** is found on the `PATH` by pandoc. Tables need the LaTeX
+packages of huxtable
+([`huxtable::install_latex_dependencies()`](https://hughjonesd.github.io/huxtable/reference/report_latex_dependencies.html)),
+and pubflow itself needs pdflscape, fancyhdr, lastpage, float and
+newunicodechar. With TinyTeX:
+
+\
+`tinytex``::`[`tlmgr_install`](https://rdrr.io/pkg/tinytex/man/tlmgr.html)`(`[`c`](https://rdrr.io/r/base/c.html)`(``"pdflscape"``, ``"fancyhdr"``, ``"lastpage"``, ``"float"``,`\
+`                         ``"newunicodechar"``)``)`
+
+**Typst** is found via the environment variable `PUBFLOW_TYPST` (the
+executable or its directory), then the `PATH`, then the typst that comes
+with Quarto.
 
 ## The example
 
@@ -76,7 +106,7 @@ instead, where they are merged over the metadata of the document:
 `    meta ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``author ``=`` ``"Jane Doe"``, app ``=`` ``"ozone-app"``, version ``=`` ``"1.2.0"``)`\
 `)`\
 [`basename`](https://rdrr.io/r/base/basename.html)`(``file``)`\
-`# [1] "20261107T150557Z_ozone_in_new_york.docx"`
+`# [1] "20261107T182855Z_ozone_in_new_york.docx"`
 
 - The entries of `meta` win over those of the document, and `NULL`
   removes one.
@@ -322,7 +352,7 @@ document. A look into the file shows them:
 `docx_text``(``file``, ``"header1.xml"``)`\
 `# [1] "Ozone study" ""            "Draft"`\
 `docx_text``(``file``, ``"footer1.xml"``)`\
-`# [1] "Jane Doe at 07-Nov-2026 15:05:57 UTC (ozone-app v1.2.0)"`\
+`# [1] "Jane Doe at 07-Nov-2026 18:28:55 UTC (ozone-app v1.2.0)"`\
 `# [2] ""                                                       `\
 `# [3] "Page "                                                  `\
 `# [4] "1"                                                      `\
@@ -404,24 +434,12 @@ overrides the page of the reference document.
 
 ## PDF output
 
-pubflow calls pandoc directly, so a PDF needs the tools that pandoc
-uses. Two engines are available:
+[`pub_render()`](https://rpahl.github.io/pubflow/reference/pub_render.md)
+takes the engine in `pdf_engine`:
 
 \
 [`pub_render`](https://rpahl.github.io/pubflow/reference/pub_render.md)`(``doc``, ``"pdf"``, file ``=`` ``"ozone.pdf"``, meta ``=`` ``meta``)`` ``# xelatex`\
 [`pub_render`](https://rpahl.github.io/pubflow/reference/pub_render.md)`(``doc``, ``"pdf"``, file ``=`` ``"ozone.pdf"``, meta ``=`` ``meta``, pdf_engine ``=`` ``"typst"``)`
-
-- **pandoc** (3.6 or later) is found via the environment variable
-  `PUBFLOW_PANDOC`, then `RSTUDIO_PANDOC`, then the `PATH`.
-- **xelatex** is found on the `PATH` by pandoc. Tables need the LaTeX
-  packages of huxtable
-  ([`huxtable::install_latex_dependencies()`](https://hughjonesd.github.io/huxtable/reference/report_latex_dependencies.html)),
-  and pubflow itself needs pdflscape, fancyhdr, lastpage, float and
-  newunicodechar. With TinyTeX:
-  `tinytex::tlmgr_install(c("pdflscape", "fancyhdr", "lastpage", "float", "newunicodechar"))`.
-- **typst** is found via the environment variable `PUBFLOW_TYPST` (the
-  executable or its directory), then the `PATH`, then the typst that
-  comes with Quarto.
 
 To change the look of a PDF, use `latex_preamble` (a file that is
 included after pubflow’s own header, so it can load packages and change

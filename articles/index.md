@@ -53,4 +53,5 @@ Report files in Word, PDF, HTML and Markdown.
   A report is a document written to a Word, PDF, HTML or Markdown file.
   Render-time metadata, the trace stamp and file names, report specs for
   each format, error items, the Word header, footer and locks, Word
-  reference documents, and the setup of LaTeX and Typst.
+  reference documents, the requirements of each format and the setup of
+  LaTeX and Typst.

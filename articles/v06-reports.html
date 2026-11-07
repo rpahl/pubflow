@@ -16,9 +16,9 @@
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Reports">
-<meta name="description" content="A report is a document written to a Word, PDF, HTML or Markdown file. Render-time metadata, the trace stamp and file names, report specs for each format, error items, the Word header, footer and locks, Word reference documents, and the setup of LaTeX and Typst.
+<meta name="description" content="A report is a document written to a Word, PDF, HTML or Markdown file. Render-time metadata, the trace stamp and file names, report specs for each format, error items, the Word header, footer and locks, Word reference documents, the requirements of each format and the setup of LaTeX and Typst.
 ">
-<meta property="og:description" content="A report is a document written to a Word, PDF, HTML or Markdown file. Render-time metadata, the trace stamp and file names, report specs for each format, error items, the Word header, footer and locks, Word reference documents, and the setup of LaTeX and Typst.
+<meta property="og:description" content="A report is a document written to a Word, PDF, HTML or Markdown file. Render-time metadata, the trace stamp and file names, report specs for each format, error items, the Word header, footer and locks, Word reference documents, the requirements of each format and the setup of LaTeX and Typst.
 ">
 <meta property="og:image" content="https://rpahl.github.io/pubflow/logo.png">
 </head>
@@ -99,10 +99,51 @@ pipeline;</li>
 <li>failed steps in a report;</li>
 <li>the extras of Word files: header, footer, locks and the reference
 document;</li>
-<li>the setup of PDF output.</li>
+<li>what each format needs, and the setup of PDF output.</li>
 </ul>
 <p>It builds on pipeflow’s vignette <a href="https://rpahl.github.io/pipeflow/articles/v05c-error-handling.html" class="external-link">Error
 handling</a> for failed steps.</p>
+<div class="section level2">
+<h2 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a>
+</h2>
+<p>pubflow calls pandoc directly, so Word and PDF need the tools that
+pandoc and its writers use. Which tools <code><a href="../reference/pub_render.html">pub_render()</a></code> needs
+depends on the format:</p>
+<table class="table">
+<thead><tr class="header">
+<th>Format</th>
+<th>Needs</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>HTML, Markdown</td>
+<td>nothing</td>
+</tr>
+<tr class="even">
+<td>Word (DOCX)</td>
+<td>pandoc (&gt;= 3.6)</td>
+</tr>
+<tr class="odd">
+<td>PDF</td>
+<td>pandoc and xelatex (the default) or Typst</td>
+</tr>
+</tbody>
+</table>
+<p><strong>pandoc</strong> is found via the environment variable
+<code>PUBFLOW_PANDOC</code>, then <code>RSTUDIO_PANDOC</code>, then the
+<code>PATH</code>.</p>
+<p><strong>xelatex</strong> is found on the <code>PATH</code> by pandoc.
+Tables need the LaTeX packages of huxtable
+(<code><a href="https://hughjonesd.github.io/huxtable/reference/report_latex_dependencies.html" class="external-link">huxtable::install_latex_dependencies()</a></code>), and pubflow
+itself needs pdflscape, fancyhdr, lastpage, float and newunicodechar.
+With TinyTeX:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">tinytex</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytex/man/tlmgr.html" class="external-link">tlmgr_install</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pdflscape"</span>, <span class="st">"fancyhdr"</span>, <span class="st">"lastpage"</span>, <span class="st">"float"</span>,</span>
+<span>                         <span class="st">"newunicodechar"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Typst</strong> is found via the environment variable
+<code>PUBFLOW_TYPST</code> (the executable or its directory), then the
+<code>PATH</code>, then the typst that comes with Quarto.</p>
+</div>
 <div class="section level2">
 <h2 id="the-example">The example<a class="anchor" aria-label="anchor" href="#the-example"></a>
 </h2>
@@ -110,7 +151,7 @@ handling</a> for failed steps.</p>
 linear model of the ozone concentration. Its header and footer lines
 have the token <a href="https://zachariahmclean.github.io/trace/" class="external-link">trace</a>, which becomes the trace stamp of
 the report.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rpahl.github.io/pipeflow/" class="external-link">pipeflow</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rpahl.github.io/pubflow/">pubflow</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -152,14 +193,14 @@ about the act of rendering. They are not part of the pipeline: if they
 were params of the layout step, every render would outdate it. They are
 passed to <code><a href="../reference/pub_render.html">pub_render()</a></code> instead, where they are merged over
 the metadata of the document:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span></span>
 <span>    <span class="va">doc</span>,</span>
 <span>    <span class="st">"docx"</span>,</span>
 <span>    meta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>author <span class="op">=</span> <span class="st">"Jane Doe"</span>, app <span class="op">=</span> <span class="st">"ozone-app"</span>, version <span class="op">=</span> <span class="st">"1.2.0"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">file</span><span class="op">)</span></span>
-<span><span class="co"># [1] "20261107T150557Z_ozone_in_new_york.docx"</span></span></code></pre></div>
+<span><span class="co"># [1] "20261107T182855Z_ozone_in_new_york.docx"</span></span></code></pre></div>
 <ul>
 <li>The entries of <code>meta</code> win over those of the document, and
 <code>NULL</code> removes one.</li>
@@ -183,7 +224,7 @@ e.g.
 <a href="https://zachariahmclean.github.io/trace/" class="external-link">trace</a> stands for. It is an error without an author, since
 pubflow doesn’t guess it: on a server, the system user is only the
 service account. Times are always UTC, with English month names:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    author <span class="op">=</span> <span class="st">"Jane Doe"</span>,</span>
 <span>    app <span class="op">=</span> <span class="st">"ozone-app"</span>,</span>
@@ -194,7 +235,7 @@ service account. Times are always UTC, with English month names:</p>
 <span><span class="co"># [1] "Jane Doe at 02-Nov-2026 09:30:00 UTC (ozone-app v1.2.0)"</span></span>
 <span><span class="fu"><a href="../reference/pub_trace_stamp.html">pub_trace_stamp</a></span><span class="op">(</span><span class="va">meta</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"author"</span>, <span class="st">"time"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co"># [1] "Jane Doe at 02-Nov-2026 09:30:00 UTC"</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pub_trace_stamp.html">pub_trace_stamp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>app <span class="op">=</span> <span class="st">"ozone-app"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `pub_trace_stamp()`:</span></span></span>
 <span><span class="co"># <span style="color: #BBBB00;">!</span> A trace stamp needs the metadata `author`.</span></span>
@@ -206,7 +247,7 @@ service account. Times are always UTC, with English month names:</p>
 <p>Without <code>file</code>, the report goes to R’s temporary directory
 under the name that <code><a href="../reference/pub_output_filename.html">pub_output_filename()</a></code> makes, the render
 time (UTC) and the title:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pub_output_filename.html">pub_output_filename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Ozone in New York"</span>, time <span class="op">=</span> <span class="va">meta</span><span class="op">$</span><span class="va">time</span><span class="op">)</span>, <span class="st">"docx"</span><span class="op">)</span></span>
 <span><span class="co"># [1] "20261102T093000Z_ozone_in_new_york.docx"</span></span></code></pre></div>
 <p>Call it yourself for a download name, e.g. in the
@@ -220,7 +261,7 @@ time (UTC) and the title:</p>
 <code><a href="../reference/pub_render.html">pub_render()</a></code> takes it as <code>spec</code>. Without it,
 <code>pub_report_spec(format)</code> is used: all defaults. Printing a
 spec shows what it uses:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pub_report_spec.html">pub_report_spec</a></span><span class="op">(</span><span class="st">"docx"</span><span class="op">)</span></span>
 <span><span class="co"># &lt;pubflow report spec: docx&gt;</span></span>
 <span><span class="co">#   reference_docx    default</span></span>
@@ -237,7 +278,7 @@ spec shows what it uses:</p>
 <p>Every field acts in every format that can show it. A field that the
 format can’t use is an error, so a setting is never silently
 ignored:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pub_report_spec.html">pub_report_spec</a></span><span class="op">(</span><span class="st">"docx"</span>, placeholder_color <span class="op">=</span> <span class="st">"#0083c0"</span><span class="op">)</span></span>
 <span><span class="co"># <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `pub_report_spec()`:</span></span></span>
 <span><span class="co"># <span style="color: #BBBB00;">!</span> `placeholder_color` can't be used for docx reports, only for html and pdf.</span></span></code></pre></div>
@@ -318,7 +359,7 @@ document (with the render-time metadata) and the format that returns
 what a document can hold: sections, outputs and lists of them. Its
 sections are not numbered, so the numbers of the body start at 1. End it
 with a page break to start the contents on a new page:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">title_page</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">doc</span>, <span class="va">format</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        <span class="fu"><a href="../reference/pub_text.html">pub_text</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Prepared by"</span>, <span class="va">doc</span><span class="op">$</span><span class="va">meta</span><span class="op">$</span><span class="va">author</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -354,7 +395,7 @@ count: to have only those, set <code>toc = FALSE</code> in the spec.</p>
 <p>A spec is a plain list that is checked when it is used. To have one
 spec for every format, write a function that builds them, so the front
 matter and the labels are in one place:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_spec</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">format</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="../reference/pub_report_spec.html">pub_report_spec</a></span><span class="op">(</span></span>
 <span>        <span class="va">format</span>,</span>
@@ -365,7 +406,7 @@ matter and the labels are in one place:</p>
 <span><span class="va">spec_docx</span> <span class="op">&lt;-</span> <span class="fu">my_spec</span><span class="op">(</span><span class="st">"docx"</span><span class="op">)</span></span></code></pre></div>
 <p>Markdown shows the effect of a spec without any tool; the table
 caption now starts with “Tab.”:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span></span>
 <span>    <span class="va">doc</span>,</span>
 <span>    <span class="st">"md"</span>,</span>
@@ -386,7 +427,7 @@ pipeline of a report with the default <code>on_error = "stop"</code>,
 and a failed step stops it before any document exists.</p>
 <p>For a draft, run with <code>on_error = "continue"</code> and let the
 spec show the error items instead:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pip</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_new.html" class="external-link">pip_new</a></span><span class="op">(</span><span class="st">"draft"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"table"</span>, <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="fu"><a href="../reference/pub_table.html">pub_table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span>, caption <span class="op">=</span> <span class="st">"Data"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"fit"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">data</span> <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Height</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -398,13 +439,13 @@ spec show the error items instead:</p>
 <span>    <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_run.html" class="external-link">pip_run</a></span><span class="op">(</span><span class="va">pip</span>, on_error <span class="op">=</span> <span class="st">"continue"</span>, lgr <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">draft</span> <span class="op">&lt;-</span> <span class="va">pip</span><span class="op">[[</span><span class="st">"report"</span>, <span class="st">"out"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span><span class="va">draft</span>, <span class="st">"md"</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".md"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `pub_render()`:</span></span></span>
 <span><span class="co"># <span style="color: #BBBB00;">!</span> Can't render a document with error items (failed steps):</span></span>
 <span><span class="co"># <span style="color: #BB0000;">✖</span> step 'fit' failed: object 'Height' not found</span></span>
 <span><span class="co"># <span style="color: #0000BB;">ℹ</span> Reports run the pipeline with `on_error = "stop"`; error items are for the viewer.</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pub_report_spec.html">pub_report_spec</a></span><span class="op">(</span><span class="st">"md"</span>, error_items <span class="op">=</span> <span class="st">"show"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">withCallingHandlers</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span><span class="va">draft</span>, <span class="st">"md"</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".md"</span><span class="op">)</span>, spec <span class="op">=</span> <span class="va">spec</span><span class="op">)</span>,</span>
@@ -429,7 +470,7 @@ be, and the warning names the failed step. Use this for drafts only.</p>
 of the document, with <a href="https://zachariahmclean.github.io/trace/" class="external-link">trace</a> expanded. They go into the
 header and footer part of the reference document. A look into the file
 shows them:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">docx_text</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">file</span>, <span class="va">part</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/on.exit.html" class="external-link">on.exit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
@@ -440,7 +481,7 @@ shows them:</p>
 <span><span class="fu">docx_text</span><span class="op">(</span><span class="va">file</span>, <span class="st">"header1.xml"</span><span class="op">)</span></span>
 <span><span class="co"># [1] "Ozone study" ""            "Draft"</span></span>
 <span><span class="fu">docx_text</span><span class="op">(</span><span class="va">file</span>, <span class="st">"footer1.xml"</span><span class="op">)</span></span>
-<span><span class="co"># [1] "Jane Doe at 07-Nov-2026 15:05:57 UTC (ozone-app v1.2.0)"</span></span>
+<span><span class="co"># [1] "Jane Doe at 07-Nov-2026 18:28:55 UTC (ozone-app v1.2.0)"</span></span>
 <span><span class="co"># [2] ""                                                       </span></span>
 <span><span class="co"># [3] "Page "                                                  </span></span>
 <span><span class="co"># [4] "1"                                                      </span></span>
@@ -475,7 +516,7 @@ tables and figures with <code>pub_set_meta(locked = TRUE)</code>.</p>
 <code>function(path, doc, spec)</code>. They change the finished file in
 place, are called in order, and a failing one stops the render, so no
 file is written. This one adds a note to a Markdown report:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">add_note</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span>, <span class="va">doc</span>, <span class="va">spec</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span>, <span class="st">""</span>, <span class="st">"&lt;!-- checked --&gt;"</span><span class="op">)</span>, <span class="va">path</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -568,28 +609,11 @@ the spec overrides the page of the reference document.</p>
 <div class="section level2">
 <h2 id="pdf-output">PDF output<a class="anchor" aria-label="anchor" href="#pdf-output"></a>
 </h2>
-<p>pubflow calls pandoc directly, so a PDF needs the tools that pandoc
-uses. Two engines are available:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p><code><a href="../reference/pub_render.html">pub_render()</a></code> takes the engine in
+<code>pdf_engine</code>:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span><span class="va">doc</span>, <span class="st">"pdf"</span>, file <span class="op">=</span> <span class="st">"ozone.pdf"</span>, meta <span class="op">=</span> <span class="va">meta</span><span class="op">)</span> <span class="co"># xelatex</span></span>
 <span><span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span><span class="va">doc</span>, <span class="st">"pdf"</span>, file <span class="op">=</span> <span class="st">"ozone.pdf"</span>, meta <span class="op">=</span> <span class="va">meta</span>, pdf_engine <span class="op">=</span> <span class="st">"typst"</span><span class="op">)</span></span></code></pre></div>
-<ul>
-<li>
-<strong>pandoc</strong> (3.6 or later) is found via the environment
-variable <code>PUBFLOW_PANDOC</code>, then <code>RSTUDIO_PANDOC</code>,
-then the <code>PATH</code>.</li>
-<li>
-<strong>xelatex</strong> is found on the <code>PATH</code> by
-pandoc. Tables need the LaTeX packages of huxtable
-(<code><a href="https://hughjonesd.github.io/huxtable/reference/report_latex_dependencies.html" class="external-link">huxtable::install_latex_dependencies()</a></code>), and pubflow
-itself needs pdflscape, fancyhdr, lastpage, float and newunicodechar.
-With TinyTeX:
-<code>tinytex::tlmgr_install(c("pdflscape", "fancyhdr", "lastpage", "float", "newunicodechar"))</code>.</li>
-<li>
-<strong>typst</strong> is found via the environment variable
-<code>PUBFLOW_TYPST</code> (the executable or its directory), then the
-<code>PATH</code>, then the typst that comes with Quarto.</li>
-</ul>
 <p>To change the look of a PDF, use <code>latex_preamble</code> (a file
 that is included after pubflow’s own header, so it can load packages and
 change the page style) or <code>typst_template</code> (start from
