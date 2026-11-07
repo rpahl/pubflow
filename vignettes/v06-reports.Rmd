@@ -7,8 +7,8 @@ output:
 description: >
   A report is a document written to a Word, PDF, HTML or Markdown file. Render-time
   metadata, the trace stamp and file names, report specs for each format, error
-  items, the Word header, footer and locks, Word reference documents, and the
-  setup of LaTeX and Typst.
+  items, the Word header, footer and locks, Word reference documents, the
+  requirements of each format and the setup of LaTeX and Typst.
 vignette: >
   %\VignetteIndexEntry{Reports}
   %\VignetteEngine{knitr::rmarkdown}
@@ -37,11 +37,38 @@ in it. This vignette goes through
 * the report spec, which sets up a format;
 * failed steps in a report;
 * the extras of Word files: header, footer, locks and the reference document;
-* the setup of PDF output.
+* what each format needs, and the setup of PDF output.
 
 It builds on pipeflow's vignette
 [Error handling](https://rpahl.github.io/pipeflow/articles/v05c-error-handling.html)
 for failed steps.
+
+## Requirements
+
+pubflow calls pandoc directly, so Word and PDF need the tools that pandoc and
+its writers use. Which tools `pub_render()` needs depends on the format:
+
+| Format | Needs |
+|---|---|
+| HTML, Markdown | nothing |
+| Word (DOCX) | pandoc (>= 3.6) |
+| PDF | pandoc and xelatex (the default) or Typst |
+
+**pandoc** is found via the environment variable `PUBFLOW_PANDOC`, then
+`RSTUDIO_PANDOC`, then the `PATH`.
+
+**xelatex** is found on the `PATH` by pandoc. Tables need the LaTeX packages
+of huxtable (`huxtable::install_latex_dependencies()`), and pubflow itself
+needs pdflscape, fancyhdr, lastpage, float and newunicodechar. With TinyTeX:
+
+```{r latex-packages, eval = FALSE}
+tinytex::tlmgr_install(c("pdflscape", "fancyhdr", "lastpage", "float",
+                         "newunicodechar"))
+```
+
+**Typst** is found via the environment variable `PUBFLOW_TYPST` (the
+executable or its directory), then the `PATH`, then the typst that comes with
+Quarto.
 
 ## The example
 
@@ -367,24 +394,12 @@ page of the reference document.
 
 ## PDF output
 
-pubflow calls pandoc directly, so a PDF needs the tools that pandoc uses. Two
-engines are available:
+`pub_render()` takes the engine in `pdf_engine`:
 
 ```{r pdf, eval = FALSE}
 pub_render(doc, "pdf", file = "ozone.pdf", meta = meta) # xelatex
 pub_render(doc, "pdf", file = "ozone.pdf", meta = meta, pdf_engine = "typst")
 ```
-
-* **pandoc** (3.6 or later) is found via the environment variable
-  `PUBFLOW_PANDOC`, then `RSTUDIO_PANDOC`, then the `PATH`.
-* **xelatex** is found on the `PATH` by pandoc. Tables need the LaTeX packages
-  of huxtable (`huxtable::install_latex_dependencies()`), and pubflow itself
-  needs pdflscape, fancyhdr, lastpage, float and newunicodechar. With TinyTeX:
-  `tinytex::tlmgr_install(c("pdflscape", "fancyhdr", "lastpage", "float",
-  "newunicodechar"))`.
-* **typst** is found via the environment variable `PUBFLOW_TYPST` (the
-  executable or its directory), then the `PATH`, then the typst that comes with
-  Quarto.
 
 To change the look of a PDF, use `latex_preamble` (a file that is included after
 pubflow's own header, so it can load packages and change the page style) or
