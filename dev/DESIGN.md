@@ -32,7 +32,7 @@ export of tables; offline math for HTML files (bundled KaTeX/MathJax).
 ## 2. Constraints
 
 - Develop with R 4.5.3; support R >= 4.3 (CI checks the oldest).
-- pipeflow >= 0.5.0.9028, pinned by commit in `Remotes` until it is on CRAN (D9).
+- pipeflow >= 0.5.0.9032, pinned by commit in `Remotes` until it is on CRAN (D9).
 - pandoc >= 3.6; optional xelatex and typst for PDF.
 - Regulated (GxP-style) use: traceable, deterministic output; errors never silently
   in a deliverable; all times in UTC.
@@ -75,7 +75,7 @@ results in the PR (`reference/benchmarks.md` has the measurements behind the dec
 | D2 | No knitr/rmarkdown in the rendering. Outputs go into an in-memory **document tree**, rendered to HTML with htmltools (UI, HTML files) or to **Pandoc Markdown with raw format-specific blocks and one pandoc call** (DOCX, PDF, Markdown). The vignettes use knitr and rmarkdown (Suggests only). |
 | D3 | PDF via LaTeX (xelatex, default) and Typst (optional). |
 | D7 | Scope of v0.1: params, param UI, outputs and tables, document tree, HTML renderer and viewer, DOCX/PDF/Markdown rendering, report specs and post-processors. |
-| D9 | Requires pipeflow >= 0.5.0.9028. A problem better solved in pipeflow is solved there (the maintainer is the same) if the change is not invasive; pubflow then pins the pipeflow commit until it is on CRAN. pipeflow hands plain values to step functions through pubflow's `pip_param_value()` method. |
+| D9 | Requires pipeflow >= 0.5.0.9032. A problem better solved in pipeflow is solved there (the maintainer is the same) if the change is not invasive; pubflow then pins the pipeflow commit until it is on CRAN. pipeflow hands plain values to step functions through pubflow's `pip_param_value()` method. |
 | D12 | The Shiny UI works with Bootstrap 3 and 5. |
 | D13 | Develop with R 4.5.3, support R >= 4.3, verified on CI. |
 

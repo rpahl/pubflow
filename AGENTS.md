@@ -24,7 +24,7 @@ The development documents live in `dev/` (excluded from the build).
   ideas: mention the ones that touch the current work. Remove done items and settled
   problems (DESIGN keeps the decisions, NEWS the history).
 - `dev/reference/` — research you should not need to redo; its `README.md` lists the
-  files. Read `pipeflow.md` (pipeflow 0.5.0.9028 API facts and quirks) before any
+  files. Read `pipeflow.md` (pipeflow 0.5.0.9032 API facts and quirks) before any
   pipeline code; add new pipeflow findings to its §9, which also holds the IDs (B1, F7,
   Q15, ...) that DESIGN and PLAN cite.
 - If DESIGN and reality disagree (pipeflow, huxtable, pandoc behave differently than
@@ -186,8 +186,8 @@ $R -q -e "covr::report(covr::package_coverage(), 'check/coverage.html', browse =
 
 ## Related repositories (read-only)
 
-- pipeflow 0.5.0.9028 (GitHub commit a3bbe82, pinned in `Remotes` and `renv.lock`;
-  required since pubflow 0.0.0.9035). pipeflow development source:
+- pipeflow 0.5.0.9032 (GitHub commit 2ee2970, pinned in `Remotes` and `renv.lock`;
+  required since pubflow 0.0.0.9047). pipeflow development source:
   `~/coding/rlang/pipeflow` (bare repo `pipeflow.git` with worktrees; GitHub
   `rpahl/pipeflow`; the local `main` worktree may lag behind GitHub, so check
   `gh api repos/rpahl/pipeflow/commits` or ask)

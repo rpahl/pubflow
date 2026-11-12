@@ -1,3 +1,8 @@
+# pubflow 0.0.0.9047
+
+* Requires pipeflow 0.5.0.9032: failed steps called with symbols give light
+  failures (pipeflow 0.5.0.9029).
+
 # pubflow 0.0.0.9046
 
 First public version, under development towards v0.1.

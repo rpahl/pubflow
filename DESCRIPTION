@@ -1,6 +1,6 @@
 Package: pubflow
 Title: Publish 'pipeflow' Pipelines: Parameter UIs, Result Viewers and Reports
-Version: 0.0.0.9046
+Version: 0.0.0.9047
 Authors@R: c(
     person("Roman", "Pahl", , "roman.pahl@gmail.com", role = c("aut", "cre", "cph"))
     )
@@ -21,7 +21,7 @@ Imports:
     commonmark,
     htmltools,
     huxtable (>= 6.0.0),
-    pipeflow (>= 0.5.0.9028),
+    pipeflow (>= 0.5.0.9032),
     ragg,
     rlang,
     shiny (>= 1.8.1),
@@ -39,7 +39,7 @@ Suggests:
     testthat (>= 3.0.0),
     withr
 Remotes:
-    rpahl/pipeflow@a3bbe8210cdc607303bca52e156c7cedd758f326
+    rpahl/pipeflow@2ee29704bb6e18b43d0bcc84c917dd63044399b1
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Encoding: UTF-8
