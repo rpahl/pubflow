@@ -180,14 +180,14 @@ pub_table <- function(
     ht <- .apply_align(ht, rows, align)
     ht <- .apply_na(ht, rows, na)
     ht <- .merge_body(ht, rows, merge)
-    ht <- .apply_borders(ht, rows, theme$borders)
+    ht <- .apply_borders(ht, rows, theme)
     ht <- .apply_widths(ht, widths)
     if (!is.null(caption)) {
         # a blank caption removes the one of a huxtable being finished
         huxtable::caption(ht) <- if (grepl("[^[:space:]]", caption)) caption else NA
     }
     huxtable::caption_pos(ht) <- "top"
-    ht
+    .apply_style(ht, rows, theme$style)
 }
 
 #' Validate the scalar arguments of pub_table()
@@ -621,33 +621,30 @@ pub_table <- function(
 #'
 #' "booktabs": rules above the table, below spanners and the header and below the body;
 #' "grid": borders around every header and body cell. Footnote rows have no borders.
+#' Rules are 0.4 pt (booktabs: 0.8 pt above and below the table) unless the theme sets
+#' `border_width` (the theme's `border_color` is a cell property, see .apply_theme()).
 #' @param ht a huxtable.
 #' @param rows the rows from .table_rows().
-#' @param borders `"booktabs"` or `"grid"`.
+#' @param theme a `pub_table_theme`.
 #' @noRd
-.apply_borders <- function(ht, rows, borders) {
-    huxtable::top_border(ht) <- 0
-    huxtable::bottom_border(ht) <- 0
-    huxtable::left_border(ht) <- 0
-    huxtable::right_border(ht) <- 0
+.apply_borders <- function(ht, rows, theme) {
+    thin <- theme$border_width %||% 0.4
+    thick <- theme$border_width %||% 0.8
+    ht <- huxtable::set_all_borders(ht, 0)
     framed <- sort(c(rows$header, rows$body))
     if (length(framed) == 0L) {
         return(ht)
     }
-    if (identical(borders, "grid")) {
-        huxtable::top_border(ht)[framed, ] <- 0.4
-        huxtable::bottom_border(ht)[framed, ] <- 0.4
-        huxtable::left_border(ht)[framed, ] <- 0.4
-        huxtable::right_border(ht)[framed, ] <- 0.4
-        return(ht)
+    if (identical(theme$borders, "grid")) {
+        return(huxtable::set_all_borders(ht, framed, huxtable::everywhere, thin))
     }
-    huxtable::top_border(ht)[framed[[1L]], ] <- 0.8
+    huxtable::top_border(ht)[framed[[1L]], ] <- thick
     for (i in rows$spanner) {
         hasSpanner <- nzchar(.text_of(unlist(ht[i, ])), keepNA = FALSE)
-        huxtable::bottom_border(ht)[i, hasSpanner] <- 0.4
+        huxtable::bottom_border(ht)[i, hasSpanner] <- thin
     }
-    huxtable::bottom_border(ht)[.label_row(ht), ] <- 0.4
-    huxtable::bottom_border(ht)[max(framed), ] <- 0.8
+    huxtable::bottom_border(ht)[.label_row(ht), ] <- thin
+    huxtable::bottom_border(ht)[max(framed), ] <- thick
     ht
 }
 
@@ -673,6 +670,31 @@ pub_table <- function(
         values
     }
     ht
+}
+
+#' Run the theme's style function on the finished table
+#' @param ht a huxtable.
+#' @param rows the rows from .table_rows().
+#' @param style the theme's `style`: `NULL` or a function(ht, rows).
+#' @param call the environment of the caller, for the error message.
+#' @return the styled `ht`.
+#' @noRd
+.apply_style <- function(ht, rows, style, call = rlang::caller_env()) {
+    if (is.null(style)) {
+        return(ht)
+    }
+    styled <- style(ht, rows)
+    if (!huxtable::is_huxtable(styled) || !identical(dim(styled), dim(ht))) {
+        rlang::abort(
+            paste(
+                "The theme's `style` function must return the table it was given,",
+                "with the same rows and columns."
+            ),
+            call = call
+        )
+    }
+    # keep the metadata (pub_meta(), with the caption) if the function rebuilt the table
+    .set_meta(styled, pub_meta(ht))
 }
 
 
@@ -976,10 +998,24 @@ pub_strikeout <- function(ht, row, col) {
 #' tables, set it as default with `options(pubflow.table_theme = pub_table_theme(...))`.
 #'
 #' @param ... Further huxtable cell properties applied to every cell, e.g.
-#'   `font = "Arial"` or `top_padding = 2` (see [huxtable::style_cells()]).
+#'   `font = "Arial"`, `top_padding = 2` or `valign = "middle"` (see
+#'   [huxtable::style_cells()]).
 #' @param font_size Font size in points.
 #' @param borders `"booktabs"`: horizontal rules above and below the header (and below
 #'   spanners) and below the body; `"grid"`: borders around all header and body cells.
+#' @param border_color Colour of the borders, e.g. `"#D9E2F3"`, or `NULL`: the cells
+#'   keep their colour (black in a new table).
+#' @param border_width Width of all borders in points, or `NULL`: 0.4 pt, with booktabs
+#'   0.8 pt above and below the table.
+#' @param style `NULL` or a function `function(ht, rows)` that styles the table after
+#'   `pub_table()` has applied the rest of the theme. `rows` is a list of row numbers
+#'   by role: `header` (spanner and label rows), `spanner`, `body` and `footnote`. The
+#'   function returns the styled huxtable, with the same rows and columns; its metadata
+#'   ([pub_meta()], with the caption) stays as before. Use it for a look that depends
+#'   on the role of a row, e.g. a coloured header. It runs on every call of
+#'   `pub_table()`, also when a table is finished again, so set properties
+#'   (`bold(ht)[rows$header, ] <- TRUE`) rather than change them relative to their
+#'   value.
 #' @param number_format Format of numeric (non-integer) columns without `digits`
 #'   (integer columns get 0 decimal places), one of
 #'   * a whole number of decimal places;
@@ -1002,17 +1038,39 @@ pub_strikeout <- function(ht, row, col) {
 #'     number_format = "%.2e"
 #' )) |>
 #'     pub_cell_text()
+#'
+#' # A house style: light blue grid, bold centred header on a grey background
+#' house <- pub_table_theme(
+#'     borders = "grid",
+#'     border_color = "#D9E2F3",
+#'     border_width = 0.5,
+#'     valign = "middle",
+#'     style = function(ht, rows) {
+#'         huxtable::align(ht)[rows$header, ] <- "center"
+#'         huxtable::background_color(ht)[rows$header, ] <- "grey90"
+#'         ht
+#'     }
+#' )
+#' ht <- pub_table(data.frame(x = 1:2, y = c("a", "b")), theme = house)
+#' huxtable::background_color(ht)[, 1]
 #' @export
 pub_table_theme <- function(
     ...,
     font_size = 9,
     borders = c("booktabs", "grid"),
+    border_color = NULL,
+    border_width = NULL,
+    style = NULL,
     number_format = 4L
 ) {
     if (!.is_positive_number(font_size)) {
         rlang::abort("`font_size` must be a positive number.")
     }
     borders <- rlang::arg_match(borders)
+    .check_theme_borders(border_color, border_width)
+    if (!is.null(style) && !is.function(style)) {
+        rlang::abort("`style` must be a function(ht, rows) or `NULL`.")
+    }
     if (.number_format_kind(number_format) == "invalid") {
         rlang::abort(paste(
             "`number_format` must be a whole number from 0 to 324, a sprintf()",
@@ -1023,12 +1081,23 @@ pub_table_theme <- function(
     if (!rlang::is_named2(properties)) {
         rlang::abort("Cell properties in `...` must be named.")
     }
-    reserved <- c("number_format", "na_string", "rowspan", "colspan")
+    reserved <- c(
+        "number_format",
+        "na_string",
+        "rowspan",
+        "colspan",
+        paste0(c("top", "bottom", "left", "right"), "_border")
+    )
     if (any(names(properties) %in% reserved)) {
         rlang::abort(sprintf(
             "`...` can't set %s (pubflow manages them).",
             toString(reserved)
         ))
+    }
+    if (!is.null(border_color)) {
+        sides <- paste0(c("top", "bottom", "left", "right"), "_border_color")
+        colors <- rlang::set_names(rep(list(border_color), 4L), sides)
+        properties <- c(colors[setdiff(sides, names(properties))], properties)
     }
     if (length(properties) > 0L) {
         do.call(huxtable::style_cells, c(list(huxtable::hux(1), 1L, 1L), properties))
@@ -1037,11 +1106,26 @@ pub_table_theme <- function(
         list(
             font_size = font_size,
             borders = borders,
+            border_width = border_width,
+            style = style,
             number_format = number_format,
             properties = properties
         ),
         class = "pub_table_theme"
     )
+}
+
+#' Check the border colour and width of a theme
+#' @param color,width the arguments of pub_table_theme().
+#' @param call the environment of the caller, for the error message.
+#' @noRd
+.check_theme_borders <- function(color, width, call = rlang::caller_env()) {
+    if (!is.null(color) && !(rlang::is_string(color) && nzchar(color))) {
+        rlang::abort("`border_color` must be a colour string or `NULL`.", call = call)
+    }
+    if (!is.null(width) && !.is_positive_number(width)) {
+        rlang::abort("`border_width` must be a positive number or `NULL`.", call = call)
+    }
 }
 
 

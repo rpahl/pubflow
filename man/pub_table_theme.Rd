@@ -8,17 +8,37 @@ pub_table_theme(
   ...,
   font_size = 9,
   borders = c("booktabs", "grid"),
+  border_color = NULL,
+  border_width = NULL,
+  style = NULL,
   number_format = 4L
 )
 }
 \arguments{
 \item{...}{Further huxtable cell properties applied to every cell, e.g.
-\code{font = "Arial"} or \code{top_padding = 2} (see \code{\link[huxtable:style_cells]{huxtable::style_cells()}}).}
+\code{font = "Arial"}, \code{top_padding = 2} or \code{valign = "middle"} (see
+\code{\link[huxtable:style_cells]{huxtable::style_cells()}}).}
 
 \item{font_size}{Font size in points.}
 
 \item{borders}{\code{"booktabs"}: horizontal rules above and below the header (and below
 spanners) and below the body; \code{"grid"}: borders around all header and body cells.}
+
+\item{border_color}{Colour of the borders, e.g. \code{"#D9E2F3"}, or \code{NULL}: the cells
+keep their colour (black in a new table).}
+
+\item{border_width}{Width of all borders in points, or \code{NULL}: 0.4 pt, with booktabs
+0.8 pt above and below the table.}
+
+\item{style}{\code{NULL} or a function \verb{function(ht, rows)} that styles the table after
+\code{pub_table()} has applied the rest of the theme. \code{rows} is a list of row numbers
+by role: \code{header} (spanner and label rows), \code{spanner}, \code{body} and \code{footnote}. The
+function returns the styled huxtable, with the same rows and columns; its metadata
+(\code{\link[=pub_meta]{pub_meta()}}, with the caption) stays as before. Use it for a look that depends
+on the role of a row, e.g. a coloured header. It runs on every call of
+\code{pub_table()}, also when a table is finished again, so set properties
+(\code{bold(ht)[rows$header, ] <- TRUE}) rather than change them relative to their
+value.}
 
 \item{number_format}{Format of numeric (non-integer) columns without \code{digits}
 (integer columns get 0 decimal places), one of
@@ -53,6 +73,21 @@ pub_table(data.frame(x = 1 / 3), theme = pub_table_theme(
     number_format = "\%.2e"
 )) |>
     pub_cell_text()
+
+# A house style: light blue grid, bold centred header on a grey background
+house <- pub_table_theme(
+    borders = "grid",
+    border_color = "#D9E2F3",
+    border_width = 0.5,
+    valign = "middle",
+    style = function(ht, rows) {
+        huxtable::align(ht)[rows$header, ] <- "center"
+        huxtable::background_color(ht)[rows$header, ] <- "grey90"
+        ht
+    }
+)
+ht <- pub_table(data.frame(x = 1:2, y = c("a", "b")), theme = house)
+huxtable::background_color(ht)[, 1]
 }
 \seealso{
 \code{\link[=pub_table]{pub_table()}}

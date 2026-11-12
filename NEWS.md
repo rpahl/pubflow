@@ -1,3 +1,10 @@
+# pubflow 0.0.0.9048
+
+* `pub_table_theme()` gains `border_color`, `border_width` and `style`, a
+  function that styles each table by the role of its rows (header, spanner,
+  body, footnote) after the rest of the theme, e.g. for a coloured header
+  (D51).
+
 # pubflow 0.0.0.9047
 
 * Requires pipeflow 0.5.0.9032: failed steps called with symbols give light
