@@ -1,11 +1,12 @@
 # pipeflow — facts relevant for pubflow
 
-Checked 2026-10-31 against **pipeflow 0.5.0.9028** (GitHub
-`rpahl/pipeflow`, commit a3bbe82; required since pubflow 0.0.0.9035 and
+Checked 2026-11-12 against **pipeflow 0.5.0.9032** (GitHub
+`rpahl/pipeflow`, commit 2ee2970; required since pubflow 0.0.0.9047 and
 pinned in `Remotes`, D9) by reading the source and running examples;
 first written for 0.5.0 (CRAN, commit aff664b), updated for 0.5.0.9012
-(af3b0e5, pubflow 0.0.0.9021-9026) and 0.5.0.9026 (bf6b314, pubflow
-0.0.0.9027-9034); the changes are in pipeflow's NEWS,
+(af3b0e5, pubflow 0.0.0.9021-9026), 0.5.0.9026 (bf6b314, pubflow
+0.0.0.9027-9034) and 0.5.0.9028 (a3bbe82, pubflow 0.0.0.9035-9046); the
+changes are in pipeflow's NEWS,
 and its `dev/pipeflow.md` maps the run flow and invariants. Source: worktree `~/coding/rlang/pipeflow/main` (bare repo
 `pipeflow.git` with worktrees; GitHub `rpahl/pipeflow`, which is public). pipeflow's maintainer is the pubflow maintainer: a problem
 that is better solved in pipeflow may be solved there if the change is not
@@ -45,7 +46,13 @@ Steps:
 - `pip_add(x, step, fun, tags = character(0), params = list(),
   exec = "auto", after = length(x))` — full pipeline only. `after` = step
   name or integer 0..n (last argument since 0.5.0.9028). `params` names
-  that aren't formals of `fun` are an error unless `fun` has `...`.
+  that aren't formals of `fun` are an error unless `fun` has `...`. Step
+  names must not start with `-` (0.5.0.9030; `~-1` is a relative
+  reference). **`step` may be a pipeline or view** (0.5.0.9030): its steps
+  are copied with functions, params, tags and exec modes but without their
+  upstream steps, and references are resolved by step name in `x`, e.g.
+  `pip_add(p, q[c("fit", "plot")])` runs `q`'s analysis steps on `p`'s
+  data steps; all or nothing.
 - `pip_replace(x, step, fun, tags = NULL, params = list(), exec = NULL,
   keep_params = FALSE)`: `NULL` keeps the step's tags/exec; the params go
   back to the defaults of `fun` (plus `params`); `keep_params = TRUE`
@@ -65,15 +72,20 @@ Nesting: `as.function(x, out = NULL, cache = TRUE, on_error = c("stop",
 "continue"), lgr = NULL, ...)` for a pipeline, `pip_inner(x, step)` (§7).
 Run: `pip_run(x, lgr = pipeflow_lgr, force = FALSE, progress = NULL,
 on_error = c("stop", "continue"), map = NULL)` (§6), `pip_run_state(x)`,
-`pip_reset(x)`; default logger `pipeflow_lgr(level, msg)`.
+`pip_reset(x)`; default logger `pipeflow_lgr(level, msg)`; the option
+`pipeflow.lgr` sets the default `lgr` of `pip_run()` (0.5.0.9029).
 Outputs: `pip_collect(x, by = "step", as.table = FALSE, simplify = TRUE)`
 (the alias `pip_collect_out()` was removed in 0.5.0.9019).
 Tags: `pip_tag(x, tags)`, `pip_untag(x, tags)`.
 Views: `pip_view(x, ..., join = c("intersect", "union"), fixed = TRUE)`,
 `` `[.pipeflow`(x, i, j, view = TRUE) ``; data.table's `%like%`, `%chin%`,
 `%between%`, ... work in `[` filters but are no longer re-exported (since
-0.5.0.9019; elsewhere `library(data.table)`).
+0.5.0.9019; elsewhere `library(data.table)`). `[` warns if the selector
+is a column name that is also a variable of the caller (0.5.0.9029: with
+`step <- "load"`, `p[step]` selects by the `step` column).
 Locking: `pip_lock(x)`, `pip_unlock(x)` (no separate skip flag).
+`pip_lock()` on a step that is not done outdates its downstream steps
+(0.5.0.9032), as the locked step now passes its stored output.
 Inspection: `pip_data(x)` (full step table, even for a view),
 `pip_graph(x, include_upstream = FALSE, format = c("visNetwork",
 "mermaid"))` (nodes with a hover `title`: state, exec, tags, lock, start
@@ -151,7 +163,20 @@ unwrapping of `Param@value` (its successor is `pip_param_value()`, §4).
   "outdated" (not "done"), and so do the steps that ran with its output
   (since 0.5.0.9016, breaking): its output comes from the old definition.
   A step that sets its own params to fixed values settles after one more
-  run; one that sets new values in every run runs in every run.
+  run; one that sets new values in every run runs in every run. Since
+  0.5.0.9031 `pip_run()` warns about it (class `pipeflow_outdated_before`)
+  if a step changes itself or a done step before it (not if it halts or
+  restarts the run); setting params of *later* steps stays silent.
+- **The step call** (since 0.5.0.9029): a step function is called by the
+  step name with its arguments as symbols, e.g. `fit(x = x)`, in an
+  environment whose parent is pipeflow's namespace. So the call of an
+  error raised in the step (and of a traceback) no longer holds the step's
+  inputs, and `match.call()` in a step gives `fit(x = x)` (an `lm` step
+  stores a call that `update()` can't evaluate later). Params that are
+  symbols or calls go into the call as they are (`subset()` works). An
+  output that keeps the step frame no longer keeps the pipeline through
+  an argument the step didn't force; a step function defined inside a
+  pipeline constructor still encloses that constructor (D20).
 
 ## 4. Parameters
 
@@ -315,7 +340,14 @@ unwrapping of `Param@value` (its successor is `pip_param_value()`, §4).
   "error", "condition")` with `message` ("step 'oot' failed: <message>",
   or "step 'x' was not run: step 'oot' failed: <message>"), `step`,
   `failed_step` and `parent` (the failed step's condition; for partitions
-  the key error). Once all states and outputs are stored, the run ends in
+  the key error). Failures are light since 0.5.0.9029 (step call with
+  symbols, §3): measured 2026-11-12 with an 8 MB input, a failure from
+  `stop()` or `rlang::abort()` in the step serialises to 0.5 KB / 59 KB
+  (the rlang backtrace), with 0.5.0.9028 to 8 MB each, and the
+  `pipeflow_run_failed` warning to 60 KB instead of 16 MB. Data can still
+  get into a condition's call if the step passes it inlined, e.g.
+  `do.call(f, list(data))` where `f` itself raises the error.
+  Once all states and outputs are stored, the run ends in
   run state "continued" and warns with class `pipeflow_run_failed` (fields
   `failed`: named list of the conditions, `skipped`: step names, `keys`:
   named list step -> failed keys of mapped steps; message e.g.
@@ -485,6 +517,18 @@ or that many R users need).
   otherwise. Suggested fix: return `setNames(list(), character(0))`.
   pubflow's `pub_get_params()` returns a named empty list itself until
   then. Low priority.
+
+**Landed in pipeflow 0.5.0.9029-0.5.0.9032** (pubflow requires it from
+0.0.0.9047; no pubflow code change needed, the tests pass unchanged):
+step calls with symbols, so failures no longer carry the step's inputs
+(§3, §6; this settles "light failures" of the SM lessons,
+`dev/PUBFLOW_LESSONS_LEARNED.md` item 7), the option `pipeflow.lgr`, the
+`[` warning for column-named selectors (§2), `pip_add()` of a pipeline or
+view (§2), the `pipeflow_outdated_before` warning (§3) and `pip_lock()`
+outdating the dependents of a step that is not done (§2). Docs:
+`?pip_add` "Outputs that keep an environment" (same advice as D20) and
+`?pip_view` (a view covers only its steps, running it runs their upstream
+steps too).
 
 **Landed in pipeflow 0.5.0.9028** (pubflow adopts it in 0.0.0.9035):
 `pip_replace(keep_params = )` (requested here 2026-10-31 for replaced

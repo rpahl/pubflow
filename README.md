@@ -6,8 +6,8 @@
 <!-- badges: end -->
 
 {pubflow} ("publishing workflow") is the companion package of
-[pipeflow](https://github.com/rpahl/pipeflow): it takes the results a
-pipeline computes and covers what is needed to *publish* them.
+[pipeflow](https://github.com/rpahl/pipeflow) (>= 0.5.0.9032): it takes the
+results a pipeline computes and covers what is needed to *publish* them.
 
 ## Why pubflow?
 

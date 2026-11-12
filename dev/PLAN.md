@@ -52,7 +52,7 @@ Acceptance:
 
 Release checklist (v0.1.0, first CRAN version):
 - [ ] pubflow validated in a real project; findings fixed.
-- [ ] pipeflow 0.5.0.9028 (or later) on CRAN; `Remotes` and the pin removed.
+- [ ] pipeflow 0.5.0.9032 (or later) on CRAN; `Remotes` and the pin removed.
 - [ ] R CMD check 0/0/0, version 0.1.0 with a NEWS heading, tag `v0.1.0`,
   GitHub release, CRAN submission.
 
