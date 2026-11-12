@@ -10,13 +10,13 @@ Source:
 [`DESCRIPTION`](https://github.com/rpahl/pubflow/blob/main/DESCRIPTION)
 
 Pahl R (2026). *pubflow: Publish 'pipeflow' Pipelines: Parameter UIs,
-Result Viewers and Reports*. R package version 0.0.0.9046,
+Result Viewers and Reports*. R package version 0.0.0.9047,
 <https://rpahl.github.io/pubflow/>.
 
 @Manual{,\
   title = {pubflow: Publish 'pipeflow' Pipelines: Parameter UIs, Result Viewers and Reports},\
   author = {Roman Pahl},\
   year = {2026},\
-  note = {R package version 0.0.0.9046},\
+  note = {R package version 0.0.0.9047},\
   url = {https://rpahl.github.io/pubflow/},\
 }

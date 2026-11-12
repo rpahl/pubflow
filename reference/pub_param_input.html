@@ -9,7 +9,7 @@ module (pub_params_server()) uses it for every row of its parameter table."><met
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9046</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9047</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -105,7 +105,7 @@ dropped automatically.</p></dd>
 
 <p>The widget depends on the type of the value (<code><a href="is_param.html">param_type()</a></code>). Choose another one with
 the param attribute <code>ui_widget</code>, either a widget name or a function:</p><table class="table table"><tr><td>Type</td><td>Default widget</td><td>Other widgets</td></tr><tr><td>character</td><td><code>"text"</code></td><td></td></tr><tr><td>factor</td><td><code>"select"</code></td><td><code>"radio"</code></td></tr><tr><td>logical</td><td><code>"switch"</code></td><td></td></tr><tr><td>numeric</td><td><code>"numeric"</code></td><td><code>"slider"</code></td></tr></table><p>The widgets are <code><a href="https://rdrr.io/pkg/shiny/man/textInput.html" class="external-link">shiny::textInput()</a></code>, <code><a href="https://rdrr.io/pkg/shiny/man/selectInput.html" class="external-link">shiny::selectInput()</a></code>,
-<code><a href="https://dreamrs.github.io/shinyWidgets/reference/radioGroupButtons.html" class="external-link">shinyWidgets::radioGroupButtons()</a></code>, <code><a href="https://dreamrs.github.io/shinyWidgets/reference/prettySwitch.html" class="external-link">shinyWidgets::prettySwitch()</a></code>,
+<code><a href="https://rdrr.io/pkg/shinyWidgets/man/radioGroupButtons.html" class="external-link">shinyWidgets::radioGroupButtons()</a></code>, <code><a href="https://rdrr.io/pkg/shinyWidgets/man/prettySwitch.html" class="external-link">shinyWidgets::prettySwitch()</a></code>,
 <code><a href="https://rdrr.io/pkg/shiny/man/numericInput.html" class="external-link">shiny::numericInput()</a></code> and <code><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">shiny::sliderInput()</a></code>. Other types need <code>ui_widget</code>.</p>
 <p>A <code><a href="param.html">param_group()</a></code> gives the inputs of its children side by side, with the input ids
 <code>&lt;inputId&gt;_&lt;child&gt;</code>. Their labels (else their names) are for screen readers only;
