@@ -128,7 +128,7 @@ report_data_table <- function() {
         header = rlang::set_names(rep("Time [months]", 3L), times),
         na = "-"
     )
-    rows <- sum(huxtable::header_rows(ht)) + seq_len(nrow(wide))
+    rows <- pub_table_rows(ht)$body
     huxtable::set_text_color(ht, rows, times, matrix(colors, nrow = 3L))
 }
 
@@ -166,7 +166,7 @@ report_summary_table <- function() {
         digits = c(estimate = 3, std.error = 3),
         merge = "Batch"
     )
-    rows <- sum(huxtable::header_rows(ht)) + seq_len(nrow(data))
+    rows <- pub_table_rows(ht)$body
     huxtable::set_text_color(
         ht,
         rows,
@@ -212,7 +212,7 @@ report_pvalue_table <- function(pInteraction = 0.31, alpha = 0.25) {
     )
     color <- if (pInteraction > alpha) "#006400" else "#8B0000"
     ht <- pub_table(df, digits = c(`F value` = 3))
-    row <- sum(huxtable::header_rows(ht)) + which(df$Source == "Batch:Slope")
+    row <- pub_table_rows(ht)$body[df$Source == "Batch:Slope"]
     ht |>
         huxtable::set_text_color(row, "Pr(>F)", color) |>
         huxtable::set_bold(row, "Pr(>F)")
@@ -328,7 +328,7 @@ slopes_criteria_table <- function() {
         Max = c("1.25", "", "200", "0.05")
     )
     ht <- pub_table(criteria, caption = "Validity Criteria")
-    rows <- sum(huxtable::header_rows(ht)) + which(!slopes_criteria_active)
+    rows <- pub_table_rows(ht)$body[!slopes_criteria_active]
     ht |>
         huxtable::set_text_color(rows, huxtable::everywhere, "#d3c8c8") |>
         pub_strikeout(rows)

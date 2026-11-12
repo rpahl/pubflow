@@ -3,7 +3,7 @@
 Audience: developers (human or agent) who want to understand how pubflow's
 parts fit together before working on it.
 Companion documents: `DESIGN.md` is the agreed design with the reasons
-(decision log D1-D51); `PLAN.md` the open work; `reference/` the research
+(decision log D1-D52); `PLAN.md` the open work; `reference/` the research
 behind both. This document is the map: what the parts are, how data flows
 between them and where to look in the code. It cites decisions (D) instead
 of repeating them; "§n below" refers to this document.
@@ -115,7 +115,7 @@ flowchart TB
 | `output.R` | metadata, output types, small content nodes | `pub_meta()`, `pub_set_meta()`, `pub_type()`, `as_pub_output()`, `pub_raw()`, `pub_toc()`, `pub_pagebreak()`, `pub_session_info()` |
 | `text.R` | Markdown text outputs | `pub_text()`, `.check_markdown()` |
 | `figure.R` | figure outputs and devices | `pub_figure()`, `.render_figure()` |
-| `table.R` | building and finishing tables | `pub_table()`, `pub_strikeout()`, `pub_table_theme()`, `pub_params_table()` |
+| `table.R` | building and finishing tables | `pub_table()`, `pub_table_rows()`, `pub_strikeout()`, `pub_table_theme()`, `pub_params_table()` |
 | `table_format.R` | the common cell formatter | `.format_cells()`, `.display_huxtable()`, `pub_cell_text()` |
 | `round.R` | rounding half away from zero | `pub_round()`, `pub_format_num()`, `.round_decimal()` |
 | `doc.R` | document tree, placing outputs | `pub_doc()`, `pub_section()`, `.expand_output()` |

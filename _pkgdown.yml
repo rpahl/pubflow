@@ -95,6 +95,7 @@ reference:
     desc: Build, style and display tables.
     contents:
       - pub_table
+      - pub_table_rows
       - pub_table_theme
       - pub_cell_text
       - pub_strikeout

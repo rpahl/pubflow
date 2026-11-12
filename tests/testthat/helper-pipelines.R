@@ -525,7 +525,7 @@ demo_data_table <- function(data, decimals) {
         header = rlang::set_names(rep("Time [months]", length(times)), times),
         footnotes = c(batch = "Batches of the demo study.")
     )
-    rows <- sum(huxtable::header_rows(ht)) + seq_len(nrow(wide))
+    rows <- pub_table_rows(ht)$body
     huxtable::set_text_color(ht, rows, times, ifelse(low, "red", "black"))
 }
 
@@ -553,7 +553,7 @@ demo_fit_table <- function(fit, decimals) {
         merge = "batch",
         na = "-"
     )
-    slopes <- sum(huxtable::header_rows(ht)) + which(long$term == "Slope")
+    slopes <- pub_table_rows(ht)$body[long$term == "Slope"]
     huxtable::set_bold(ht, slopes, "estimate")
 }
 
@@ -579,7 +579,7 @@ demo_criteria_table <- function(check, limits) {
         ),
         na = "-"
     )
-    rows <- sum(huxtable::header_rows(ht)) + which(!active)
+    rows <- pub_table_rows(ht)$body[!active]
     ht |>
         huxtable::set_text_color(rows, huxtable::everywhere, "#d3c8c8") |>
         pub_strikeout(rows)

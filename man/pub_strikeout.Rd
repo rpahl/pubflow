@@ -37,10 +37,10 @@ its block markers: \verb{~~A~~ and B} becomes \verb{~~A and B~~} and \code{"# A\
 }
 }
 \examples{
-df <- data.frame(sample = c("S1", "S2", "S3"), result = c(0.8, 12.25, 0.95))
+df <- airquality[1:3, c("Day", "Ozone", "Wind")]
 excluded <- c(FALSE, TRUE, FALSE)
-ht <- pub_table(df, digits = c(result = 2))
-rows <- sum(huxtable::header_rows(ht)) + which(excluded)
+ht <- pub_table(df, digits = c(Wind = 1))
+rows <- pub_table_rows(ht)$body[excluded]
 ht <- huxtable::set_text_color(ht, rows, huxtable::everywhere, "grey")
 ht <- pub_strikeout(ht, rows)
 pub_cell_text(ht)

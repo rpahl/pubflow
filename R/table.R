@@ -4,7 +4,8 @@
 # huxtable's text (numbers as as.character()) and their formats live in huxtable's
 # number_format and na_string (see R/table_format.R). Styling, binding and subsetting
 # use huxtable's own functions; pub_strikeout() adds strikeout as huxtable Markdown
-# cells. pubflow stores no table structure of its own.
+# cells. The only table structure pubflow stores is the role of each row (attribute
+# `pub_table_rows`, see pub_table_rows()), which binding and subsetting invalidate.
 
 # ======================================================================================
 # Building tables
@@ -50,8 +51,8 @@
 #' Style tables with huxtable's functions, e.g. [huxtable::set_text_color()] or
 #' [huxtable::map_text_color()]. Keep in mind:
 #'
-#' * Their rows include the header rows, so body row `i` is table row
-#'   `sum(huxtable::header_rows(ht)) + i` (see Examples).
+#' * Their rows include the header rows: [pub_table_rows()] gives the table rows of
+#'   the header, body and footnotes (see Examples).
 #' * Use integer rows: huxtable recycles short logical vectors, also into the footnote
 #'   rows.
 #' * Strike cells through with [pub_strikeout()].
@@ -89,8 +90,9 @@
 #'   cell. Data.frames and matrices only.
 #' @param footnotes Named character vector: column name -> footnote. The label gets a
 #'   numbered marker (superscript digit), the footnotes are listed below the body (equal
-#'   texts share one number). Add footnotes in the last `pub_table()` call: a later call
-#'   treats footnote rows as body rows.
+#'   texts share one number). Give all footnotes in one call, for the final table:
+#'   a table that has footnotes keeps them when it is finished again, but after
+#'   binding or subsetting they become body rows.
 #' @param merge Character vector of column names whose consecutive equal body cells are
 #'   merged vertically.
 #' @param na `character(1)` text shown for missing values.
@@ -98,48 +100,45 @@
 #' @param theme A [pub_table_theme()]. Default: option `pubflow.table_theme`, otherwise
 #'   `pub_table_theme()`.
 #' @return A huxtable.
-#' @seealso [pub_cell_text()], [pub_strikeout()], [pub_table_theme()],
-#'   [pub_params_table()]
+#' @seealso [pub_table_rows()], [pub_cell_text()], [pub_strikeout()],
+#'   [pub_table_theme()], [pub_params_table()]
 #' @examples
-#' df <- data.frame(
-#'     batch = c("A", "A", "B"),
-#'     time = c(0, 3, 0),
-#'     slope = c(0.125, 2.675, NA)
-#' )
+#' df <- airquality[c(1, 2, 32, 33), c("Month", "Day", "Ozone", "Wind")]
+#' df$Month <- month.name[df$Month]
 #' ht <- pub_table(
 #'     df,
-#'     caption = "Slopes",
-#'     labels = c(batch = "Batch", time = "Time", slope = "Slope"),
-#'     digits = c(time = 0, slope = 2),
-#'     header = c(time = "Model", slope = "Model"),
-#'     footnotes = c(slope = "Per month."),
-#'     merge = "batch",
+#'     caption = "First days of May and June",
+#'     labels = c(Ozone = "Ozone (ppb)", Wind = "Wind (mph)"),
+#'     digits = c(Wind = 0),
+#'     header = c(Ozone = "Measured", Wind = "Measured"),
+#'     footnotes = c(Ozone = "Mean from 1 to 3 pm."),
+#'     merge = "Month",
 #'     na = "-"
 #' )
 #' pub_cell_text(ht)
 #'
-#' # Style with huxtable: body row i is table row nh + i
-#' nh <- sum(huxtable::header_rows(ht))
-#' ht <- huxtable::set_text_color(ht, nh + which(df$time > 0), "slope", "red")
+#' # Style with huxtable: body row i is table row pub_table_rows(ht)$body[i]
+#' body <- pub_table_rows(ht)$body
+#' ht <- huxtable::set_text_color(ht, body[df$Wind > 9], "Wind", "red")
 #'
 #' # Combine the data, then build one table
-#' more <- rbind(df, data.frame(batch = "C", time = 0, slope = 1.5))
-#' pub_cell_text(pub_table(more, digits = c(slope = 2), merge = "batch"))
+#' more <- rbind(df, data.frame(Month = "July", Day = 1L, Ozone = 135L, Wind = 4.1))
+#' pub_cell_text(pub_table(more, digits = c(Wind = 0), merge = "Month"))
 #'
 #' # A matrix works like a data.frame
-#' m <- matrix(c(0.125, 2.675, 10, 20), 2, dimnames = list(NULL, c("a", "b")))
-#' pub_cell_text(pub_table(m, digits = c(a = 1, b = 0)))
+#' m <- as.matrix(airquality[1:2, c("Wind", "Temp")])
+#' pub_cell_text(pub_table(m, digits = c(Wind = 1, Temp = 0)))
 #'
 #' # Layout: alignment, column widths and font size
 #' pub_table(
 #'     df,
-#'     align = c(batch = "center"),
-#'     widths = c(batch = "2cm", slope = 1),
+#'     align = c(Month = "center"),
+#'     widths = c(Month = "2cm", Ozone = 1),
 #'     font_size = 9
 #' )
 #'
 #' # Combined tables: `[` and `cbind()` drop the metadata, `rbind()` keeps the first
-#' ht <- pub_set_meta(pub_table(df), id = "slopes")
+#' ht <- pub_set_meta(pub_table(df), id = "first-days")
 #' pub_meta(ht[1:2, ], "id")
 #' pub_meta(rbind(ht, ht), "id")
 #' @export
@@ -158,13 +157,15 @@ pub_table <- function(
     theme = getOption("pubflow.table_theme", pub_table_theme())
 ) {
     .check_table_args(caption, na, font_size, theme)
+    old <- .recorded_roles(x)
+    nOldNotes <- old$nNotes %||% 0L
     ht <- if (huxtable::is_huxtable(x)) {
         if (!is.null(header)) {
             rlang::abort(
                 "`header` needs a data.frame or matrix; `x` is a huxtable."
             )
         }
-        .finish_table(x, labels, digits)
+        .finish_table(x, labels, digits, old)
     } else {
         .new_table(x, labels, digits, header, theme)
     }
@@ -174,8 +175,9 @@ pub_table <- function(
     )
     merge <- .check_merge(merge, cols)
     notes <- .check_notes(footnotes, cols)
-    ht <- .add_footnotes(ht, notes)
-    rows <- .table_rows(ht, length(.unique_notes(notes)))
+    ht <- .add_footnotes(ht, notes, nOldNotes)
+    marks <- old$marks %||% .footnote_marks(notes)
+    rows <- .table_rows(ht, nOldNotes + length(.unique_notes(notes)))
     ht <- .apply_theme(ht, rows, theme, font_size)
     ht <- .apply_align(ht, rows, align)
     ht <- .apply_na(ht, rows, na)
@@ -187,7 +189,8 @@ pub_table <- function(
         huxtable::caption(ht) <- if (grepl("[^[:space:]]", caption)) caption else NA
     }
     huxtable::caption_pos(ht) <- "top"
-    .apply_style(ht, rows, theme$style)
+    ht <- .apply_style(ht, rows, theme$style)
+    .record_rows(ht, rows, marks)
 }
 
 #' Validate the scalar arguments of pub_table()
@@ -351,10 +354,12 @@ pub_table <- function(
 #' so that merges cannot reformat them.
 #' @param x a huxtable.
 #' @param labels,digits the specs of pub_table() (`NULL` or named by column).
+#' @param old the row roles recorded on `x` (.recorded_roles()) or `NULL`: labels
+#'   keep their footnote markers, footnote rows get no digits.
 #' @param call the environment of the caller, for the error message.
 #' @return `x` with text columns, labels and number formats.
 #' @noRd
-.finish_table <- function(x, labels, digits, call = rlang::caller_env()) {
+.finish_table <- function(x, labels, digits, old, call = rlang::caller_env()) {
     cols <- names(x)
     for (j in seq_along(cols)) {
         if (is.character(x[[j]])) {
@@ -379,10 +384,10 @@ pub_table <- function(
         }
         .check_text_spec(labels[hasLabel], "labels", call)
         for (j in which(hasLabel)) {
-            x[labelRow, j] <- labels[[j]]
+            x[labelRow, j] <- paste0(labels[[j]], old$marks[j])
         }
     }
-    rows <- which(!huxtable::header_rows(x))
+    rows <- .table_rows(x, old$nNotes %||% 0L)$body
     for (j in which(!is.na(digits))) {
         huxtable::number_format(x)[rows, j] <- as.integer(digits[[j]])
     }
@@ -438,22 +443,29 @@ pub_table <- function(
 #' Footnote markers in the label row and footnote rows below the table
 #' @param ht a huxtable.
 #' @param notes footnotes from .check_notes(), one per column.
+#' @param nOld number of footnotes the table already has.
 #' @param call the environment of the caller, for the error message.
 #' @return `ht` with the markers and footnote rows.
 #' @noRd
-.add_footnotes <- function(ht, notes, call = rlang::caller_env()) {
+.add_footnotes <- function(ht, notes, nOld, call = rlang::caller_env()) {
     texts <- .footnote_text(notes)
     if (length(texts) == 0L) {
         return(ht)
+    }
+    if (nOld > 0L) {
+        rlang::abort(
+            "The table has footnotes; give all footnotes in one `pub_table()` call.",
+            call = call
+        )
     }
     labelRow <- .label_row(ht)
     if (length(labelRow) == 0L) {
         rlang::abort("`footnotes` need a table with a header row.", call = call)
     }
-    marks <- match(notes, .unique_notes(notes))
-    for (j in which(!is.na(marks))) {
+    marks <- .footnote_marks(notes)
+    for (j in which(nzchar(marks))) {
         label <- .text_of(ht[[j]][[labelRow]])
-        ht[labelRow, j] <- paste0(label, .superscript(marks[[j]]))
+        ht[labelRow, j] <- paste0(label, marks[[j]])
     }
     for (text in texts) {
         ht <- huxtable::add_footnote(ht, text, border = NULL)
@@ -505,6 +517,17 @@ pub_table <- function(
     )
 }
 
+#' Footnote marker of each column (`""` without footnote)
+#' @param notes footnotes from .check_notes(), one per column.
+#' @return character vector, one per column.
+#' @noRd
+.footnote_marks <- function(notes) {
+    marks <- rep("", length(notes))
+    has <- !is.na(notes)
+    marks[has] <- .superscript(match(notes[has], .unique_notes(notes)))
+    marks
+}
+
 
 # ======================================================================================
 # Styling tables
@@ -513,6 +536,89 @@ pub_table <- function(
 # ----
 # Rows
 # ----
+#' Rows of a table by role
+#'
+#' Gives the rows of a table built by [pub_table()]: header, spanner, body and
+#' footnote rows. Use them to style rows by role with huxtable's functions, whose rows
+#' count from the first header row.
+#'
+#' `pub_table()` records the roles. huxtable's `rbind()`, `cbind()`, `[` and functions
+#' that add rows make them unknown: finish the combined table with `pub_table()`
+#' again before asking for its rows. A table with footnotes that is finished again
+#' keeps them as footnotes, unless it was bound or subset since.
+#' @param ht A huxtable returned by [pub_table()].
+#' @return A list of integer row numbers: `header` (spanner and label rows),
+#'   `spanner`, `body` and `footnote`. The same list is passed to the `style` function
+#'   of a [pub_table_theme()].
+#' @seealso [pub_table()]
+#' @examples
+#' df <- aggregate(Ozone ~ Month, data = airquality, FUN = mean)
+#' ht <- pub_table(df, digits = c(Ozone = 1), footnotes = c(Ozone = "Mean in ppb."))
+#' rows <- pub_table_rows(ht)
+#' rows
+#'
+#' # body row i is table row rows$body[i]
+#' ht <- huxtable::set_bold(ht, rows$body[df$Ozone > 40], "Ozone")
+#'
+#' # binding makes the roles unknown until the table is finished again
+#' parts <- pub_table(df, digits = c(Ozone = 1))
+#' both <- rbind(parts, parts[-1, ])
+#' try(pub_table_rows(both))
+#' pub_table_rows(pub_table(both, footnotes = c(Ozone = "Mean in ppb.")))
+#' @export
+pub_table_rows <- function(ht) {
+    .assert_huxtable(ht)
+    roles <- .recorded_roles(ht)
+    if (is.null(roles)) {
+        rlang::abort(c(
+            "The row roles of `ht` are unknown.",
+            i = paste(
+                "Build it with `pub_table()`, or finish it with `pub_table()` again",
+                "after binding or subsetting it."
+            )
+        ))
+    }
+    .table_rows(ht, roles$nNotes)
+}
+
+#' Row roles recorded by pub_table(), if the record still fits
+#'
+#' With the number of footnote rows, .table_rows() gives all roles. The record fits
+#' if the table has the number of rows and the header rows it had: `[` and `cbind()`
+#' drop the attribute, `rbind()` and added rows change the number of rows (a
+#' best-effort check: changes of cells in place are not noticed).
+#' @param x any object.
+#' @return `NULL` or a list: `nNotes`, the number of footnote rows, and `marks`, the
+#'   footnote marker of each column (`""` without footnote).
+#' @noRd
+.recorded_roles <- function(x) {
+    recorded <- attr(x, "pub_table_rows", exact = TRUE)
+    if (is.null(recorded) || !huxtable::is_huxtable(x)) {
+        return(NULL)
+    }
+    header <- which(unname(huxtable::header_rows(x)))
+    fits <- identical(recorded$nRows, nrow(x)) &&
+        identical(recorded$header, header) &&
+        length(recorded$marks) == ncol(x)
+    if (fits) recorded[c("nNotes", "marks")]
+}
+
+#' Record the row roles on a table (see pub_table_rows())
+#' @param ht a huxtable.
+#' @param rows the rows from .table_rows().
+#' @param marks the footnote marker of each column (`""` without footnote).
+#' @return `ht` with attribute `pub_table_rows`.
+#' @noRd
+.record_rows <- function(ht, rows, marks) {
+    attr(ht, "pub_table_rows") <- list(
+        nNotes = length(rows$footnote),
+        marks = marks,
+        nRows = nrow(ht),
+        header = rows$header
+    )
+    ht
+}
+
 #' Rows of a table being built: header, spanner, body and footnote rows
 #' @param ht a huxtable.
 #' @param nNotes number of footnote rows (the last rows).
@@ -693,7 +799,9 @@ pub_table <- function(
             call = call
         )
     }
-    # keep the metadata (pub_meta(), with the caption) if the function rebuilt the table
+    # keep the header rows and metadata (pub_meta(), with the caption) if the
+    # function rebuilt the table
+    huxtable::header_rows(styled) <- huxtable::header_rows(ht)
     .set_meta(styled, pub_meta(ht))
 }
 
@@ -858,10 +966,10 @@ pub_table <- function(
 #' @return `ht` with the cells struck through.
 #' @seealso [pub_table()]
 #' @examples
-#' df <- data.frame(sample = c("S1", "S2", "S3"), result = c(0.8, 12.25, 0.95))
+#' df <- airquality[1:3, c("Day", "Ozone", "Wind")]
 #' excluded <- c(FALSE, TRUE, FALSE)
-#' ht <- pub_table(df, digits = c(result = 2))
-#' rows <- sum(huxtable::header_rows(ht)) + which(excluded)
+#' ht <- pub_table(df, digits = c(Wind = 1))
+#' rows <- pub_table_rows(ht)$body[excluded]
 #' ht <- huxtable::set_text_color(ht, rows, huxtable::everywhere, "grey")
 #' ht <- pub_strikeout(ht, rows)
 #' pub_cell_text(ht)

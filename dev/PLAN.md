@@ -61,6 +61,15 @@ Release checklist (v0.1.0, first CRAN version):
 ## Later
 
 - Later versions: see `DESIGN.md` §1.
+- **Generic example data** (after the current table and document additions):
+  switch the remaining help examples with batch, slope or assay data
+  (`pub_render_html()`, `pub_render_markdown()`, `doc.R`, `render.R`,
+  `report_spec.R`, `round.R`, `pipeline.R`, `output.R`) to `airquality` or
+  other base R data, as the vignettes and `pub_table()` do (docs-only PR).
+- **Benchmark R15 body rows**: `inst/bench/r15.R` computes body rows as
+  `sum(header_rows(ht)) + i`; switch to `pub_table_rows(ht)$body` when the
+  benchmark is next recorded (it also runs against versions before
+  0.0.0.9049, which lack `pub_table_rows()`).
 
 ### Parked (decide when convenient)
 
