@@ -206,6 +206,95 @@ describe("pub_table()", {
         }
     })
 
+    it("colours the borders and sets their width from the theme", {
+        theme <- pub_table_theme(border_color = "#D9E2F3", border_width = 0.5)
+
+        booktabs <- pub_table(df, theme = theme)
+        grid <- pub_table(
+            df,
+            theme = pub_table_theme(
+                borders = "grid",
+                border_width = 1
+            )
+        )
+
+        expect_identical(border(booktabs, "top")[, 1], c(0.5, 0.5, 0))
+        expect_identical(border(booktabs, "bottom")[, 1], c(0.5, 0, 0.5))
+        expect_true(all(huxtable::top_border_color(booktabs) == "#D9E2F3"))
+        expect_true(all(huxtable::right_border_color(booktabs) == "#D9E2F3"))
+        for (side in c("top", "bottom", "left", "right")) {
+            expect_true(all(border(grid, side) == 1))
+        }
+        expect_true(all(is.na(huxtable::top_border_color(grid))))
+    })
+
+    it("calls the theme's style function last, with the row roles", {
+        seen <- NULL
+        theme <- pub_table_theme(style = function(ht, rows) {
+            seen <<- rows
+            huxtable::align(ht)[rows$header, ] <- "center"
+            huxtable::bold(ht)[rows$body, ] <- TRUE
+            ht
+        })
+
+        ht <- pub_table(
+            df,
+            header = c(n = "Spanner"),
+            footnotes = c(n = "A note."),
+            theme = theme
+        )
+
+        expect_identical(
+            seen,
+            list(header = 1:2, spanner = 1L, body = 3:4, footnote = 5L)
+        )
+        expect_true(all(huxtable::align(ht)[1:2, ] == "center"))
+        expect_true(all(huxtable::bold(ht)[3:4, ]))
+        expect_false(any(huxtable::bold(ht)[5, ]))
+    })
+
+    it("styles a finished table again with the theme's style function", {
+        theme <- pub_table_theme(style = function(ht, rows) {
+            huxtable::background_color(ht)[rows$header, ] <- "grey90"
+            ht
+        })
+        parts <- pub_table(df, theme = theme)
+
+        ht <- pub_table(rbind(parts, parts[-1, ]), theme = theme)
+
+        expect_identical(
+            unname(huxtable::background_color(ht)[, 1]),
+            c("grey90", NA, NA, NA, NA)
+        )
+    })
+
+    it("fails if the theme's style function doesn't return the table", {
+        bad <- list(\(ht, rows) NULL, \(ht, rows) ht[, 1], \(ht, rows) "x")
+        for (style in bad) {
+            expect_error(
+                pub_table(df, theme = pub_table_theme(style = style)),
+                "same rows and columns"
+            )
+        }
+    })
+
+    it("keeps the metadata if the theme's style function rebuilds the table", {
+        rebuild <- \(ht, rows) huxtable::as_hux(as.matrix(ht), add_colnames = FALSE)
+        theme <- pub_table_theme(style = rebuild)
+        parts <- pub_set_meta(pub_table(df, caption = "Slopes"), id = "slopes")
+
+        ht <- pub_table(parts, theme = theme)
+
+        expect_identical(pub_meta(ht), list(id = "slopes", caption = "Slopes"))
+    })
+
+    it("lets `...` override the colour of single border sides", {
+        theme <- pub_table_theme(border_color = "red", top_border_color = "blue")
+
+        expect_identical(theme$properties$top_border_color, "blue")
+        expect_identical(theme$properties$left_border_color, "red")
+    })
+
     it("applies further cell properties of the theme", {
         theme <- pub_table_theme(font = "Arial", top_padding = 2)
 
@@ -582,6 +671,8 @@ describe("pub_table_theme()", {
         expect_identical(theme$borders, "booktabs")
         expect_identical(theme$number_format, 4L)
         expect_identical(theme$properties, list())
+        expect_null(theme$border_width)
+        expect_null(theme$style)
     })
 
     it("accepts every supported number format", {
@@ -613,7 +704,14 @@ describe("pub_table_theme()", {
         expect_error(pub_table_theme(number_format = "%5.2f"), "`number_format`")
         expect_error(pub_table_theme("Arial"), "must be named")
         expect_error(pub_table_theme(na_string = "-"), "pubflow manages")
+        expect_error(pub_table_theme(top_border = 1), "pubflow manages")
         expect_error(pub_table_theme(colour = "red"), "Unrecognized")
+        expect_error(pub_table_theme(border_color = 1), "`border_color`")
+        expect_error(pub_table_theme(border_color = ""), "`border_color`")
+        expect_error(pub_table_theme(border_color = c("a", "b")), "`border_color`")
+        expect_error(pub_table_theme(border_width = 0), "`border_width`")
+        expect_error(pub_table_theme(border_width = c(1, 2)), "`border_width`")
+        expect_error(pub_table_theme(style = "bold"), "`style` must be a function")
     })
 })
 

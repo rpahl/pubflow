@@ -3,7 +3,7 @@
 The agreed design of pubflow and the reasons behind it. `ARCHITECTURE.md` maps the
 code; `PLAN.md` lists the open work; the help pages and vignettes document the API.
 This file keeps what none of them show: **why** things are the way they are. Cite a
-decision by its number (D1-D50) in code comments, commits and PRs, and add a new one
+decision by its number (D1-D51) in code comments, commits and PRs, and add a new one
 here (not a renumbering) when a change settles a design question.
 
 ## 1. Purpose and scope
@@ -120,6 +120,7 @@ results in the PR (`reference/benchmarks.md` has the measurements behind the dec
 | D16 | Table numbers are rounded **half away from zero on the decimal value** (0.125 -> 0.13, 2.675 -> 2.68, -0.5 -> -1, a result of zero has no sign), as reports under USP rounding rules require. pubflow rounds the cell's text digit by digit (no fuzz factor); `round()`, `sprintf()` and `formatC()` round the binary value and differ. Step code gets the same rule from `pub_round()` and `pub_format_num()`. Number formats are digits or a `sprintf()` format with exactly one `%.nf`, `%.ne` or `%.ng` conversion. |
 | D17 | Numeric columns without `digits` show 4 decimal places, integer columns 0; steps should set `digits` deliberately. |
 | D18 | **huxtable's API for styling and combining**: pubflow builds and finishes tables (`pub_table()`) and adds only `pub_strikeout()`. Pattern: combine the data, build the table once; footnotes, widths, metadata and strikeout belong to the final table (huxtable's `[` and `cbind()` drop the pubflow attribute). No underline. |
+| D51 | **Table themes carry a house style as data plus one hook**: `pub_table_theme()` has `border_color` and `border_width` (the borders are pubflow's own logic, booktabs or grid) and `style = function(ht, rows)`, called last in every `pub_table()` with the row roles (`header`, `spanner`, `body`, `footnote`); `...` takes any other huxtable property (e.g. `valign`). Header bold/alignment and other role-dependent looks go into `style`, not into more arguments. The hook runs again when a combined table is finished, so it sets properties instead of changing them relative to their value. No S3 generic: a theme is a value (set as the default with an option), and an app wraps `pub_table_theme()` to extend it. |
 | D27 | **Column widths are automatic**: columns are sized by content and wrap to the page, using each engine's own layout (Word autofit, Typst `auto`, browsers). LaTeX has none, so pubflow computes widths from the cell texts like a browser and passes them to huxtable. `pub_table(widths = )` overrides. |
 | D28 | **Tables break across pages in PDF**: every LaTeX/Typst table is a `breakable()` table (longtable) with repeated header rows. huxtable's default float doesn't break and silently lost rows. |
 | D29 | **PDF typography**: table cells, captions and header/footer lines are written literally (pubflow escapes ligatures and shorthands itself); other text is written by pandoc and keeps the engines' typography. |
