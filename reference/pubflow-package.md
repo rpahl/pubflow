@@ -3,9 +3,9 @@
 Companion of 'pipeflow' that covers everything needed to publish the
 results of a pipeline: self-describing parameter objects with validity
 checks, a 'shiny' module that builds parameter inputs from a pipeline,
-conventions for step outputs (tables, figures, text), layout steps that
-arrange pipeline outputs into documents, a 'shiny' result viewer, and
-reports in HTML, 'Word' and PDF format rendered with 'pandoc'.
+step results as tables, figures and text, layout steps that arrange them
+into a document that is previewed in a 'shiny' viewer and rendered to
+HTML, 'Word' and PDF with 'pandoc', without a source file to knit.
 
 ## See also
 

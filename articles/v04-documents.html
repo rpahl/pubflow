@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9047</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9048</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,7 @@
 
 
 
-<link href="v04-documents_files/pubflow-doc-0.0.0.9047/pubflow-doc.css" rel="stylesheet">
+<link href="v04-documents_files/pubflow-doc-0.0.0.9048/pubflow-doc.css" rel="stylesheet">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Documents and layout steps</h1>
@@ -231,7 +231,7 @@ with the steps that don’t depend on <code>fit</code>:</p>
 <span><span class="co"># 7:              [NULL]</span></span>
 <span><span class="co"># 8:        &lt;pub_doc[2]&gt;</span></span>
 <span><span class="co"># --------------------------</span></span>
-<span><span class="co"># &lt;continued&gt; last run: 2026-11-12 14:26:37 (0.064 s)</span></span>
+<span><span class="co"># &lt;continued&gt; last run: 2026-11-12 16:27:37 (0.063 s)</span></span>
 <span><span class="co"># steps: 4 done, 1 failed, 3 new</span></span></code></pre></div>
 <p>The run warns (class <code>pipeflow_run_failed</code>), but the
 document is there. The steps <code>coef_table</code>, <code>plot</code>
@@ -395,7 +395,7 @@ failed:</p>
 <span><span class="co"># 7: The model explains **49%** of the varian...</span></span>
 <span><span class="co"># 8:                                &lt;pub_doc[2]&gt;</span></span>
 <span><span class="co"># --------------------------</span></span>
-<span><span class="co"># &lt;ready&gt; last run: 2026-11-12 14:26:37 (0.074 s)</span></span>
+<span><span class="co"># &lt;ready&gt; last run: 2026-11-12 16:27:38 (0.070 s)</span></span>
 <span><span class="co"># steps: 8 done</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -456,7 +456,7 @@ steps, and a run of a view computes just what its report needs:</p>
 <span><span class="co">#  9:                                &lt;pub_doc[2]&gt;           </span></span>
 <span><span class="co"># 10:                                      [NULL]           </span></span>
 <span><span class="co"># ---------------------------</span></span>
-<span><span class="co"># &lt;ready&gt; last run: 2026-11-12 14:26:38 (0.026 s)</span></span>
+<span><span class="co"># &lt;ready&gt; last run: 2026-11-12 16:27:38 (0.027 s)</span></span>
 <span><span class="co"># steps: 6 done, 4 new</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/methods/show.html" class="external-link">show</a></span><span class="op">(</span><span class="va">tagged</span><span class="op">[[</span><span class="st">"short"</span>, <span class="st">"out"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <div style="border: 1px solid #ccc; border-radius: 4px; padding: 0 1em;"><div class="pubflow-doc">
@@ -764,7 +764,7 @@ section the step returned:</p>
 <span><span class="co"># 6: section data,table,plot months,table,plot  done           &lt;list[5]&gt;   auto</span></span>
 <span><span class="co"># 7:     doc        sections           section  done        &lt;pub_doc[2]&gt; reduce</span></span>
 <span><span class="co"># -----------------------------</span></span>
-<span><span class="co"># &lt;ready&gt; last run: 2026-11-12 14:26:38 (0.116 s)</span></span>
+<span><span class="co"># &lt;ready&gt; last run: 2026-11-12 16:27:38 (0.113 s)</span></span>
 <span><span class="co"># steps: 7 done</span></span></code></pre></div>
 <div style="border: 1px solid #ccc; border-radius: 4px; padding: 0 1em;"><div class="pubflow-doc">
 <header class="pubflow-doc-header"><h2 data-toc-skip class="pubflow-title">Ozone by month</h2>
@@ -1061,7 +1061,7 @@ pipeline:</p>
 <span><span class="co"># 3:   table        res    mean  done    &lt;huxtable[3x2]&gt;</span></span>
 <span><span class="co"># 4: content      table   table  done          &lt;list[1]&gt;</span></span>
 <span><span class="co"># ------------------------</span></span>
-<span><span class="co"># &lt;ready&gt; last run: 2026-11-12 14:26:39 (0.012 s)</span></span>
+<span><span class="co"># &lt;ready&gt; last run: 2026-11-12 16:27:39 (0.048 s)</span></span>
 <span><span class="co"># steps: 4 done</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="read-the-parts-with-pub_out">Read the parts with <code>pub_out()</code><a class="anchor" aria-label="anchor" href="#read-the-parts-with-pub_out"></a>
@@ -1214,7 +1214,7 @@ pipeline gets the new part:</p>
 <span><span class="co"># 1: parts  parts          done    &lt;list[3]&gt;</span></span>
 <span><span class="co"># 2:   doc  parts   parts  done &lt;pub_doc[2]&gt;</span></span>
 <span><span class="co"># ---------------------------</span></span>
-<span><span class="co"># &lt;ready&gt; last run: 2026-11-12 14:26:40 (0.004 s)</span></span>
+<span><span class="co"># &lt;ready&gt; last run: 2026-11-12 16:27:40 (0.004 s)</span></span>
 <span><span class="co"># steps: 2 done</span></span></code></pre></div>
 <p>Two things to know when a worker runs the group’s pipeline:</p>
 <ul>

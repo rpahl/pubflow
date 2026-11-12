@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9047</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9048</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,7 @@
 
 
 
-<link href="v03-tables-figures-text_files/pubflow-doc-0.0.0.9047/pubflow-doc.css" rel="stylesheet">
+<link href="v03-tables-figures-text_files/pubflow-doc-0.0.0.9048/pubflow-doc.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Tables, figures and text</h1>
@@ -299,7 +299,9 @@ ozone concentration, one fit per month:</p>
 </div></div>
 <p><code><a href="../reference/pub_table.html">?pub_table</a></code> lists the other arguments: alignment, column
 widths, font size and the table <code>theme</code>. A theme sets font
-size, borders and the default number format for all tables. Use
+size, borders (style, colour, width) and the default number format for
+all tables, and can carry a <code>style</code> function for a house look
+that depends on the role of a row, e.g. a coloured header. Use
 <code>options(pubflow.table_theme = pub_table_theme(...))</code> to
 change it for the whole session.</p>
 </div>

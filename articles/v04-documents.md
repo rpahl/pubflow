@@ -153,7 +153,7 @@ depend on `fit`:
 `# 7:              [NULL]`\
 `# 8:        <pub_doc[2]>`\
 `# --------------------------`\
-`# <continued> last run: 2026-11-12 14:26:37 (0.064 s)`\
+`# <continued> last run: 2026-11-12 16:27:37 (0.063 s)`\
 `# steps: 4 done, 1 failed, 3 new`
 
 The run warns (class `pipeflow_run_failed`), but the document is there.
@@ -261,7 +261,7 @@ Set the param back and the next run repairs the steps that failed:
 `# 7: The model explains **49%** of the varian...`\
 `# 8:                                <pub_doc[2]>`\
 `# --------------------------`\
-`# <ready> last run: 2026-11-12 14:26:37 (0.074 s)`\
+`# <ready> last run: 2026-11-12 16:27:38 (0.070 s)`\
 `# steps: 8 done`
 
 ### Select the steps of a report by tags
@@ -329,7 +329,7 @@ view computes just what its report needs:
 `#  9:                                <pub_doc[2]>           `\
 `# 10:                                      [NULL]           `\
 `# ---------------------------`\
-`# <ready> last run: 2026-11-12 14:26:38 (0.026 s)`\
+`# <ready> last run: 2026-11-12 16:27:38 (0.027 s)`\
 `# steps: 6 done, 4 new`\
 [`show`](https://rdrr.io/r/methods/show.html)`(``tagged``[[``"short"``, ``"out"``]``]``)`
 
@@ -535,7 +535,7 @@ by its key, around the section the step returned:
 `# 6: section data,table,plot months,table,plot  done           <list[5]>   auto`\
 `# 7:     doc        sections           section  done        <pub_doc[2]> reduce`\
 `# -----------------------------`\
-`# <ready> last run: 2026-11-12 14:26:38 (0.116 s)`\
+`# <ready> last run: 2026-11-12 16:27:38 (0.113 s)`\
 `# steps: 7 done`
 
 ## Ozone by month
@@ -725,7 +725,7 @@ in a parallel worker, which does the same and returns the pipeline:
 `# 3:   table        res    mean  done    <huxtable[3x2]>`\
 `# 4: content      table   table  done          <list[1]>`\
 `# ------------------------`\
-`# <ready> last run: 2026-11-12 14:26:39 (0.012 s)`\
+`# <ready> last run: 2026-11-12 16:27:39 (0.048 s)`\
 `# steps: 4 done`
 
 #### Read the parts with `pub_out()`
@@ -847,7 +847,7 @@ gets the new part:
 `# 1: parts  parts          done    <list[3]>`\
 `# 2:   doc  parts   parts  done <pub_doc[2]>`\
 `# ---------------------------`\
-`# <ready> last run: 2026-11-12 14:26:40 (0.004 s)`\
+`# <ready> last run: 2026-11-12 16:27:40 (0.004 s)`\
 `# steps: 2 done`
 
 Two things to know when a worker runs the group’s pipeline:

@@ -11,7 +11,7 @@ tables, set it as default with options(pubflow.table_theme = pub_table_theme(...
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9047</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9048</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,6 +64,9 @@ tables, set it as default with <code>options(pubflow.table_theme = pub_table_the
 <span>  <span class="va">...</span>,</span>
 <span>  font_size <span class="op">=</span> <span class="fl">9</span>,</span>
 <span>  borders <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"booktabs"</span>, <span class="st">"grid"</span><span class="op">)</span>,</span>
+<span>  border_color <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  border_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  style <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  number_format <span class="op">=</span> <span class="fl">4L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -74,7 +77,8 @@ tables, set it as default with <code>options(pubflow.table_theme = pub_table_the
 
 <dl><dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Further huxtable cell properties applied to every cell, e.g.
-<code>font = "Arial"</code> or <code>top_padding = 2</code> (see <code><a href="https://hughjonesd.github.io/huxtable/reference/style-functions.html" class="external-link">huxtable::style_cells()</a></code>).</p></dd>
+<code>font = "Arial"</code>, <code>top_padding = 2</code> or <code>valign = "middle"</code> (see
+<code><a href="https://hughjonesd.github.io/huxtable/reference/style-functions.html" class="external-link">huxtable::style_cells()</a></code>).</p></dd>
 
 
 <dt id="arg-font-size">font_size<a class="anchor" aria-label="anchor" href="#arg-font-size"></a></dt>
@@ -84,6 +88,28 @@ tables, set it as default with <code>options(pubflow.table_theme = pub_table_the
 <dt id="arg-borders">borders<a class="anchor" aria-label="anchor" href="#arg-borders"></a></dt>
 <dd><p><code>"booktabs"</code>: horizontal rules above and below the header (and below
 spanners) and below the body; <code>"grid"</code>: borders around all header and body cells.</p></dd>
+
+
+<dt id="arg-border-color">border_color<a class="anchor" aria-label="anchor" href="#arg-border-color"></a></dt>
+<dd><p>Colour of the borders, e.g. <code>"#D9E2F3"</code>, or <code>NULL</code>: the cells
+keep their colour (black in a new table).</p></dd>
+
+
+<dt id="arg-border-width">border_width<a class="anchor" aria-label="anchor" href="#arg-border-width"></a></dt>
+<dd><p>Width of all borders in points, or <code>NULL</code>: 0.4 pt, with booktabs
+0.8 pt above and below the table.</p></dd>
+
+
+<dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
+<dd><p><code>NULL</code> or a function <code>function(ht, rows)</code> that styles the table after
+<code><a href="pub_table.html">pub_table()</a></code> has applied the rest of the theme. <code>rows</code> is a list of row numbers
+by role: <code>header</code> (spanner and label rows), <code>spanner</code>, <code>body</code> and <code>footnote</code>. The
+function returns the styled huxtable, with the same rows and columns; its metadata
+(<code><a href="pub_meta.html">pub_meta()</a></code>, with the caption) stays as before. Use it for a look that depends
+on the role of a row, e.g. a coloured header. It runs on every call of
+<code><a href="pub_table.html">pub_table()</a></code>, also when a table is finished again, so set properties
+(<code>bold(ht)[rows$header, ] &lt;- TRUE</code>) rather than change them relative to their
+value.</p></dd>
 
 
 <dt id="arg-number-format">number_format<a class="anchor" aria-label="anchor" href="#arg-number-format"></a></dt>
@@ -128,6 +154,23 @@ reaches huxtable instead of being taken for <code>font_size</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "x"       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "3.33e-01"</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># A house style: light blue grid, bold centred header on a grey background</span></span></span>
+<span class="r-in"><span><span class="va">house</span> <span class="op">&lt;-</span> <span class="fu">pub_table_theme</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    borders <span class="op">=</span> <span class="st">"grid"</span>,</span></span>
+<span class="r-in"><span>    border_color <span class="op">=</span> <span class="st">"#D9E2F3"</span>,</span></span>
+<span class="r-in"><span>    border_width <span class="op">=</span> <span class="fl">0.5</span>,</span></span>
+<span class="r-in"><span>    valign <span class="op">=</span> <span class="st">"middle"</span>,</span></span>
+<span class="r-in"><span>    style <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">ht</span>, <span class="va">rows</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/align.html" class="external-link">align</a></span><span class="op">(</span><span class="va">ht</span><span class="op">)</span><span class="op">[</span><span class="va">rows</span><span class="op">$</span><span class="va">header</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"center"</span></span></span>
+<span class="r-in"><span>        <span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/background_color.html" class="external-link">background_color</a></span><span class="op">(</span><span class="va">ht</span><span class="op">)</span><span class="op">[</span><span class="va">rows</span><span class="op">$</span><span class="va">header</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"grey90"</span></span></span>
+<span class="r-in"><span>        <span class="va">ht</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ht</span> <span class="op">&lt;-</span> <span class="fu"><a href="pub_table.html">pub_table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span><span class="op">)</span><span class="op">)</span>, theme <span class="op">=</span> <span class="va">house</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/background_color.html" class="external-link">background_color</a></span><span class="op">(</span><span class="va">ht</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 1        2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "grey90"       NA       NA </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

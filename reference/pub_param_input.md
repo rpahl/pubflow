@@ -65,8 +65,8 @@ name or a function:
 The widgets are
 [`shiny::textInput()`](https://rdrr.io/pkg/shiny/man/textInput.html),
 [`shiny::selectInput()`](https://rdrr.io/pkg/shiny/man/selectInput.html),
-[`shinyWidgets::radioGroupButtons()`](https://rdrr.io/pkg/shinyWidgets/man/radioGroupButtons.html),
-[`shinyWidgets::prettySwitch()`](https://rdrr.io/pkg/shinyWidgets/man/prettySwitch.html),
+[`shinyWidgets::radioGroupButtons()`](https://dreamrs.github.io/shinyWidgets/reference/radioGroupButtons.html),
+[`shinyWidgets::prettySwitch()`](https://dreamrs.github.io/shinyWidgets/reference/prettySwitch.html),
 [`shiny::numericInput()`](https://rdrr.io/pkg/shiny/man/numericInput.html)
 and
 [`shiny::sliderInput()`](https://rdrr.io/pkg/shiny/man/sliderInput.html).

@@ -150,8 +150,10 @@ style="margin-left: auto; margin-right: auto;   break-inside: avoid; page-break-
 
 [`?pub_table`](https://rpahl.github.io/pubflow/reference/pub_table.md)
 lists the other arguments: alignment, column widths, font size and the
-table `theme`. A theme sets font size, borders and the default number
-format for all tables. Use
+table `theme`. A theme sets font size, borders (style, colour, width)
+and the default number format for all tables, and can carry a `style`
+function for a house look that depends on the role of a row, e.g. a
+coloured header. Use
 `options(pubflow.table_theme = pub_table_theme(...))` to change it for
 the whole session.
 
