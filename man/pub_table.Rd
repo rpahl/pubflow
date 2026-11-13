@@ -46,8 +46,9 @@ cell. Data.frames and matrices only.}
 
 \item{footnotes}{Named character vector: column name -> footnote. The label gets a
 numbered marker (superscript digit), the footnotes are listed below the body (equal
-texts share one number). Add footnotes in the last \code{pub_table()} call: a later call
-treats footnote rows as body rows.}
+texts share one number). Give all footnotes in one call, for the final table:
+a table that has footnotes keeps them when it is finished again, but after
+binding or subsetting they become body rows.}
 
 \item{merge}{Character vector of column names whose consecutive equal body cells are
 merged vertically.}
@@ -100,8 +101,8 @@ the theme's default for numeric columns) and \code{na_string} (from \code{na}).
 Style tables with huxtable's functions, e.g. \code{\link[huxtable:set_text_color]{huxtable::set_text_color()}} or
 \code{\link[huxtable:map_text_color]{huxtable::map_text_color()}}. Keep in mind:
 \itemize{
-\item Their rows include the header rows, so body row \code{i} is table row
-\code{sum(huxtable::header_rows(ht)) + i} (see Examples).
+\item Their rows include the header rows: \code{\link[=pub_table_rows]{pub_table_rows()}} gives the table rows of
+the header, body and footnotes (see Examples).
 \item Use integer rows: huxtable recycles short logical vectors, also into the footnote
 rows.
 \item Strike cells through with \code{\link[=pub_strikeout]{pub_strikeout()}}.
@@ -125,49 +126,46 @@ and strikeout on the final table.
 }
 }
 \examples{
-df <- data.frame(
-    batch = c("A", "A", "B"),
-    time = c(0, 3, 0),
-    slope = c(0.125, 2.675, NA)
-)
+df <- airquality[c(1, 2, 32, 33), c("Month", "Day", "Ozone", "Wind")]
+df$Month <- month.name[df$Month]
 ht <- pub_table(
     df,
-    caption = "Slopes",
-    labels = c(batch = "Batch", time = "Time", slope = "Slope"),
-    digits = c(time = 0, slope = 2),
-    header = c(time = "Model", slope = "Model"),
-    footnotes = c(slope = "Per month."),
-    merge = "batch",
+    caption = "First days of May and June",
+    labels = c(Ozone = "Ozone (ppb)", Wind = "Wind (mph)"),
+    digits = c(Wind = 0),
+    header = c(Ozone = "Measured", Wind = "Measured"),
+    footnotes = c(Ozone = "Mean from 1 to 3 pm."),
+    merge = "Month",
     na = "-"
 )
 pub_cell_text(ht)
 
-# Style with huxtable: body row i is table row nh + i
-nh <- sum(huxtable::header_rows(ht))
-ht <- huxtable::set_text_color(ht, nh + which(df$time > 0), "slope", "red")
+# Style with huxtable: body row i is table row pub_table_rows(ht)$body[i]
+body <- pub_table_rows(ht)$body
+ht <- huxtable::set_text_color(ht, body[df$Wind > 9], "Wind", "red")
 
 # Combine the data, then build one table
-more <- rbind(df, data.frame(batch = "C", time = 0, slope = 1.5))
-pub_cell_text(pub_table(more, digits = c(slope = 2), merge = "batch"))
+more <- rbind(df, data.frame(Month = "July", Day = 1L, Ozone = 135L, Wind = 4.1))
+pub_cell_text(pub_table(more, digits = c(Wind = 0), merge = "Month"))
 
 # A matrix works like a data.frame
-m <- matrix(c(0.125, 2.675, 10, 20), 2, dimnames = list(NULL, c("a", "b")))
-pub_cell_text(pub_table(m, digits = c(a = 1, b = 0)))
+m <- as.matrix(airquality[1:2, c("Wind", "Temp")])
+pub_cell_text(pub_table(m, digits = c(Wind = 1, Temp = 0)))
 
 # Layout: alignment, column widths and font size
 pub_table(
     df,
-    align = c(batch = "center"),
-    widths = c(batch = "2cm", slope = 1),
+    align = c(Month = "center"),
+    widths = c(Month = "2cm", Ozone = 1),
     font_size = 9
 )
 
 # Combined tables: `[` and `cbind()` drop the metadata, `rbind()` keeps the first
-ht <- pub_set_meta(pub_table(df), id = "slopes")
+ht <- pub_set_meta(pub_table(df), id = "first-days")
 pub_meta(ht[1:2, ], "id")
 pub_meta(rbind(ht, ht), "id")
 }
 \seealso{
-\code{\link[=pub_cell_text]{pub_cell_text()}}, \code{\link[=pub_strikeout]{pub_strikeout()}}, \code{\link[=pub_table_theme]{pub_table_theme()}},
-\code{\link[=pub_params_table]{pub_params_table()}}
+\code{\link[=pub_table_rows]{pub_table_rows()}}, \code{\link[=pub_cell_text]{pub_cell_text()}}, \code{\link[=pub_strikeout]{pub_strikeout()}},
+\code{\link[=pub_table_theme]{pub_table_theme()}}, \code{\link[=pub_params_table]{pub_params_table()}}
 }

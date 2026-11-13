@@ -278,14 +278,21 @@ describe("pub_table()", {
         }
     })
 
-    it("keeps the metadata if the theme's style function rebuilds the table", {
+    it("keeps metadata and row roles if the theme's style function rebuilds it", {
         rebuild <- \(ht, rows) huxtable::as_hux(as.matrix(ht), add_colnames = FALSE)
         theme <- pub_table_theme(style = rebuild)
-        parts <- pub_set_meta(pub_table(df, caption = "Slopes"), id = "slopes")
+        parts <- pub_table(df, caption = "Slopes", footnotes = c(n = "A note."))
+        parts <- pub_set_meta(parts, id = "slopes")
 
         ht <- pub_table(parts, theme = theme)
 
         expect_identical(pub_meta(ht), list(id = "slopes", caption = "Slopes"))
+        expect_identical(
+            unname(huxtable::header_rows(ht)),
+            c(TRUE, FALSE, FALSE, FALSE)
+        )
+        expect_identical(pub_table_rows(ht)$footnote, 4L)
+        expect_identical(pub_table_rows(pub_table(ht, theme = theme))$footnote, 4L)
     })
 
     it("lets `...` override the colour of single border sides", {
@@ -513,6 +520,123 @@ describe("pub_table()", {
         headerless <- huxtable::as_hux(df, add_colnames = FALSE)
         expect_error(pub_table(headerless, labels = c(n = "N")), "header row")
         expect_error(pub_table(headerless, footnotes = c(n = "x")), "header row")
+    })
+})
+
+
+# ======================================================================================
+# Styling tables
+# ======================================================================================
+
+# ----
+# Rows
+# ----
+
+describe("pub_table_rows()", {
+    df <- data.frame(batch = c("A", "B"), slope = c(0.5, 1.5))
+    note <- c(slope = "Per month.")
+
+    it("gives the rows by role, as the theme's style function gets them", {
+        seen <- NULL
+        theme <- pub_table_theme(style = function(ht, rows) {
+            seen <<- rows
+            ht
+        })
+
+        ht <- pub_table(
+            df,
+            header = c(slope = "Model"),
+            footnotes = note,
+            theme = theme
+        )
+
+        expected <- list(header = 1:2, spanner = 1L, body = 3:4, footnote = 5L)
+        expect_identical(pub_table_rows(ht), expected)
+        expect_identical(seen, expected)
+        expect_identical(
+            pub_table_rows(pub_table(df[0, ])),
+            list(
+                header = 1L,
+                spanner = integer(0),
+                body = integer(0),
+                footnote = integer(0)
+            )
+        )
+    })
+
+    it("survives styling with huxtable and pubflow's functions", {
+        ht <- pub_table(df, footnotes = note) |>
+            huxtable::set_bold(2, 1) |>
+            pub_strikeout(3, 2) |>
+            pub_set_meta(id = "slopes")
+
+        expect_identical(pub_table_rows(ht)$footnote, 4L)
+    })
+
+    it("fails after binding or subsetting until the table is finished again", {
+        ht <- pub_table(df, footnotes = note)
+        changed <- list(
+            rbind(ht, ht[2, ]),
+            ht[1:3, ],
+            cbind(ht, ht),
+            huxtable::add_footnote(ht, "More."),
+            huxtable::set_header_rows(ht, 2, TRUE)
+        )
+        for (x in changed) {
+            expect_error(pub_table_rows(x), "finish it with `pub_table\\(\\)`")
+        }
+
+        both <- pub_table(rbind(ht[1:3, ], ht[2:3, ]))
+
+        expect_identical(pub_table_rows(both)$body, 2:5)
+    })
+
+    it("keeps footnotes as footnotes when a table is finished again", {
+        theme <- pub_table_theme(style = function(ht, rows) {
+            huxtable::italic(ht)[rows$footnote, ] <- TRUE
+            ht
+        })
+        ht <- pub_table(df, footnotes = note, theme = theme)
+
+        again <- pub_table(
+            ht,
+            labels = c(batch = "Batch", slope = "Slope"),
+            digits = c(slope = 2),
+            theme = theme
+        )
+
+        expect_identical(pub_table_rows(again), pub_table_rows(ht))
+        expect_identical(cell_text(again)[1, ], c("Batch", "Slope\u00b9"))
+        expect_identical(cell_text(again)[2:3, 2], c("0.50", "1.50"))
+        expect_identical(
+            huxtable::number_format(again)[4, ],
+            huxtable::number_format(ht)[4, ]
+        )
+        expect_identical(border(again, "bottom")[, 1], c(0.4, 0, 0.8, 0))
+        expect_true(all(huxtable::italic(again)[4, ]))
+        expect_error(
+            pub_table(ht, footnotes = c(batch = "Lots.")),
+            "give all footnotes in one"
+        )
+    })
+
+    it("keeps only the footnote markers it set when labels change", {
+        area <- data.frame(a = 1, b = 2)
+        ht <- pub_table(
+            area,
+            labels = c(a = "Area m\u00b2", b = "R\u00b2"),
+            footnotes = c(b = "Adjusted.")
+        )
+        expect_identical(cell_text(ht)[1, ], c("Area m\u00b2", "R\u00b2\u00b9"))
+
+        again <- pub_table(ht, labels = c(a = "Area", b = "R"))
+
+        expect_identical(cell_text(again)[1, ], c("Area", "R\u00b9"))
+    })
+
+    it("validates its input", {
+        expect_error(pub_table_rows(df), "huxtable")
+        expect_error(pub_table_rows(huxtable::hux(df)), "unknown")
     })
 })
 
@@ -865,7 +989,7 @@ describe("report tables", {
             widths = c(note = "auto"),
             align = c(test = "center")
         )
-        rows <- sum(huxtable::header_rows(ht)) + 1:2
+        rows <- pub_table_rows(ht)$body[1:2]
         ht <- ht |>
             huxtable::set_text_color(rows, "value", c("black", "#00B050")) |>
             huxtable::set_bold(rows[[2L]], "status")

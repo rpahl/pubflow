@@ -1,7 +1,7 @@
 # Outputs. A step output is an ordinary R object; optional metadata lives in one
-# attribute, `attr(x, "pubflow")`. pub_type() tells renderers and the document builder
-# how to show an output; as_pub_output() converts anything else (S3 generic for
-# clients).
+# attribute, `attr(x, "pubflow")` (tables also record their row roles, see
+# pub_table_rows()). pub_type() tells renderers and the document builder how to show
+# an output; as_pub_output() converts anything else (S3 generic for clients).
 
 # ======================================================================================
 # Metadata

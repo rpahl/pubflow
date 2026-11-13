@@ -162,20 +162,20 @@ pubflow has no functions of its own to style cells, use
 `set_bold()`, `set_text_color()` or the mapping functions like `map_text_color()`.
 Two things to keep in mind:
 
-* The rows of huxtable's functions include the header rows, so the body row `i`
-  is the table row `sum(huxtable::header_rows(tab)) + i`.
+* The rows of huxtable's functions include the header rows. `pub_table_rows()`
+  gives the table rows of the header, body and footnotes, so the body row `i` is
+  the table row `pub_table_rows(tab)$body[i]`.
 * Give rows as integer indices (or names), not as a logical vector:
   huxtable recycles a short logical vector, also into the footnote rows.
 
 Here the months with a mean above 40 ppb are set in bold red:
 
 ```{r style}
-nHeader <- sum(huxtable::header_rows(tab))
-high <- which(monthly$mean > 40)
+high <- pub_table_rows(tab)$body[monthly$mean > 40]
 
 tab |>
-    huxtable::set_bold(nHeader + high, huxtable::everywhere) |>
-    huxtable::set_text_color(nHeader + high, huxtable::everywhere, "darkred") |>
+    huxtable::set_bold(high, huxtable::everywhere) |>
+    huxtable::set_text_color(high, huxtable::everywhere, "darkred") |>
     show_doc()
 ```
 
@@ -199,7 +199,7 @@ tabRuns <- pub_table(
     caption = "Assay results",
     digits = c(result = 2L)
 )
-rows <- sum(huxtable::header_rows(tabRuns)) + which(runs$excluded)
+rows <- pub_table_rows(tabRuns)$body[runs$excluded]
 tabRuns |>
     huxtable::set_text_color(rows, huxtable::everywhere, "grey50") |>
     pub_strikeout(rows) |>
