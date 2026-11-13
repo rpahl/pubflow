@@ -35,10 +35,13 @@ numeric column (rounded half away from zero, see \code{\link[=pub_round]{pub_rou
 
 \item{widths}{Named vector: column name -> relative width (a positive number),
 absolute width (\code{"<n>cm"}) or \code{"auto"} (as if not given). Absolute columns keep
-their width, relative widths share the rest of the table width. Usually not needed:
-without widths, columns are sized by their content and text wraps to fit the page.
-(In PDF via LaTeX pubflow computes the widths from the cell texts, and a table
-whose longest words don't fit gets a smaller font.)}
+their width, relative widths share the rest of the table width (columns without
+width count as one share each). Unless all columns have absolute widths, a table
+with widths spans the page width. Usually not needed: without widths, columns are
+sized by their content and text wraps to fit the page. (In PDF via LaTeX pubflow
+computes the widths from the cell texts, and a table whose longest words don't fit
+gets a smaller font. In HTML the widths are preferred widths: a table too wide for
+the page shrinks its columns to their content.)}
 
 \item{header}{Named character vector: column name -> spanner label shown above the
 labels. Consecutive equal labels are merged; columns without a spanner get an empty

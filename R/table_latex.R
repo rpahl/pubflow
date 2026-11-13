@@ -237,18 +237,17 @@
 # Typst
 # -----
 #' Column widths for Typst: `"<n>cm"` as is, numbers as shares (`fr`) of the rest, other
-#' columns `auto` (sized by their content)
+#' columns one share each (as in DOCX); without widths all columns `auto` (sized by
+#' their content)
 #' @param value `huxtable::col_width()` of a table.
 #' @return character vector of Typst column widths.
 #' @noRd
 .typst_widths <- function(value) {
-    value <- as.character(value)
-    share <- suppressWarnings(as.numeric(value))
-    ifelse(
-        grepl(.cm_pattern, value),
-        value,
-        ifelse(is.finite(share) & share > 0, paste0(share, "fr"), "auto")
-    )
+    w <- .width_kinds(value)
+    if (all(w$auto)) {
+        return(rep("auto", length(w$value)))
+    }
+    ifelse(w$cm, w$value, paste0(w$share, "fr"))
 }
 
 
@@ -273,12 +272,9 @@
 #'   (proportions), or without widths (natural width).
 #' @noRd
 .latex_widths <- function(ht, text_width, unit_width) {
-    value <- as.character(huxtable::col_width(ht))
-    cm <- grepl(.cm_pattern, value)
-    share <- suppressWarnings(as.numeric(value))
-    auto <- !cm & !(is.finite(share) & share > 0)
+    w <- .width_kinds(huxtable::col_width(ht))
     total <- .table_width(huxtable::width(ht), text_width, per_cm = 72 / 2.54)
-    if (all(auto)) {
+    if (all(w$auto)) {
         ext <- .column_extents(ht)
         if (sum(ext$max) <= total) {
             huxtable::width(ht) <- NA_real_
@@ -294,10 +290,9 @@
         }
         widths <- widths * total / sum(widths)
     } else {
-        widths <- numeric(length(value))
-        widths[cm] <- as.numeric(sub("cm$", "", value[cm])) * 72 / 2.54
-        share[auto] <- 1
-        widths <- .share_widths(widths, share, cm, total, per_cm = 72 / 2.54)
+        widths <- numeric(length(w$value))
+        widths[w$cm] <- w$size[w$cm] * 72 / 2.54
+        widths <- .share_widths(widths, w$share, w$cm, total, per_cm = 72 / 2.54)
     }
     huxtable::width(ht) <- signif(sum(widths) / unit_width, 6)
     huxtable::col_width(ht) <- signif(widths / sum(widths), 6)
