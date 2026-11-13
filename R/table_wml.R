@@ -480,36 +480,49 @@
 #' @param text_width width of the text area in twips.
 #' @noRd
 .wml_widths <- function(ht, text_width) {
-    value <- as.character(huxtable::col_width(ht))
-    cm <- grepl(.cm_pattern, value)
-    share <- suppressWarnings(as.numeric(value))
-    # other values (e.g. set with huxtable directly) count as automatic
-    auto <- !cm & !(is.finite(share) & share > 0)
-    m <- length(value)
-    if (all(auto)) {
+    w <- .width_kinds(huxtable::col_width(ht))
+    m <- length(w$value)
+    if (all(w$auto)) {
         return(list(
             layout = "autofit",
             table = NA_real_,
             grid = rep(as.integer(text_width %/% m), m),
-            auto = auto
+            auto = w$auto
         ))
     }
     total <- .table_width(huxtable::width(ht), text_width)
     twips <- numeric(m)
-    twips[cm] <- as.numeric(sub("cm$", "", value[cm])) * 1440 / 2.54
-    share[auto] <- 1
-    twips <- .share_widths(twips, share, cm, total)
+    twips[w$cm] <- w$size[w$cm] * 1440 / 2.54
+    twips <- .share_widths(twips, w$share, w$cm, total)
     list(
-        layout = if (any(auto)) "autofit" else "fixed",
-        table = if (any(auto)) total else sum(twips),
+        layout = if (any(w$auto)) "autofit" else "fixed",
+        table = if (any(w$auto)) total else sum(twips),
         grid = as.integer(round(twips)),
-        auto = auto
+        auto = w$auto
     )
 }
 
 #' An absolute width such as `"2.5cm"`
 #' @noRd
 .cm_pattern <- "^([0-9]*\\.)?[0-9]+cm$"
+
+#' Kinds of column widths, the same in every format
+#' @param value `huxtable::col_width()` of a table.
+#' @return list: `value` (character), `cm` (absolute `"<n>cm"`), `auto` (automatic:
+#'   anything but `"<n>cm"` and positive numbers, e.g. values set with huxtable
+#'   directly), `share` (the numbers, 1 for automatic columns) and `size` (cm of the
+#'   absolute columns, else `NA`).
+#' @noRd
+.width_kinds <- function(value) {
+    value <- as.character(value)
+    cm <- grepl(.cm_pattern, value)
+    share <- suppressWarnings(as.numeric(value))
+    auto <- !cm & !(is.finite(share) & share > 0)
+    share[auto] <- 1
+    size <- rep(NA_real_, length(value))
+    size[cm] <- as.numeric(sub("cm$", "", value[cm]))
+    list(value = value, cm = cm, auto = auto, share = share, size = size)
+}
 
 #' Table width from `huxtable::width()` (a fraction of the text width, or `"<n>%"` /
 #' `"<n>cm"`), in the unit of `text_width`

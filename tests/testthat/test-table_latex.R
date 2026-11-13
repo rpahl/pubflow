@@ -187,7 +187,7 @@ describe(".table_typst()", {
 
         res <- .table_typst(ht, NULL, NULL)
 
-        expect_match(res, "columns: (2cm, 2fr, auto)", fixed = TRUE)
+        expect_match(res, "columns: (2cm, 2fr, 1fr)", fixed = TRUE)
         expect_match(res, "[x\\.\\.\\.]", fixed = TRUE)
         expect_match(res, "[\\-1]", fixed = TRUE)
     })
@@ -276,14 +276,15 @@ describe(".latex_text() and .typst_text()", {
 # ======================================================================================
 
 describe(".typst_widths()", {
-    it("keeps cm, makes positive numbers shares and the rest auto", {
+    it("keeps cm, makes positive numbers shares and the rest one share each", {
         res <- .typst_widths(c("1.5cm", "0.5", "2", "0", "-1", NA, "abc", "2 cm"))
 
         expect_identical(
             res,
-            c("1.5cm", "0.5fr", "2fr", "auto", "auto", "auto", "auto", "auto")
+            c("1.5cm", "0.5fr", "2fr", "1fr", "1fr", "1fr", "1fr", "1fr")
         )
-        expect_identical(.typst_widths(NA_real_), "auto")
+        expect_identical(.typst_widths(c("2cm", NA)), c("2cm", "1fr"))
+        expect_identical(.typst_widths(c(NA_real_, NA_real_)), c("auto", "auto"))
     })
 })
 

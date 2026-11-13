@@ -637,12 +637,37 @@ pub_html <- function(
 .huxtable_html <- function(x, font_size) {
     ht <- .display_huxtable(x)
     huxtable::caption(ht) <- NA
+    ht <- .html_widths(ht)
     if (!is.null(font_size)) {
         huxtable::font_size(ht) <- font_size
     }
     html <- huxtable::to_html(ht)
     html <- sub("(?s)^\\s*<style>.*?</style>\\s*", "", html, perl = TRUE)
     sub("\n+$", "", html)
+}
+
+#' Column widths for HTML, as in DOCX and PDF
+#'
+#' Numbers become percentages (automatic columns count as one share, as in DOCX) of
+#' the table width: `huxtable::width()`, else the page width unless all columns are
+#' absolute. `"<n>cm"` columns also get a `min-width`, so that browsers take their
+#' width from the other columns (they ignore `calc()` mixing `%` and `cm` in columns).
+#' @param ht a huxtable.
+#' @return `ht` with CSS widths in `col_width()` and `width()`.
+#' @noRd
+.html_widths <- function(ht) {
+    w <- .width_kinds(huxtable::col_width(ht))
+    if (all(w$auto)) {
+        return(ht)
+    }
+    widths <- paste0(signif(100 * w$share / sum(w$share[!w$cm]), 6), "%")
+    # huxtable writes the value as is into the column's `style="width: ..."`
+    widths[w$cm] <- paste0(w$value[w$cm], "; min-width: ", w$value[w$cm])
+    huxtable::col_width(ht) <- widths
+    if (!all(w$cm) && is.na(huxtable::width(ht))) {
+        huxtable::width(ht) <- 1
+    }
+    ht
 }
 
 

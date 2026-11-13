@@ -451,6 +451,52 @@ describe("tables and figures", {
         expect_false(grepl("font-size: 7pt;", pub_html(pub_doc(table)), fixed = TRUE))
     })
 
+    it("gives the column widths the same meaning as in DOCX and PDF", {
+        html_of <- function(widths) {
+            df <- data.frame(a = 1, b = 2, c = 3)
+            html <- as.character(pub_html(pub_doc(pub_table(df, widths = widths))))
+            cols <- regmatches(html, gregexpr("<col[^>]*>", html))[[1L]]
+            table <- regmatches(html, regexpr("<table[^>]*>", html))
+            list(cols = cols, spans = grepl("width: 100%;", table, fixed = TRUE))
+        }
+        col <- function(width) sprintf("<col style=\"width: %s\">", width)
+
+        expect_identical(
+            html_of(c(a = 2, b = 1, c = 1)),
+            list(cols = col(c("50%", "25%", "25%")), spans = TRUE)
+        )
+        expect_identical(
+            html_of(c(a = 3, b = 1)),
+            list(cols = col(c("60%", "20%", "20%")), spans = TRUE)
+        )
+        expect_identical(
+            html_of(c(a = "2.5cm", b = 1, c = 3)),
+            list(
+                cols = col(c("2.5cm; min-width: 2.5cm", "25%", "75%")),
+                spans = TRUE
+            )
+        )
+        expect_identical(
+            html_of(c(a = "2cm", b = "1cm", c = "1cm")),
+            list(
+                cols = col(c(
+                    "2cm; min-width: 2cm",
+                    "1cm; min-width: 1cm",
+                    "1cm; min-width: 1cm"
+                )),
+                spans = FALSE
+            )
+        )
+        expect_identical(html_of(NULL), list(cols = rep("<col>", 3), spans = FALSE))
+        expect_identical(
+            html_of(c(a = "auto", b = "auto", c = "auto")),
+            list(cols = col(rep("auto", 3)), spans = FALSE)
+        )
+        half <- pub_table(data.frame(a = 1, b = 2), widths = c(a = 1))
+        huxtable::width(half) <- 0.5
+        expect_match(as.character(pub_html(pub_doc(half))), "width: 50%;", fixed = TRUE)
+    })
+
     it("takes the alt text from the caption, the title or \"Figure\"", {
         alt_of <- function(...) {
             figure <- pub_figure(recorded_plot(), width = 2, height = 2, ...)
