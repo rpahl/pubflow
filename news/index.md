@@ -1,5 +1,14 @@
 # Changelog
 
+## pubflow 0.0.0.9050
+
+- `pub_table(widths = )` means the same in HTML as in DOCX and PDF:
+  numbers are shares of the table width (a width of 2 no longer gives
+  200 %), `"<n>cm"` columns keep their width, and a table with widths
+  spans the page width unless all its columns are absolute.
+- In PDF via Typst, columns without width in a table with `widths` get
+  one share each, as in DOCX and HTML, instead of their content width.
+
 ## pubflow 0.0.0.9049
 
 - New

@@ -9,7 +9,7 @@ finishes an existing huxtable."><meta property="og:image" content="https://rpahl
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9049</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9050</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,10 +103,13 @@ numeric column (rounded half away from zero, see <code><a href="pub_round.html">
 <dt id="arg-widths">widths<a class="anchor" aria-label="anchor" href="#arg-widths"></a></dt>
 <dd><p>Named vector: column name -&gt; relative width (a positive number),
 absolute width (<code>"&lt;n&gt;cm"</code>) or <code>"auto"</code> (as if not given). Absolute columns keep
-their width, relative widths share the rest of the table width. Usually not needed:
-without widths, columns are sized by their content and text wraps to fit the page.
-(In PDF via LaTeX pubflow computes the widths from the cell texts, and a table
-whose longest words don't fit gets a smaller font.)</p></dd>
+their width, relative widths share the rest of the table width (columns without
+width count as one share each). Unless all columns have absolute widths, a table
+with widths spans the page width. Usually not needed: without widths, columns are
+sized by their content and text wraps to fit the page. (In PDF via LaTeX pubflow
+computes the widths from the cell texts, and a table whose longest words don't fit
+gets a smaller font. In HTML the widths are preferred widths: a table too wide for
+the page shrinks its columns to their content.)</p></dd>
 
 
 <dt id="arg-header">header<a class="anchor" aria-label="anchor" href="#arg-header"></a></dt>

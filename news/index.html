@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9049</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9050</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,12 @@
       <small>Source: <a href="https://github.com/rpahl/pubflow/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.0.9050" id="pubflow-0009050">pubflow 0.0.0.9050<a class="anchor" aria-label="anchor" href="#pubflow-0009050"></a></h2>
+<ul><li>
+<code>pub_table(widths = )</code> means the same in HTML as in DOCX and PDF: numbers are shares of the table width (a width of 2 no longer gives 200 %), <code>"&lt;n&gt;cm"</code> columns keep their width, and a table with widths spans the page width unless all its columns are absolute.</li>
+<li>In PDF via Typst, columns without width in a table with <code>widths</code> get one share each, as in DOCX and HTML, instead of their content width.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9049" id="pubflow-0009049">pubflow 0.0.0.9049<a class="anchor" aria-label="anchor" href="#pubflow-0009049"></a></h2>
 <ul><li>New <code><a href="../reference/pub_table_rows.html">pub_table_rows()</a></code> gives the header, spanner, body and footnote rows of a table built by <code><a href="../reference/pub_table.html">pub_table()</a></code>, e.g. to style body rows with huxtable. After binding or subsetting it fails until the table is finished with <code><a href="../reference/pub_table.html">pub_table()</a></code> again (D52).</li>
