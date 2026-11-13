@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9048</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9049</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,7 @@
 
 
 
-<link href="v03-tables-figures-text_files/pubflow-doc-0.0.0.9048/pubflow-doc.css" rel="stylesheet">
+<link href="v03-tables-figures-text_files/pubflow-doc-0.0.0.9049/pubflow-doc.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Tables, figures and text</h1>
@@ -313,21 +313,21 @@ e.g. <code>set_bold()</code>, <code>set_text_color()</code> or the
 mapping functions like <code>map_text_color()</code>. Two things to keep
 in mind:</p>
 <ul>
-<li>The rows of huxtable’s functions include the header rows, so the
-body row <code>i</code> is the table row
-<code>sum(huxtable::header_rows(tab)) + i</code>.</li>
+<li>The rows of huxtable’s functions include the header rows.
+<code><a href="../reference/pub_table_rows.html">pub_table_rows()</a></code> gives the table rows of the header, body
+and footnotes, so the body row <code>i</code> is the table row
+<code>pub_table_rows(tab)$body[i]</code>.</li>
 <li>Give rows as integer indices (or names), not as a logical vector:
 huxtable recycles a short logical vector, also into the footnote
 rows.</li>
 </ul>
 <p>Here the months with a mean above 40 ppb are set in bold red:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nHeader</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/header_cols.html" class="external-link">header_rows</a></span><span class="op">(</span><span class="va">tab</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">high</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">monthly</span><span class="op">$</span><span class="va">mean</span> <span class="op">&gt;</span> <span class="fl">40</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">high</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pub_table_rows.html">pub_table_rows</a></span><span class="op">(</span><span class="va">tab</span><span class="op">)</span><span class="op">$</span><span class="va">body</span><span class="op">[</span><span class="va">monthly</span><span class="op">$</span><span class="va">mean</span> <span class="op">&gt;</span> <span class="fl">40</span><span class="op">]</span></span>
 <span></span>
 <span><span class="va">tab</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/bold.html" class="external-link">set_bold</a></span><span class="op">(</span><span class="va">nHeader</span> <span class="op">+</span> <span class="va">high</span>, <span class="fu">huxtable</span><span class="fu">::</span><span class="va"><a href="https://hughjonesd.github.io/huxtable/reference/stripe.html" class="external-link">everywhere</a></span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/text_color.html" class="external-link">set_text_color</a></span><span class="op">(</span><span class="va">nHeader</span> <span class="op">+</span> <span class="va">high</span>, <span class="fu">huxtable</span><span class="fu">::</span><span class="va"><a href="https://hughjonesd.github.io/huxtable/reference/stripe.html" class="external-link">everywhere</a></span>, <span class="st">"darkred"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/bold.html" class="external-link">set_bold</a></span><span class="op">(</span><span class="va">high</span>, <span class="fu">huxtable</span><span class="fu">::</span><span class="va"><a href="https://hughjonesd.github.io/huxtable/reference/stripe.html" class="external-link">everywhere</a></span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/text_color.html" class="external-link">set_text_color</a></span><span class="op">(</span><span class="va">high</span>, <span class="fu">huxtable</span><span class="fu">::</span><span class="va"><a href="https://hughjonesd.github.io/huxtable/reference/stripe.html" class="external-link">everywhere</a></span>, <span class="st">"darkred"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">show_doc</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div style="border: 1px solid #ccc; border-radius: 4px; padding: 0 1em;"><div class="pubflow-doc">
 <div class="pubflow-item pubflow-table">
@@ -398,7 +398,7 @@ strike through <em>last</em>, after all number formats are set:</p>
 <span>    caption <span class="op">=</span> <span class="st">"Assay results"</span>,</span>
 <span>    digits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>result <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/header_cols.html" class="external-link">header_rows</a></span><span class="op">(</span><span class="va">tabRuns</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">runs</span><span class="op">$</span><span class="va">excluded</span><span class="op">)</span></span>
+<span><span class="va">rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pub_table_rows.html">pub_table_rows</a></span><span class="op">(</span><span class="va">tabRuns</span><span class="op">)</span><span class="op">$</span><span class="va">body</span><span class="op">[</span><span class="va">runs</span><span class="op">$</span><span class="va">excluded</span><span class="op">]</span></span>
 <span><span class="va">tabRuns</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/text_color.html" class="external-link">set_text_color</a></span><span class="op">(</span><span class="va">rows</span>, <span class="fu">huxtable</span><span class="fu">::</span><span class="va"><a href="https://hughjonesd.github.io/huxtable/reference/stripe.html" class="external-link">everywhere</a></span>, <span class="st">"grey50"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="../reference/pub_strikeout.html">pub_strikeout</a></span><span class="op">(</span><span class="va">rows</span><span class="op">)</span> <span class="op">|&gt;</span></span>

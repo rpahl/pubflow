@@ -111,6 +111,8 @@ Build, style and display tables.
 
 - [`pub_table()`](https://rpahl.github.io/pubflow/reference/pub_table.md)
   : Create a pubflow table
+- [`pub_table_rows()`](https://rpahl.github.io/pubflow/reference/pub_table_rows.md)
+  : Rows of a table by role
 - [`pub_table_theme()`](https://rpahl.github.io/pubflow/reference/pub_table_theme.md)
   : Table theme
 - [`pub_cell_text()`](https://rpahl.github.io/pubflow/reference/pub_cell_text.md)

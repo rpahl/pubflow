@@ -61,16 +61,16 @@ between `~~`. Therefore:
 ## Examples
 
 ``` r
-df <- data.frame(sample = c("S1", "S2", "S3"), result = c(0.8, 12.25, 0.95))
+df <- airquality[1:3, c("Day", "Ozone", "Wind")]
 excluded <- c(FALSE, TRUE, FALSE)
-ht <- pub_table(df, digits = c(result = 2))
-rows <- sum(huxtable::header_rows(ht)) + which(excluded)
+ht <- pub_table(df, digits = c(Wind = 1))
+rows <- pub_table_rows(ht)$body[excluded]
 ht <- huxtable::set_text_color(ht, rows, huxtable::everywhere, "grey")
 ht <- pub_strikeout(ht, rows)
 pub_cell_text(ht)
-#>      [,1]     [,2]       
-#> [1,] "sample" "result"   
-#> [2,] "S1"     "0.80"     
-#> [3,] "~~S2~~" "~~12.25~~"
-#> [4,] "S3"     "0.95"     
+#>      [,1]    [,2]     [,3]     
+#> [1,] "Day"   "Ozone"  "Wind"   
+#> [2,] "1"     "41"     "7.4"    
+#> [3,] "~~2~~" "~~36~~" "~~8.0~~"
+#> [4,] "3"     "12"     "12.6"   
 ```

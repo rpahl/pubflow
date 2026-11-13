@@ -1,5 +1,23 @@
 # Changelog
 
+## pubflow 0.0.0.9049
+
+- New
+  [`pub_table_rows()`](https://rpahl.github.io/pubflow/reference/pub_table_rows.md)
+  gives the header, spanner, body and footnote rows of a table built by
+  [`pub_table()`](https://rpahl.github.io/pubflow/reference/pub_table.md),
+  e.g. to style body rows with huxtable. After binding or subsetting it
+  fails until the table is finished with
+  [`pub_table()`](https://rpahl.github.io/pubflow/reference/pub_table.md)
+  again (D52).
+- [`pub_table()`](https://rpahl.github.io/pubflow/reference/pub_table.md)
+  keeps existing footnote rows as footnotes when it finishes a table
+  again (unless the table was bound or subset since): borders, `digits`,
+  `na`, `align` and the theme’s `style` function treat them as
+  footnotes, and new `labels` keep their footnote markers. Giving
+  `footnotes` again for such a table is an error: give all footnotes in
+  one call.
+
 ## pubflow 0.0.0.9048
 
 - [`pub_table_theme()`](https://rpahl.github.io/pubflow/reference/pub_table_theme.md)

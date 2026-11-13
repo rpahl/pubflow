@@ -164,20 +164,21 @@ pubflow has no functions of its own to style cells, use
 e.g. `set_bold()`, `set_text_color()` or the mapping functions like
 `map_text_color()`. Two things to keep in mind:
 
-- The rows of huxtable’s functions include the header rows, so the body
-  row `i` is the table row `sum(huxtable::header_rows(tab)) + i`.
+- The rows of huxtable’s functions include the header rows.
+  [`pub_table_rows()`](https://rpahl.github.io/pubflow/reference/pub_table_rows.md)
+  gives the table rows of the header, body and footnotes, so the body
+  row `i` is the table row `pub_table_rows(tab)$body[i]`.
 - Give rows as integer indices (or names), not as a logical vector:
   huxtable recycles a short logical vector, also into the footnote rows.
 
 Here the months with a mean above 40 ppb are set in bold red:
 
 \
-`nHeader`` ``<-`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``huxtable``::`[`header_rows`](https://hughjonesd.github.io/huxtable/reference/header_cols.html)`(``tab``)``)`\
-`high`` ``<-`` `[`which`](https://rdrr.io/r/base/which.html)`(``monthly``$``mean`` ``>`` ``40``)`\
+`high`` ``<-`` `[`pub_table_rows`](https://rpahl.github.io/pubflow/reference/pub_table_rows.md)`(``tab``)``$``body``[``monthly``$``mean`` ``>`` ``40``]`\
 \
 `tab`` ``|>`\
-`    ``huxtable``::`[`set_bold`](https://hughjonesd.github.io/huxtable/reference/bold.html)`(``nHeader`` ``+`` ``high``, ``huxtable``::`[`everywhere`](https://hughjonesd.github.io/huxtable/reference/stripe.html)`)`` ``|>`\
-`    ``huxtable``::`[`set_text_color`](https://hughjonesd.github.io/huxtable/reference/text_color.html)`(``nHeader`` ``+`` ``high``, ``huxtable``::`[`everywhere`](https://hughjonesd.github.io/huxtable/reference/stripe.html)`, ``"darkred"``)`` ``|>`\
+`    ``huxtable``::`[`set_bold`](https://hughjonesd.github.io/huxtable/reference/bold.html)`(``high``, ``huxtable``::`[`everywhere`](https://hughjonesd.github.io/huxtable/reference/stripe.html)`)`` ``|>`\
+`    ``huxtable``::`[`set_text_color`](https://hughjonesd.github.io/huxtable/reference/text_color.html)`(``high``, ``huxtable``::`[`everywhere`](https://hughjonesd.github.io/huxtable/reference/stripe.html)`, ``"darkred"``)`` ``|>`\
 `    ``show_doc``(``)`
 
 | Month     |   N | Mean (ppb) | SD (ppb) |
@@ -213,7 +214,7 @@ number formats are set:
 `    caption ``=`` ``"Assay results"``,`\
 `    digits ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``result ``=`` ``2L``)`\
 `)`\
-`rows`` ``<-`` `[`sum`](https://rdrr.io/r/base/sum.html)`(``huxtable``::`[`header_rows`](https://hughjonesd.github.io/huxtable/reference/header_cols.html)`(``tabRuns``)``)`` ``+`` `[`which`](https://rdrr.io/r/base/which.html)`(``runs``$``excluded``)`\
+`rows`` ``<-`` `[`pub_table_rows`](https://rpahl.github.io/pubflow/reference/pub_table_rows.md)`(``tabRuns``)``$``body``[``runs``$``excluded``]`\
 `tabRuns`` ``|>`\
 `    ``huxtable``::`[`set_text_color`](https://hughjonesd.github.io/huxtable/reference/text_color.html)`(``rows``, ``huxtable``::`[`everywhere`](https://hughjonesd.github.io/huxtable/reference/stripe.html)`, ``"grey50"``)`` ``|>`\
 `    `[`pub_strikeout`](https://rpahl.github.io/pubflow/reference/pub_strikeout.md)`(``rows``)`` ``|>`\

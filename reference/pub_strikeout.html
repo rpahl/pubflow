@@ -11,7 +11,7 @@ huxtable's rbind(), cbind() and [."><meta property="og:image" content="https://r
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9048</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9049</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,18 +101,18 @@ its block markers: <code>~~A~~ and B</code> becomes <code>~~A and B~~</code> and
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>sample <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"S1"</span>, <span class="st">"S2"</span>, <span class="st">"S3"</span><span class="op">)</span>, result <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">12.25</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">airquality</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Day"</span>, <span class="st">"Ozone"</span>, <span class="st">"Wind"</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">excluded</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">ht</span> <span class="op">&lt;-</span> <span class="fu"><a href="pub_table.html">pub_table</a></span><span class="op">(</span><span class="va">df</span>, digits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>result <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/header_cols.html" class="external-link">header_rows</a></span><span class="op">(</span><span class="va">ht</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">excluded</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ht</span> <span class="op">&lt;-</span> <span class="fu"><a href="pub_table.html">pub_table</a></span><span class="op">(</span><span class="va">df</span>, digits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Wind <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="pub_table_rows.html">pub_table_rows</a></span><span class="op">(</span><span class="va">ht</span><span class="op">)</span><span class="op">$</span><span class="va">body</span><span class="op">[</span><span class="va">excluded</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">ht</span> <span class="op">&lt;-</span> <span class="fu">huxtable</span><span class="fu">::</span><span class="fu"><a href="https://hughjonesd.github.io/huxtable/reference/text_color.html" class="external-link">set_text_color</a></span><span class="op">(</span><span class="va">ht</span>, <span class="va">rows</span>, <span class="fu">huxtable</span><span class="fu">::</span><span class="va"><a href="https://hughjonesd.github.io/huxtable/reference/stripe.html" class="external-link">everywhere</a></span>, <span class="st">"grey"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ht</span> <span class="op">&lt;-</span> <span class="fu">pub_strikeout</span><span class="op">(</span><span class="va">ht</span>, <span class="va">rows</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="pub_cell_text.html">pub_cell_text</a></span><span class="op">(</span><span class="va">ht</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]     [,2]       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "sample" "result"   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "S1"     "0.80"     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] "~~S2~~" "~~12.25~~"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "S3"     "0.95"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]    [,2]     [,3]     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "Day"   "Ozone"  "Wind"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "1"     "41"     "7.4"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] "~~2~~" "~~36~~" "~~8.0~~"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "3"     "12"     "12.6"   </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

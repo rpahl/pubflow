@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9048</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9049</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,12 @@
       <small>Source: <a href="https://github.com/rpahl/pubflow/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.0.9049" id="pubflow-0009049">pubflow 0.0.0.9049<a class="anchor" aria-label="anchor" href="#pubflow-0009049"></a></h2>
+<ul><li>New <code><a href="../reference/pub_table_rows.html">pub_table_rows()</a></code> gives the header, spanner, body and footnote rows of a table built by <code><a href="../reference/pub_table.html">pub_table()</a></code>, e.g. to style body rows with huxtable. After binding or subsetting it fails until the table is finished with <code><a href="../reference/pub_table.html">pub_table()</a></code> again (D52).</li>
+<li>
+<code><a href="../reference/pub_table.html">pub_table()</a></code> keeps existing footnote rows as footnotes when it finishes a table again (unless the table was bound or subset since): borders, <code>digits</code>, <code>na</code>, <code>align</code> and the theme’s <code>style</code> function treat them as footnotes, and new <code>labels</code> keep their footnote markers. Giving <code>footnotes</code> again for such a table is an error: give all footnotes in one call.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9048" id="pubflow-0009048">pubflow 0.0.0.9048<a class="anchor" aria-label="anchor" href="#pubflow-0009048"></a></h2>
 <ul><li>

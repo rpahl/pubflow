@@ -69,8 +69,10 @@ pub_table(
 
   Named character vector: column name -\> footnote. The label gets a
   numbered marker (superscript digit), the footnotes are listed below
-  the body (equal texts share one number). Add footnotes in the last
-  `pub_table()` call: a later call treats footnote rows as body rows.
+  the body (equal texts share one number). Give all footnotes in one
+  call, for the final table: a table that has footnotes keeps them when
+  it is finished again, but after binding or subsetting they become body
+  rows.
 
 - merge:
 
@@ -143,8 +145,9 @@ or
 [`huxtable::map_text_color()`](https://hughjonesd.github.io/huxtable/reference/text_color.html).
 Keep in mind:
 
-- Their rows include the header rows, so body row `i` is table row
-  `sum(huxtable::header_rows(ht)) + i` (see Examples).
+- Their rows include the header rows:
+  [`pub_table_rows()`](https://rpahl.github.io/pubflow/reference/pub_table_rows.md)
+  gives the table rows of the header, body and footnotes (see Examples).
 
 - Use integer rows: huxtable recycles short logical vectors, also into
   the footnote rows.
@@ -175,6 +178,7 @@ widths, metadata and strikeout on the final table.
 
 ## See also
 
+[`pub_table_rows()`](https://rpahl.github.io/pubflow/reference/pub_table_rows.md),
 [`pub_cell_text()`](https://rpahl.github.io/pubflow/reference/pub_cell_text.md),
 [`pub_strikeout()`](https://rpahl.github.io/pubflow/reference/pub_strikeout.md),
 [`pub_table_theme()`](https://rpahl.github.io/pubflow/reference/pub_table_theme.md),
@@ -183,73 +187,81 @@ widths, metadata and strikeout on the final table.
 ## Examples
 
 ``` r
-df <- data.frame(
-    batch = c("A", "A", "B"),
-    time = c(0, 3, 0),
-    slope = c(0.125, 2.675, NA)
-)
+df <- airquality[c(1, 2, 32, 33), c("Month", "Day", "Ozone", "Wind")]
+df$Month <- month.name[df$Month]
 ht <- pub_table(
     df,
-    caption = "Slopes",
-    labels = c(batch = "Batch", time = "Time", slope = "Slope"),
-    digits = c(time = 0, slope = 2),
-    header = c(time = "Model", slope = "Model"),
-    footnotes = c(slope = "Per month."),
-    merge = "batch",
+    caption = "First days of May and June",
+    labels = c(Ozone = "Ozone (ppb)", Wind = "Wind (mph)"),
+    digits = c(Wind = 0),
+    header = c(Ozone = "Measured", Wind = "Measured"),
+    footnotes = c(Ozone = "Mean from 1 to 3 pm."),
+    merge = "Month",
     na = "-"
 )
 pub_cell_text(ht)
-#>      [,1]           [,2]           [,3]          
-#> [1,] ""             "Model"        "Model"       
-#> [2,] "Batch"        "Time"         "Slope¹"      
-#> [3,] "A"            "0"            "0.13"        
-#> [4,] "A"            "3"            "2.68"        
-#> [5,] "B"            "0"            "-"           
-#> [6,] "¹ Per month." "¹ Per month." "¹ Per month."
+#>      [,1]                     [,2]                     [,3]                    
+#> [1,] ""                       ""                       "Measured"              
+#> [2,] "Month"                  "Day"                    "Ozone (ppb)¹"          
+#> [3,] "May"                    "1"                      "41"                    
+#> [4,] "May"                    "2"                      "36"                    
+#> [5,] "June"                   "1"                      "-"                     
+#> [6,] "June"                   "2"                      "-"                     
+#> [7,] "¹ Mean from 1 to 3 pm." "¹ Mean from 1 to 3 pm." "¹ Mean from 1 to 3 pm."
+#>      [,4]                    
+#> [1,] "Measured"              
+#> [2,] "Wind (mph)"            
+#> [3,] "7"                     
+#> [4,] "8"                     
+#> [5,] "9"                     
+#> [6,] "10"                    
+#> [7,] "¹ Mean from 1 to 3 pm."
 
-# Style with huxtable: body row i is table row nh + i
-nh <- sum(huxtable::header_rows(ht))
-ht <- huxtable::set_text_color(ht, nh + which(df$time > 0), "slope", "red")
+# Style with huxtable: body row i is table row pub_table_rows(ht)$body[i]
+body <- pub_table_rows(ht)$body
+ht <- huxtable::set_text_color(ht, body[df$Wind > 9], "Wind", "red")
 
 # Combine the data, then build one table
-more <- rbind(df, data.frame(batch = "C", time = 0, slope = 1.5))
-pub_cell_text(pub_table(more, digits = c(slope = 2), merge = "batch"))
-#>      [,1]    [,2]     [,3]   
-#> [1,] "batch" "time"   "slope"
-#> [2,] "A"     "0.0000" "0.13" 
-#> [3,] "A"     "3.0000" "2.68" 
-#> [4,] "B"     "0.0000" ""     
-#> [5,] "C"     "0.0000" "1.50" 
+more <- rbind(df, data.frame(Month = "July", Day = 1L, Ozone = 135L, Wind = 4.1))
+pub_cell_text(pub_table(more, digits = c(Wind = 0), merge = "Month"))
+#>      [,1]    [,2]  [,3]    [,4]  
+#> [1,] "Month" "Day" "Ozone" "Wind"
+#> [2,] "May"   "1"   "41"    "7"   
+#> [3,] "May"   "2"   "36"    "8"   
+#> [4,] "June"  "1"   ""      "9"   
+#> [5,] "June"  "2"   ""      "10"  
+#> [6,] "July"  "1"   "135"   "4"   
 
 # A matrix works like a data.frame
-m <- matrix(c(0.125, 2.675, 10, 20), 2, dimnames = list(NULL, c("a", "b")))
-pub_cell_text(pub_table(m, digits = c(a = 1, b = 0)))
-#>      [,1]  [,2]
-#> [1,] "a"   "b" 
-#> [2,] "0.1" "10"
-#> [3,] "2.7" "20"
+m <- as.matrix(airquality[1:2, c("Wind", "Temp")])
+pub_cell_text(pub_table(m, digits = c(Wind = 1, Temp = 0)))
+#>      [,1]   [,2]  
+#> [1,] "Wind" "Temp"
+#> [2,] "7.4"  "67"  
+#> [3,] "8.0"  "72"  
 
 # Layout: alignment, column widths and font size
 pub_table(
     df,
-    align = c(batch = "center"),
-    widths = c(batch = "2cm", slope = 1),
+    align = c(Month = "center"),
+    widths = c(Month = "2cm", Ozone = 1),
     font_size = 9
 )
-#>                           ───────────────────────────
-#>                             batch     time    slope  
-#>                           ───────────────────────────
-#>                               A     0.0000   0.1250  
-#>                               A     3.0000   2.6750  
-#>                               B     0.0000           
-#>                           ───────────────────────────
+#>                        ─────────────────────────────────
+#>                          Month    Day   Ozone     Wind  
+#>                        ─────────────────────────────────
+#>                           May       1      41   7.4000  
+#>                           May       2      36   8.0000  
+#>                          June       1           8.6000  
+#>                          June       2           9.7000  
+#>                        ─────────────────────────────────
 #> 
-#> Column names: batch, time, slope
+#> Column names: Month, Day, Ozone, Wind
 
 # Combined tables: `[` and `cbind()` drop the metadata, `rbind()` keeps the first
-ht <- pub_set_meta(pub_table(df), id = "slopes")
+ht <- pub_set_meta(pub_table(df), id = "first-days")
 pub_meta(ht[1:2, ], "id")
 #> NULL
 pub_meta(rbind(ht, ht), "id")
-#> [1] "slopes"
+#> [1] "first-days"
 ```
