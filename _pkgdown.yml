@@ -78,6 +78,7 @@ reference:
       - pub_doc
       - pub_error_items
       - pub_layout_inputs
+      - pub_layout_sections
       - pub_out
       - pub_pagebreak
       - pub_session_info
