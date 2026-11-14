@@ -1,3 +1,10 @@
+# pubflow 0.0.0.9053
+
+* In PDF via Typst, the text of Markdown table cells (e.g. from `pub_strikeout()`)
+  is escaped: `$`, `#` and other characters with a meaning in Typst no longer break
+  the document. As in Word, these cells may use strong, emphasis and strikethrough;
+  other Markdown is an error naming the cell.
+
 # pubflow 0.0.0.9052
 
 * New `pub_md_escape()` escapes data (e.g. names from a data set) for `pub_text()`

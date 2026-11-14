@@ -346,40 +346,22 @@
     gsub(">", "&gt;", x, fixed = TRUE)
 }
 
-#' Drop the control characters that XML 1.0 does not allow
-#' @param x `character`.
-#' @noRd
-.strip_control <- function(x) {
-    gsub("[\x01-\x08\x0B\x0C\x0E-\x1F]", "", x, perl = TRUE)
-}
-
 
 # --------------
 # Markdown cells
 # --------------
 #' Runs of the paragraphs of a Markdown cell
 #'
-#' Only strong, emphasis and strikethrough are supported; other Markdown is an error
-#' naming the cell.
+#' Only the Markdown of `.cell_markdown_blocks()` is supported.
 #' @param text `character(1)`: the Markdown of the cell.
 #' @param props cell properties from `.wml_props()`.
 #' @param k index of the cell (column-major).
 #' @return `character`: the runs of each paragraph.
 #' @noRd
 .wml_markdown_runs <- function(text, props, k) {
-    xml <- xml2::read_xml(
-        # commonmark's XML writer would turn control characters into U+FFFD
-        commonmark::markdown_xml(.strip_control(text), extensions = "strikethrough")
-    )
-    blocks <- xml2::xml_children(xml)
     vapply(
-        blocks,
-        \(block) {
-            if (xml2::xml_name(block) != "paragraph") {
-                .wml_markdown_error(xml2::xml_name(block), props, k)
-            }
-            paste(.wml_inlines(block, props, k, list()), collapse = "")
-        },
+        .cell_markdown_blocks(text, .wml_cell(props, k), "docx"),
+        \(block) paste(.wml_inlines(block, props, k, list()), collapse = ""),
         character(1)
     )
 }
@@ -404,30 +386,19 @@
             text = .wml_run(xml2::xml_text(x), rPr),
             softbreak = .wml_run(" ", rPr),
             linebreak = "<w:r><w:br/></w:r>",
-            .wml_markdown_error(name, props, k)
+            .cell_markdown_error(name, .wml_cell(props, k), "docx")
         )
     }))
 }
 
-#' Signal a render error for unsupported Markdown in cell `k`
-#' @param name the name of the commonmark node.
+#' Row and column of cell `k`
 #' @param props cell properties from `.wml_props()`.
 #' @param k index of the cell (column-major).
+#' @return `integer(2)`.
 #' @noRd
-.wml_markdown_error <- function(name, props, k) {
+.wml_cell <- function(props, k) {
     n <- nrow(props$jc)
-    rlang::cnd_signal(.render_error(
-        sprintf(
-            paste(
-                "Can't write table cell [%d, %d] to Word: Markdown cells may",
-                "only use strong, emphasis and strikethrough (found %s)."
-            ),
-            (k - 1L) %% n + 1L,
-            (k - 1L) %/% n + 1L,
-            gsub("_", " ", name)
-        ),
-        format = "docx"
-    ))
+    c((k - 1L) %% n + 1L, (k - 1L) %/% n + 1L)
 }
 
 
