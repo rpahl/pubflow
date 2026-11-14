@@ -381,10 +381,11 @@
     )
     text[is.na(text)] <- ""
     isMarkdown <- huxtable::markdown(ht)
-    # markup and backslash escapes take no width
+    # markup (not escaped: after an even number of backslashes) and backslash escapes
+    # take no width
     text[isMarkdown] <- gsub(
-        "(?<!\\\\)(~~|\\*\\*|__|[*_])",
-        "",
+        "(?<!\\\\)((?:\\\\\\\\)*)(?:~~|\\*\\*|__|[*_])",
+        "\\1",
         text[isMarkdown],
         perl = TRUE
     )
