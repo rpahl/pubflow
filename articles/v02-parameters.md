@@ -382,7 +382,7 @@ outdated and run again:
 `# 6:                             <huxtable[5x3]>`\
 `# 7:                                <pub_doc[2]>`\
 `# --------------------------`\
-`# <ready> last run: 2026-11-14 12:14:14 (0.059 s)`\
+`# <ready> last run: 2026-11-14 14:33:13 (0.062 s)`\
 `# steps: 1 done, 6 outdated`
 
 ### One value per name
