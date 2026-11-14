@@ -106,7 +106,7 @@ instead, where they are merged over the metadata of the document:
 `    meta ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``author ``=`` ``"Jane Doe"``, app ``=`` ``"ozone-app"``, version ``=`` ``"1.2.0"``)`\
 `)`\
 [`basename`](https://rdrr.io/r/base/basename.html)`(``file``)`\
-`# [1] "20261113T072720Z_ozone_in_new_york.docx"`
+`# [1] "20261114T082120Z_ozone_in_new_york.docx"`
 
 - The entries of `meta` win over those of the document, and `NULL`
   removes one.
@@ -332,6 +332,15 @@ error items instead:
 The file has an error box where the model of the failed step would be,
 and the warning names the failed step. Use this for drafts only.
 
+To check a document before rendering it, e.g. to tell the user of an app
+why a report can’t be downloaded yet,
+[`pub_error_items()`](https://rpahl.github.io/pubflow/reference/pub_error_items.md)
+lists its error items:
+
+\
+[`vapply`](https://rdrr.io/r/base/lapply.html)`(`[`pub_error_items`](https://rpahl.github.io/pubflow/reference/pub_error_items.md)`(``draft``)``, \``(``x``)`` ``x``$``message``, `[`character`](https://rdrr.io/r/base/character.html)`(``1``)``)`\
+`# [1] "object 'Height' not found"`
+
 ## Word files
 
 ### Header, footer and locks
@@ -352,7 +361,7 @@ document. A look into the file shows them:
 `docx_text``(``file``, ``"header1.xml"``)`\
 `# [1] "Ozone study" ""            "Draft"`\
 `docx_text``(``file``, ``"footer1.xml"``)`\
-`# [1] "Jane Doe at 13-Nov-2026 07:27:20 UTC (ozone-app v1.2.0)"`\
+`# [1] "Jane Doe at 14-Nov-2026 08:21:20 UTC (ozone-app v1.2.0)"`\
 `# [2] ""                                                       `\
 `# [3] "Page "                                                  `\
 `# [4] "1"                                                      `\

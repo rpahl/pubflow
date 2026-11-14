@@ -1,5 +1,12 @@
 # Changelog
 
+## pubflow 0.0.0.9051
+
+- New
+  [`pub_error_items()`](https://rpahl.github.io/pubflow/reference/pub_error_items.md)
+  finds the error items (failed steps) in a document or in step outputs,
+  e.g. to list the problems of a report before rendering it (D53).
+
 ## pubflow 0.0.0.9050
 
 - `pub_table(widths = )` means the same in HTML as in DOCX and PDF:
