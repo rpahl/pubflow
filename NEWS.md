@@ -1,4 +1,4 @@
-# pubflow (development version)
+# pubflow 0.0.0.9056
 
 * `pub_doc()` has a new argument `front_matter` (e.g. a title page, a signature table
   and `pub_toc()`) that replaces the title block in the viewer, in `pub_html()` and in
