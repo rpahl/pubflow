@@ -144,9 +144,10 @@
 #'   made with xelatex, or `NULL`.
 #' @param typst_template Path of the pandoc template of PDF reports made with Typst, or
 #'   `NULL` (pubflow's).
-#' @param front_matter `function(doc, format)` returning the front matter, or `NULL`
-#'   (the document's front matter, else the title block: title, subtitle, author and
-#'   time; shown only with a title, subtitle or author).
+#' @param front_matter `function(doc, format)` returning the front matter (`NULL`: the
+#'   title block, `list()`: none), or `NULL` (the document's front matter, else the
+#'   title block: title, subtitle, author and time; shown only with a title, subtitle
+#'   or author).
 #' @param toc `TRUE`: add a table of contents (see Details).
 #' @param toc_depth `integer(1)` deepest heading level in it (1-6).
 #' @param number_sections `TRUE`: number the sections.
@@ -848,7 +849,10 @@ print.pub_page <- function(x, ...) {
         return(doc$front_matter)
     }
     tryCatch(
-        .as_children(list(fun(doc, settings$format))),
+        {
+            front <- fun(doc, settings$format)
+            if (!is.null(front)) .as_children(list(front))
+        },
         error = function(e) {
             rlang::cnd_signal(.render_error(
                 "`front_matter` failed.",

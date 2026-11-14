@@ -3,7 +3,7 @@
 The agreed design of pubflow and the reasons behind it. `ARCHITECTURE.md` maps the
 code; `PLAN.md` lists the open work; the help pages and vignettes document the API.
 This file keeps what none of them show: **why** things are the way they are. Cite a
-decision by its number (D1-D55) in code comments, commits and PRs, and add a new one
+decision by its number (D1-D56) in code comments, commits and PRs, and add a new one
 here (not a renumbering) when a change settles a design question.
 
 ## 1. Purpose and scope

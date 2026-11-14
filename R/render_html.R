@@ -63,7 +63,8 @@
 #'
 #' @param doc A `pub_doc`.
 #' @param cache A [pub_cache()] or `NULL` (render every figure and table).
-#' @param toc `TRUE`: add a table of contents (headings up to level 3).
+#' @param toc `TRUE`: add a table of contents (headings up to level 3) unless the
+#'   document places one ([pub_toc()]).
 #' @param math `"mathjax"`: attach MathJax if the document has math; `"none"`: math
 #'   stays as `\(...\)` and `\[...\]`.
 #' @param figure Device settings of figures: `device` (`"png"` or `"svg"`) and `res`
@@ -100,7 +101,7 @@ pub_html <- function(
     .html_doc(
         doc,
         cache,
-        toc = toc,
+        toc = toc && !.has_toc(c(doc$front_matter, doc$children)),
         math = math,
         figure = .check_figure_settings(figure),
         front = doc$front_matter

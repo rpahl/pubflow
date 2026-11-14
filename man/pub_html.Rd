@@ -17,7 +17,8 @@ pub_html(
 
 \item{cache}{A \code{\link[=pub_cache]{pub_cache()}} or \code{NULL} (render every figure and table).}
 
-\item{toc}{\code{TRUE}: add a table of contents (headings up to level 3).}
+\item{toc}{\code{TRUE}: add a table of contents (headings up to level 3) unless the
+document places one (\code{\link[=pub_toc]{pub_toc()}}).}
 
 \item{math}{\code{"mathjax"}: attach MathJax if the document has math; \code{"none"}: math
 stays as \verb{\\(...\\)} and \verb{\[...\]}.}

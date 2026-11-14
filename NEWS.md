@@ -6,6 +6,9 @@
   `front_matter` function of `pub_report_spec()` replaces it and can build on it
   (`doc$front_matter`); so a spec of `\(doc, format) list()` is no longer needed to
   drop the title block when the document holds its own front matter.
+* A `front_matter` function of `pub_report_spec()` that returns `NULL` now keeps the
+  title block; return `list()` to drop it.
+* `pub_html()` adds no table of contents if the document places one (`pub_toc()`).
 
 # pubflow 0.0.0.9055
 

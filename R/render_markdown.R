@@ -29,7 +29,8 @@
 #'   as LaTeX or Typst code that breaks across pages and repeats the header rows.
 #'   Figures are PNG images unless the spec's `figure` asks for `"pdf"` (LaTeX) or
 #'   `"svg"` (Typst).
-#' * `"md"`: a plain Markdown document with a YAML front matter that holds the header,
+#' * `"md"`: a plain Markdown document with a YAML front matter that holds the header
+#'   (unless a front matter replaces it),
 #'   numbered headings, tables as Pandoc multiline tables and images. Page breaks,
 #'   landscape parts and tables of contents are left out.
 #'
@@ -55,10 +56,11 @@
 #'
 #' ## Report spec
 #'
-#' The report spec (see [pub_report_spec()]) adds the front matter, table of contents,
-#' section numbers, caption labels, figure devices and page. [pub_render()] calls
-#' `pub_markdown()` with its spec. The document's metadata is used as-is (no
-#' render-time metadata), so the Markdown of a document is always the same.
+#' The report spec (see [pub_report_spec()]) adds the front matter (by default the
+#' document's, see [pub_doc()]), table of contents, section numbers, caption labels,
+#' figure devices and page. [pub_render()] calls `pub_markdown()` with its spec. The
+#' document's metadata is used as-is (no render-time metadata), so the Markdown of a
+#' document is always the same.
 #'
 #' @param doc A `pub_doc`.
 #' @param target `"docx"`, `"latex"`, `"typst"` or `"md"`.

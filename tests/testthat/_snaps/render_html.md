@@ -9,26 +9,6 @@
       <p class="pubflow-subtitle">Subtitle &amp; more</p>
       <p class="pubflow-doc-meta">A. User &middot; 2026-10-05 12:00:00 UTC &middot; tests 1.0</p>
       </header>
-      <nav class="pubflow-toc">
-      <ul>
-      <li><a href="#pubflow-sec-1"><span class="pubflow-section-number">1</span> Text</a>
-      </li>
-      <li><a href="#pubflow-sec-2"><span class="pubflow-section-number">2</span> Tables</a>
-      </li>
-      <li><a href="#pubflow-sec-3">Figures</a>
-      <ul>
-      <li><a href="#pubflow-sec-3-1">Nested</a>
-      </li>
-      </ul></li>
-      <li><a href="#pubflow-sec-4"><span class="pubflow-section-number">3</span> Results</a>
-      <ul>
-      <li><a href="#pubflow-sec-4-1"><span class="pubflow-section-number">3.1</span> Fit</a>
-      </li>
-      <li><a href="#pubflow-sec-4-2"><span class="pubflow-section-number">3.2</span> Check</a>
-      </li>
-      </ul></li>
-      </ul>
-      </nav>
       <section class="pubflow-section pubflow-level-1" id="pubflow-sec-1">
       <h2><span class="pubflow-section-number">1</span> Text</h2>
       <div class="pubflow-item pubflow-text">

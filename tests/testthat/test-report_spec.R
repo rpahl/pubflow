@@ -577,8 +577,10 @@ describe(".front_nodes()", {
         expect_identical(nodes[[1L]]$object, pub_text("T by A (pdf)"))
         expect_identical(nodes[[2L]]$type, "pagebreak")
         expect_null(.front_nodes(default_settings("md"), doc))
-        empty <- pub_report_spec("md", front_matter = \(doc, format) NULL)
+        empty <- pub_report_spec("md", front_matter = \(doc, format) list())
         expect_identical(.front_nodes(.render_settings(empty, "md"), doc), list())
+        none <- pub_report_spec("md", front_matter = \(doc, format) doc$front_matter)
+        expect_null(.front_nodes(.render_settings(none, "md"), doc))
     })
 
     it("takes the document's front matter unless the spec has a function", {

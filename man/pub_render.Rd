@@ -113,9 +113,9 @@ when, e.g. "Jane Doe at 07-Oct-2026 12:00:00 UTC (myapp v1.2.0)" (see
 
 \subsection{Title block and table of contents}{
 
-The title block appears only if the document has a title, subtitle or author. A table
-of contents follows it if the document has sections, unless the document places one
-itself.
+The title block appears only if the document has a title, subtitle or author, and
+a front matter (of the document or the spec) replaces it. A table of contents
+follows it if the document has sections, unless the document places one itself.
 }
 
 \subsection{Render-time metadata}{
