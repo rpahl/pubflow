@@ -108,3 +108,10 @@ describe(".first_line()", {
         expect_identical(.first_line(c("", "x"), 10L), "x")
     })
 })
+
+describe(".child_label()", {
+    it("is the label of the child, else its name", {
+        expect_identical(.child_label(param(1, label = "One"), "n"), "One")
+        expect_identical(.child_label(param(1, label = ""), "n"), "n")
+    })
+})

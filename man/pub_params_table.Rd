@@ -7,7 +7,8 @@
 pub_params_table(
   params,
   caption = NULL,
-  columns = c(label = "Parameter", value = "Value", description = "Description")
+  columns = c(label = "Parameter", value = "Value", description = "Description"),
+  na = ""
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ shown with their name as label.}
 \item{columns}{Named character vector: field -> column header. The fields are
 \code{"name"} (the param name), \code{"value"} or any param attribute such as \code{"label"},
 \code{"description"} or \code{"area"}.}
+
+\item{na}{\code{character(1)} text shown for empty values.}
 }
 \value{
 A huxtable.
@@ -26,14 +29,25 @@ A huxtable.
 \description{
 Makes a table (see \code{\link[=pub_table]{pub_table()}}) that lists params, e.g. for a parameter section in
 a report. By default it shows their labels, values and descriptions. Values are
-shown as \code{toString(param_value(p))} (date-times in UTC).
+shown as \code{toString(param_value(p))} (date-times in UTC). A \code{\link[=param_group]{param_group()}} is shown
+as \code{"<label>: <value>"} of its members that have a value, e.g.
+\code{"Lower: 1, Upper: 2"}. An empty value (length 0, all \code{NA} or blank) is shown as
+\code{na}.
 }
 \examples{
 params <- param_config(
     alpha = numeric_param(0.05, label = "Alpha", description = "Level"),
-    trans = choice_param("log", c("none", "log"), label = "Transformation")
+    trans = choice_param("log", c("none", "log"), label = "Transformation"),
+    limits = param_group(
+        list(
+            lower = numeric_param(1, label = "Lower"),
+            upper = numeric_param(NA_real_, label = "Upper")
+        ),
+        label = "Limits"
+    ),
+    note = param("", label = "Note")
 )
-ht <- pub_params_table(params, caption = "Parameters")
+ht <- pub_params_table(params, caption = "Parameters", na = "-")
 pub_cell_text(ht)
 
 pub_params_table(params, columns = c(name = "Name", value = "Value")) |>

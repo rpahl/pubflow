@@ -1242,7 +1242,10 @@ pub_table_theme <- function(
 #'
 #' Makes a table (see [pub_table()]) that lists params, e.g. for a parameter section in
 #' a report. By default it shows their labels, values and descriptions. Values are
-#' shown as `toString(param_value(p))` (date-times in UTC).
+#' shown as `toString(param_value(p))` (date-times in UTC). A [param_group()] is shown
+#' as `"<label>: <value>"` of its members that have a value, e.g.
+#' `"Lower: 1, Upper: 2"`. An empty value (length 0, all `NA` or blank) is shown as
+#' `na`.
 #'
 #' @param params Named list of params, e.g. from [pub_get_params()]. Plain values are
 #'   shown with their name as label.
@@ -1250,14 +1253,23 @@ pub_table_theme <- function(
 #' @param columns Named character vector: field -> column header. The fields are
 #'   `"name"` (the param name), `"value"` or any param attribute such as `"label"`,
 #'   `"description"` or `"area"`.
+#' @param na `character(1)` text shown for empty values.
 #' @return A huxtable.
 #' @seealso [pub_get_params()]
 #' @examples
 #' params <- param_config(
 #'     alpha = numeric_param(0.05, label = "Alpha", description = "Level"),
-#'     trans = choice_param("log", c("none", "log"), label = "Transformation")
+#'     trans = choice_param("log", c("none", "log"), label = "Transformation"),
+#'     limits = param_group(
+#'         list(
+#'             lower = numeric_param(1, label = "Lower"),
+#'             upper = numeric_param(NA_real_, label = "Upper")
+#'         ),
+#'         label = "Limits"
+#'     ),
+#'     note = param("", label = "Note")
 #' )
-#' ht <- pub_params_table(params, caption = "Parameters")
+#' ht <- pub_params_table(params, caption = "Parameters", na = "-")
 #' pub_cell_text(ht)
 #'
 #' pub_params_table(params, columns = c(name = "Name", value = "Value")) |>
@@ -1270,7 +1282,8 @@ pub_params_table <- function(
         label = "Parameter",
         value = "Value",
         description = "Description"
-    )
+    ),
+    na = ""
 ) {
     if (!is.list(params) || !rlang::is_named2(params)) {
         rlang::abort("`params` must be a named list.")
@@ -1278,6 +1291,9 @@ pub_params_table <- function(
     isNamedChr <- is.character(columns) && rlang::is_named(columns)
     if (!isNamedChr) {
         rlang::abort("`columns` must be a named character vector.")
+    }
+    if (!rlang::is_string(na)) {
+        rlang::abort("`na` must be a single string.")
     }
     fields <- names(columns)
     data <- lapply(
@@ -1296,25 +1312,47 @@ pub_params_table <- function(
         stringsAsFactors = FALSE,
         optional = TRUE
     )
-    pub_table(data, caption = caption, labels = columns)
+    pub_table(data, caption = caption, labels = columns, na = na)
 }
 
 #' One field of a param as display string
 #' @param p a param or a plain value.
 #' @param name the name of the param.
 #' @param field `"name"`, `"value"` or a param attribute.
-#' @return `character(1)`.
+#' @return `character(1)`, `NA` for an empty value.
 #' @noRd
 .param_field <- function(p, name, field) {
     if (field == "name") {
         return(name)
     }
     if (field == "value") {
-        return(.field_text(if (is_param(p)) param_value(p) else p))
+        return(.param_value_text(p))
     }
     default <- if (field == "label") name else ""
     value <- if (is_param(p)) param_attr(p, field, default) else default
     .field_text(value)
+}
+
+#' The value of a param as display string
+#'
+#' A group lists "<label>: <value>" of its members that have a value.
+#' @param p a param or a plain value.
+#' @return `character(1)`, `NA` for an empty value (length 0, all `NA` or blank).
+#' @noRd
+.param_value_text <- function(p) {
+    if (inherits(p, "param_group")) {
+        members <- unclass(p)
+        texts <- vapply(members, .param_value_text, character(1))
+        has <- names(members)[!is.na(texts)]
+        if (length(has) == 0L) {
+            return(NA_character_)
+        }
+        labels <- vapply(has, \(n) .child_label(members[[n]], n), character(1))
+        return(paste(labels, texts[has], sep = ": ", collapse = ", "))
+    }
+    value <- if (is_param(p)) param_value(p) else p
+    hasText <- any(grepl("[^[:space:]]", unlist(value)))
+    if (hasText) .field_text(value) else NA_character_
 }
 
 #' A value as one string (`toString()`; date-times in UTC)

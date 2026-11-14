@@ -281,16 +281,6 @@ pub_param_input <- function(
     )
 }
 
-#' Label of a child of a param group: its attribute `label`, else its name
-#' @param x a param object.
-#' @param name name of the child.
-#' @return `character(1)`.
-#' @noRd
-.child_label <- function(x, name) {
-    label <- param_attr(x, "label")
-    if (rlang::is_string(label) && nzchar(label)) label else name
-}
-
 #' Input of a child of a param group, labelled for screen readers only
 #'
 #' A visually hidden `<label for>` if the widget is labelable (see `.label_for()`),
