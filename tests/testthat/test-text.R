@@ -106,3 +106,59 @@ describe(".check_markdown()", {
         expect_identical(err$call, quote(f()))
     })
 })
+
+describe("pub_md_escape()", {
+    it("escapes inline syntax and block starts", {
+        expect_identical(
+            pub_md_escape(c("*A* $5 @fig:x {.c}", "1. one", "- item", "> q")),
+            c("\\*A\\* \\$5 \\@fig:x \\{.c\\}", "1\\. one", "\\- item", "\\> q")
+        )
+    })
+
+    it("puts the text on one line but keeps single outer spaces", {
+        expect_identical(pub_md_escape(" a\n\n b\t c  "), " a b c ")
+        expect_identical(pub_md_escape("\n- x"), " \\- x")
+        expect_identical(pub_md_escape("  12) x"), " 12\\) x")
+    })
+
+    it("leaves numbers alone", {
+        expect_identical(
+            pub_md_escape(c("-1.5", "+2", "0.95", "1.")),
+            c("-1.5", "+2", "0.95", "1\\.")
+        )
+    })
+
+    it("is vectorised and keeps empty strings and NA", {
+        expect_identical(pub_md_escape(character()), character())
+        expect_identical(pub_md_escape(c("", NA, "3")), c("", NA, "3"))
+    })
+
+    it("shows the text as it is in a document", {
+        strings <- c(
+            "Mean *Ozone* (Month #5_a)",
+            "1. Main Street",
+            "<b>B</b> & $5 and $6",
+            "x^2^ H~2~O @fig:x [l](u) {.c} `c` a\\b"
+        )
+        md <- c(
+            paste0("Before ", pub_md_escape(strings), " after."),
+            pub_md_escape(strings)
+        )
+        html <- pub_html(pub_doc(pub_text(paste(md, collapse = "\n\n"))))
+        paras <- xml2::xml_text(xml2::xml_find_all(xml2::read_html(html), "//p"))
+
+        expect_identical(
+            paras,
+            c(paste0("Before ", strings, " after."), strings)
+        )
+    })
+
+    it("takes factors", {
+        expect_identical(pub_md_escape(factor(c("*a*", NA))), c("\\*a\\*", NA))
+    })
+
+    it("rejects input that isn't character", {
+        expect_error(pub_md_escape(1), "must be a character vector")
+        expect_error(pub_md_escape(NULL), "must be a character vector")
+    })
+})

@@ -956,7 +956,7 @@ pub_table_rows <- function(ht) {
 #' * The text is fixed when the cells are struck through (a later change of their
 #'   number format does not apply), so strike through last.
 #' * Empty cells stay unchanged.
-#' * Markdown characters in the text are escaped.
+#' * Markdown characters in the text are escaped, and each line is struck through.
 #' * In cells that are Markdown already, each line is struck through as a whole after
 #'   its block markers: `~~A~~ and B` becomes `~~A and B~~` and `"# A\n\n- b"` becomes
 #'   `"# ~~A~~\n\n- ~~b~~"`.
@@ -1005,7 +1005,9 @@ pub_strikeout <- function(ht, row, col) {
         text[[i]] <- if (isMarkdown[[i]]) {
             .strike_markdown(text[[i]])
         } else {
-            paste0("~~", .escape_markdown(text[[i]]), "~~")
+            # a line starting with `~~` starts no block: inline escapes suffice
+            lines <- trimws(strsplit(text[[i]], "\r\n|\r|\n")[[1L]])
+            paste0("~~", .escape_inline(lines[nzchar(lines)]), "~~", collapse = "  \n")
         }
     }
     text
@@ -1075,13 +1077,6 @@ pub_strikeout <- function(ht, row, col) {
         return(FALSE)
     }
     identical(xml2::xml_name(xml2::xml_children(blocks[[1L]])), "strikethrough")
-}
-
-#' Escape the characters with a meaning in CommonMark inline text
-#' @param x character vector.
-#' @noRd
-.escape_markdown <- function(x) {
-    gsub("([][\\\\`*_<>&~#|])", "\\\\\\1", x)
 }
 
 #' Check that `ht` is a huxtable

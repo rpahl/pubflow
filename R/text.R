@@ -1,6 +1,9 @@
 # Text: character outputs are Markdown in a supported subset, without headings (document
 # structure comes from sections).
 
+# -----------
+# Text output
+# -----------
 #' Text output
 #'
 #' Joins lines into one Markdown text and checks that it has no headings (use sections
@@ -44,7 +47,7 @@
 #' @param title `character(1)` heading line shown above the text (not a section) or
 #'   `NULL` (as is a blank string).
 #' @return `character(1)` with metadata (see [pub_meta()]).
-#' @seealso [pub_meta()], [pub_type()]
+#' @seealso [pub_md_escape()] for data in the text, [pub_meta()], [pub_type()]
 #' @examples
 #' txt <- pub_text(
 #'     c(
@@ -125,4 +128,44 @@ pub_text <- function(x, title = NULL) {
         ),
         call = call
     )
+}
+
+# --------
+# Escaping
+# --------
+#' Escape text for Markdown
+#'
+#' Escapes text so that it shows as it is in a [pub_text()] or a Markdown table cell,
+#' e.g. a name, a label or a model formula from data. Without escaping, a label
+#' `*new*` would come out in italics, the formula `airquality$Ozone ~ airquality$Temp`
+#' partly as math, and a line starting with `1.` as a numbered list.
+#'
+#' Every character with a meaning in pubflow's Markdown gets a backslash: the inline
+#' syntax (emphasis, code, links, math, superscript, cross-references, raw HTML) and
+#' what starts a block at the beginning of a line (lists, quotes). The text comes out
+#' on one line: line breaks and other runs of whitespace become one space. For several
+#' lines, escape each line and join them with `"  \n"` (a line break) or `"\n\n"` (a
+#' new paragraph).
+#'
+#' @param x Character vector or factor of plain text.
+#' @return `x` as Markdown, a character vector of the same length; `NA` stays `NA`.
+#' @seealso [pub_text()]
+#' @examples
+#' model <- "airquality$Ozone ~ airquality$Temp"
+#' txt <- pub_text(paste("The model", pub_md_escape(model), "fits the data well."))
+#' writeLines(txt)
+#'
+#' # several lines: escape each, then join
+#' address <- c("1. Main Street", "<Building B>")
+#' writeLines(paste(pub_md_escape(address), collapse = "  \n"))
+#' @export
+pub_md_escape <- function(x) {
+    if (!is.character(x) && !is.factor(x)) {
+        rlang::abort("`x` must be a character vector or a factor.")
+    }
+    x <- .escape_inline(gsub("[[:space:]]+", " ", x, perl = TRUE))
+    # block starts: quotes and `:::` always; list markers before a space or the end;
+    # `---` and `===` (thematic breaks, setext underlines)
+    x <- sub("^( ?)([>:]|([-+=])(?=\\s|$|\\3))", "\\1\\\\\\2", x, perl = TRUE)
+    sub("^( ?[0-9]+)([.)])(?=\\s|$)", "\\1\\\\\\2", x, perl = TRUE)
 }

@@ -672,6 +672,21 @@ describe("pub_strikeout()", {
         expect_identical(cell_text(ht)[1, ], c("name", "min"))
     })
 
+    it("escapes the syntax of pubflow's Markdown, not only CommonMark's", {
+        ht <- pub_table(data.frame(a = c("$5 and $6", "x^2^ @fig:x {.c}")))
+
+        expect_identical(
+            cell_text(pub_strikeout(ht, 2:3))[-1, 1],
+            c("~~\\$5 and \\$6~~", "~~x\\^2\\^ \\@fig:x \\{.c\\}~~")
+        )
+    })
+
+    it("strikes each line of a text cell through", {
+        ht <- pub_table(data.frame(a = "- a\n\n b\n"))
+
+        expect_identical(cell_text(pub_strikeout(ht, 2))[2, 1], "~~- a~~  \n~~b~~")
+    })
+
     it("selects cells like huxtable's setters", {
         ht <- table()
 

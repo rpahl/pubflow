@@ -90,5 +90,5 @@ writeLines(pub_text(c(
 try(pub_text(c("# Results", "Text")))
 }
 \seealso{
-\code{\link[=pub_meta]{pub_meta()}}, \code{\link[=pub_type]{pub_type()}}
+\code{\link[=pub_md_escape]{pub_md_escape()}} for data in the text, \code{\link[=pub_meta]{pub_meta()}}, \code{\link[=pub_type]{pub_type()}}
 }

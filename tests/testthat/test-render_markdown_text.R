@@ -191,7 +191,7 @@ describe(".escape_literal()", {
         expect_identical(.escape_literal(character()), character())
         expect_identical(
             .escape_literal(c("", NA, "10. x", "+1", "3")),
-            c("", NA, "10\\. x", "\\+1", "3")
+            c("", NA, "10\\. x", "+1", "3")
         )
     })
 

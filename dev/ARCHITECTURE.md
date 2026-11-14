@@ -3,7 +3,7 @@
 Audience: developers (human or agent) who want to understand how pubflow's
 parts fit together before working on it.
 Companion documents: `DESIGN.md` is the agreed design with the reasons
-(decision log D1-D53); `PLAN.md` the open work; `reference/` the research
+(decision log D1-D54); `PLAN.md` the open work; `reference/` the research
 behind both. This document is the map: what the parts are, how data flows
 between them and where to look in the code. It cites decisions (D) instead
 of repeating them; "§n below" refers to this document.
@@ -113,7 +113,7 @@ flowchart TB
 | `ui_params_module.R` | param UI server logic | `pub_params_ui()`, `pub_params_server()`, `pub_pipeline_params_server()`; `.params_module()` |
 | `ui_param_input.R` | widgets and the params table | `pub_param_input()`, `.widget()`, `.params_table()`, `.pubflow_dependency()` |
 | `output.R` | metadata, output types, small content nodes | `pub_meta()`, `pub_set_meta()`, `pub_type()`, `as_pub_output()`, `pub_raw()`, `pub_toc()`, `pub_pagebreak()`, `pub_session_info()` |
-| `text.R` | Markdown text outputs | `pub_text()`, `.check_markdown()` |
+| `text.R` | Markdown text outputs, escaping data for Markdown | `pub_text()`, `.check_markdown()`, `pub_md_escape()` |
 | `figure.R` | figure outputs and devices | `pub_figure()`, `.render_figure()` |
 | `table.R` | building and finishing tables | `pub_table()`, `pub_table_rows()`, `pub_strikeout()`, `pub_table_theme()`, `pub_params_table()` |
 | `table_format.R` | the common cell formatter | `.format_cells()`, `.display_huxtable()`, `pub_cell_text()` |

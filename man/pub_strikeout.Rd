@@ -30,7 +30,7 @@ huxtable has no strikeout property, so the cells become Markdown cells
 \item The text is fixed when the cells are struck through (a later change of their
 number format does not apply), so strike through last.
 \item Empty cells stay unchanged.
-\item Markdown characters in the text are escaped.
+\item Markdown characters in the text are escaped, and each line is struck through.
 \item In cells that are Markdown already, each line is struck through as a whole after
 its block markers: \verb{~~A~~ and B} becomes \verb{~~A and B~~} and \code{"# A\\n\\n- b"} becomes
 \code{"# ~~A~~\\n\\n- ~~b~~"}.

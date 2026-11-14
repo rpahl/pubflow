@@ -3,7 +3,7 @@
 The agreed design of pubflow and the reasons behind it. `ARCHITECTURE.md` maps the
 code; `PLAN.md` lists the open work; the help pages and vignettes document the API.
 This file keeps what none of them show: **why** things are the way they are. Cite a
-decision by its number (D1-D53) in code comments, commits and PRs, and add a new one
+decision by its number (D1-D54) in code comments, commits and PRs, and add a new one
 here (not a renumbering) when a change settles a design question.
 
 ## 1. Purpose and scope
@@ -135,6 +135,7 @@ results in the PR (`reference/benchmarks.md` has the measurements behind the dec
 | D26 | **Texts on the Pandoc path are CommonMark, escaped like the HTML**: read with pandoc's `commonmark` reader plus the extensions pubflow's own markup needs, not Pandoc Markdown (raw TeX would pass into LaTeX). Raw attributes, spans and divs are neutralised in text nodes; strings pubflow writes itself are escaped as literal text. Math in LaTeX output is checked first by pandoc's math parser (texmath): a formula it can't parse or one that defines macros is a `pubflow_render_error`, so only math commands reach TeX. |
 | D44 | **Cross-references** `@fig:<id>` and `@tab:<id>` in texts refer to the figure or table with that metadata `id` (unique per document). They are **engine-native where the engine numbers captions**: a `REF` field in DOCX, `\hyperref` in LaTeX, `#ref` in Typst, a link in HTML, the number as text in Markdown. Problems (unknown id, wrong prefix, no caption, duplicates) are a `pubflow_render_error` in reports and a warning in the viewer. |
 | D45 | **Lists of figures and tables** are `pub_toc(what = "figures")` and `"tables"`, placed like a table of contents; the engines list their captions themselves (Word TOC field, `\listoffigures`, Typst `#outline`). HTML and Markdown leave them out. |
+| D54 | **Data in Markdown is escaped with `pub_md_escape(x)`**, the escape pubflow uses for its own literal text (titles, captions, messages): every inline syntax of pubflow's dialect (CommonMark plus math, superscript, cross-references, attributes) and block starts at the beginning of a line get a backslash; whitespace runs become one space (one line per string; the caller joins lines). Not trimmed, so it can be pasted between words. `pub_strikeout()` uses the same inline escape, per line: CommonMark's set alone let `$...$` in a struck cell become math on the Pandoc path. No `escape =` in `pub_text()` (texts mix markup and data) and no LaTeX escape. |
 
 ### Figures and caching
 
