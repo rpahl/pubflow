@@ -219,17 +219,11 @@
     gsub("([][\\\\`*_<>&~#|$^@{}])", "\\\\\\1", x, perl = TRUE)
 }
 
-#' Markdown for a literal string on one line (titles, captions, messages)
-#'
-#' Whitespace runs (also line breaks) become one space; besides inline syntax, what
-#' would start a block at the beginning of a line is escaped (list markers, block
-#' quotes, setext underlines, `:::`).
+#' Markdown for a literal string on one line, trimmed (titles, captions, messages)
 #' @param x `character` literal strings.
 #' @noRd
 .escape_literal <- function(x) {
-    x <- .escape_inline(.one_line(x))
-    x <- sub("^([-+=>:])", "\\\\\\1", x, perl = TRUE)
-    sub("^([0-9]+)([.)])", "\\1\\\\\\2", x, perl = TRUE)
+    trimws(pub_md_escape(x))
 }
 
 #' A string on one line: whitespace runs (also line breaks) become one space

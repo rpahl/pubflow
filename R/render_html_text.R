@@ -167,10 +167,11 @@
 #' @noRd
 .protect_markdown <- function(text, store, convert, context = NULL) {
     code <- .token_store()
-    # code spans: a run of backticks up to the next run of the same length
+    # code spans: a run of backticks up to the next run of the same length; a backtick
+    # escaped by an odd number of backslashes (e.g. from `pub_md_escape()`) opens none
     text <- .tokenize(
         text,
-        "(?<!`)(`+)(?!`)[\\s\\S]*?(?<!`)\\1(?!`)",
+        "(?<!\\\\)(?:\\\\\\\\)*\\\\`|(?<!`)(`+)(?!`)[\\s\\S]*?(?<!`)\\1(?!`)",
         "code",
         code,
         identity

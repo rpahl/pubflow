@@ -381,7 +381,14 @@
     )
     text[is.na(text)] <- ""
     isMarkdown <- huxtable::markdown(ht)
-    text[isMarkdown] <- gsub("~~|\\*\\*|__|[*_]", "", text[isMarkdown])
+    # markup and backslash escapes take no width
+    text[isMarkdown] <- gsub(
+        "(?<!\\\\)(~~|\\*\\*|__|[*_])",
+        "",
+        text[isMarkdown],
+        perl = TRUE
+    )
+    text[isMarkdown] <- gsub("\\\\([[:punct:]])", "\\1", text[isMarkdown])
     face <- 1L + .true(huxtable::bold(ht)) + 2L * .true(huxtable::italic(ht))
     lines <- strsplit(text, "\n", fixed = TRUE)
     words <- lapply(lines, \(l) unlist(strsplit(l, "[[:space:]]+")))

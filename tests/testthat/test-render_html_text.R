@@ -110,6 +110,22 @@ describe(".markdown_html()", {
         expect_false(grepl("\\(", out, fixed = TRUE))
     })
 
+    it("starts no code span at an escaped backtick", {
+        out <- html("a \\` $x$ b \\` and \\\\`$y$` and `c\\` $z$")
+
+        expect_match(
+            out,
+            "a ` <span class=\"pubflow-math\">\\(x\\)</span> b `",
+            fixed = TRUE
+        )
+        expect_match(out, "\\<code>$y$</code>", fixed = TRUE)
+        expect_match(
+            out,
+            "<code>c\\</code> <span class=\"pubflow-math\">",
+            fixed = TRUE
+        )
+    })
+
     it("handles an unclosed code fence and text without lines", {
         expect_match(html("```\n$a$"), "<code>$a$\n</code>", fixed = TRUE)
         expect_identical(html(""), "")

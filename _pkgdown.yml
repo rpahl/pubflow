@@ -85,6 +85,7 @@ reference:
     desc: Step outputs that documents show.
     contents:
       - pub_text
+      - pub_md_escape
       - pub_figure
       - pub_type
       - as_pub_output

@@ -444,6 +444,15 @@ describe(".cell_extents()", {
 
         expect_identical(res$max[[1L]], res$max[[2L]])
     })
+
+    it("measures escaped characters without their backslash", {
+        ht <- huxtable::hux(a = c("~~a\\*b\\$~~", "a*b$"), add_colnames = FALSE)
+        huxtable::markdown(ht)[1L, 1L] <- TRUE
+
+        res <- .cell_extents(ht)
+
+        expect_identical(res$max[[1L]], res$max[[2L]])
+    })
 })
 
 describe(".string_widths()", {
