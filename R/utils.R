@@ -93,6 +93,16 @@
     isTRUE(param_attr(x, "locked"))
 }
 
+#' Label of a child of a param group: its attribute `label`, else its name
+#' @param x a param object.
+#' @param name name of the child.
+#' @return `character(1)`.
+#' @noRd
+.child_label <- function(x, name) {
+    label <- param_attr(x, "label")
+    if (rlang::is_string(label) && nzchar(label)) label else name
+}
+
 #' Paragraphs of the Markdown of a table cell, as commonmark XML nodes
 #'
 #' The table writers that translate Markdown cells themselves (Word, Typst) read them

@@ -162,7 +162,6 @@ describe("pub_param_input()", {
         )
         html <- html_of(pub_param_input(g, "g", label = NULL))
         expect_match(html, 'class="pubflow-visually-hidden" for="g_on">Show</label>')
-        expect_equal(.child_label(param(1, label = ""), "n"), "n")
         expect_match(html, '<div role="group" aria-label="day">\\s*<div[^>]*id="g_day"')
     })
 

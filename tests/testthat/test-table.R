@@ -870,8 +870,8 @@ describe("pub_params_table()", {
         ),
         limits = param_group(
             list(
-                lower = numeral_param("1"),
-                upper = numeral_param("2")
+                lower = numeral_param("1", label = "Lower"),
+                upper = numeral_param("2", label = "Upper")
             ),
             label = "Limits"
         )
@@ -886,7 +886,7 @@ describe("pub_params_table()", {
                 c("Parameter", "Value", "Description"),
                 c("Alpha", "0.05", "Level"),
                 c("Transformation", "log", "Transformation"),
-                c("Limits", "1, 2", "Limits")
+                c("Limits", "Lower: 1, Upper: 2", "Limits")
             )
         )
         expect_identical(huxtable::caption(ht), "Parameters")
@@ -917,11 +917,50 @@ describe("pub_params_table()", {
         expect_identical(cells(ht)[2, 1:2], c("When", "2024-01-03 04:30:00 UTC"))
     })
 
+    it("lists the members of a group that have a value", {
+        group <- \(lower, upper) {
+            param_group(list(
+                lower = numeral_param(lower, label = "Lower"),
+                upper = param(upper, label = "Upper")
+            ))
+        }
+        ht <- pub_params_table(list(
+            both = group("1", "x"),
+            one = group("", "x"),
+            none = group(NA_character_, " ")
+        ))
+
+        expect_identical(
+            pub_cell_text(ht)[-1, 2],
+            c("Lower: 1, Upper: x", "Upper: x", "")
+        )
+    })
+
+    it("shows empty values (not empty attributes) as `na`", {
+        ht <- pub_params_table(
+            list(
+                a = NULL,
+                b = NA,
+                c = c("", " "),
+                d = list(NA, NA),
+                e = c(1, NA),
+                f = param("x", description = "")
+            ),
+            na = "-"
+        )
+
+        expect_identical(
+            pub_cell_text(ht)[-1, 2],
+            c("-", "-", "-", "-", "1, NA", "x")
+        )
+        expect_identical(pub_cell_text(ht)[-1, 3], rep("", 6))
+    })
+
     it("shows plain values with their name as label", {
         ht <- pub_params_table(list(n = 3, empty = NULL))
 
         expect_identical(
-            cells(ht),
+            pub_cell_text(ht),
             rbind(
                 c("Parameter", "Value", "Description"),
                 c("n", "3", ""),
@@ -970,6 +1009,7 @@ describe("pub_params_table()", {
         expect_error(pub_params_table(params, columns = character(0)), "named char")
         expect_error(pub_params_table(params, columns = c(a = 1)), "named character")
         expect_error(pub_params_table(NULL), "named list")
+        expect_error(pub_params_table(params, na = NA), "`na` must be a single string")
         expect_error(pub_params_table(params, caption = 1), "`caption` must")
     })
 })

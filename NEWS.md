@@ -1,3 +1,10 @@
+# pubflow 0.0.0.9054
+
+* `pub_params_table()` shows a `param_group()` as `"<label>: <value>"` of its members
+  that have a value (e.g. `"Lower: 1, Upper: 2"`) instead of only the values. Its new
+  argument `na` sets the text of empty values (length 0, all `NA` or blank), which
+  were shown as `"NA"` or as an empty cell.
+
 # pubflow 0.0.0.9053
 
 * In PDF via Typst, the text of Markdown table cells (e.g. from `pub_strikeout()`)
