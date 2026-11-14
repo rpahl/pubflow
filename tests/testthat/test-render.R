@@ -792,7 +792,7 @@ describe("cross-format consistency", {
         )
         struck <- grepl("#strike[", content, fixed = TRUE)
         text <- trimws(content)
-        pattern <- "(?s)^#[a-z]+(\\([^()]*\\))?\\[(.*)\\]$"
+        pattern <- "(?s)^#[a-z]+(\\([^()]*\\))?\\[(.*)\\];?$"
         while (any(hit <- grepl(pattern, text, perl = TRUE))) {
             text[hit] <- trimws(sub(pattern, "\\2", text[hit], perl = TRUE))
         }

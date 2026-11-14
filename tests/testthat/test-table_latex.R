@@ -191,6 +191,14 @@ describe(".table_typst()", {
         expect_match(res, "[x\\.\\.\\.]", fixed = TRUE)
         expect_match(res, "[\\-1]", fixed = TRUE)
     })
+
+    it("escapes the text of struck-out cells", {
+        ht <- pub_strikeout(pub_table(data.frame(a = "$5 and $6 #b")), 2L, 1L)
+
+        res <- .table_typst(ht, NULL, NULL)
+
+        expect_match(res, "[#strike[\\$5 and \\$6 \\#b];]", fixed = TRUE)
+    })
 })
 
 
@@ -266,6 +274,51 @@ describe(".latex_text() and .typst_text()", {
         expect_identical(
             .latex_text(c("---", ",,,", "?`", "\\{")),
             c("-{}-{}-", ",{},{},", "?{}\\textasciigrave{}", "\\textbackslash{}\\{")
+        )
+    })
+})
+
+
+describe(".typst_markdown_cells()", {
+    it("writes the text of Markdown cells escaped, their markup as functions", {
+        ht <- huxtable::hux(
+            a = c("~~$5 and $6 #b~~", "**a**(b) _x_.y", "$1"),
+            add_colnames = FALSE
+        )
+        huxtable::markdown(ht)[1:2, 1L] <- TRUE
+
+        res <- .typst_markdown_cells(ht)
+
+        expect_identical(
+            res[[1L]],
+            c("#strike[\\$5 and \\$6 \\#b];", "#strong[a];(b) #emph[x];\\.y", "$1")
+        )
+        expect_false(any(huxtable::markdown(res)))
+    })
+
+    it("writes line breaks and paragraphs", {
+        ht <- huxtable::hux(a = c("a  \nb\nc\n\nd", "", NA), add_colnames = FALSE)
+        huxtable::markdown(ht) <- TRUE
+
+        res <- .typst_markdown_cells(ht)[[1L]]
+
+        expect_identical(res, c("a#linebreak();b c\n\nd", "", NA))
+    })
+
+    it("refuses other Markdown as the Word writer does, naming the cell", {
+        ht <- huxtable::hux(a = c("x", "- a list", "`code`"), add_colnames = FALSE)
+        huxtable::markdown(ht)[2L, 1L] <- TRUE
+
+        expect_error(
+            .typst_markdown_cells(ht),
+            "cell \\[2, 1\\] to Typst.*\\(found list\\)",
+            class = "pubflow_render_error"
+        )
+        huxtable::markdown(ht)[2:3, 1L] <- c(FALSE, TRUE)
+        expect_error(
+            .typst_markdown_cells(ht),
+            "cell \\[3, 1\\] to Typst.*\\(found code\\)",
+            class = "pubflow_render_error"
         )
     })
 })

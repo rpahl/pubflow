@@ -121,7 +121,8 @@
         huxtable::label(ht) <- label
     }
     huxtable::col_width(ht) <- .typst_widths(huxtable::col_width(ht))
-    typst <- huxtable::to_typst(.escape_cells(ht, .typst_text))
+    ht <- .typst_markdown_cells(.escape_cells(ht, .typst_text))
+    typst <- huxtable::to_typst(ht)
     if (is.null(caption)) {
         return(paste("#[", "#set figure(numbering: none)", typst, "]", sep = "\n"))
     }
@@ -226,6 +227,69 @@
 #' @noRd
 .typst_text <- function(x) {
     gsub("([\\\\#*$_`<>=@+/~\"'.\\[\\]-])", "\\\\\\1", x, perl = TRUE)
+}
+
+#' Markdown cells as Typst markup
+#'
+#' huxtable's Typst writer leaves the text of Markdown cells unescaped, so `$` or `#`
+#' in it break the document. pubflow writes these cells itself, with the Markdown the
+#' Word writer supports (see `.cell_markdown_blocks()`).
+#' @param ht a huxtable with `escape_contents()` off.
+#' @return `ht` with Typst markup in its Markdown cells, which are no longer Markdown.
+#' @noRd
+.typst_markdown_cells <- function(ht) {
+    isMarkdown <- huxtable::markdown(ht)
+    for (j in which(colSums(isMarkdown) > 0L)) {
+        rows <- which(isMarkdown[, j])
+        ht[[j]][rows] <- mapply(
+            \(text, i) .typst_markdown(text, c(i, j)),
+            ht[[j]][rows],
+            rows,
+            USE.NAMES = FALSE
+        )
+    }
+    huxtable::markdown(ht) <- FALSE
+    ht
+}
+
+#' Typst markup of the Markdown of one cell
+#' @param text `character(1)`: the Markdown of the cell.
+#' @param cell `integer(2)`: row and column of the cell, for errors.
+#' @noRd
+.typst_markdown <- function(text, cell) {
+    if (is.na(text)) {
+        return(text)
+    }
+    paras <- vapply(
+        .cell_markdown_blocks(text, cell, "typst"),
+        \(block) .typst_inlines(block, cell),
+        character(1)
+    )
+    paste(paras, collapse = "\n\n")
+}
+
+#' Typst markup of the inline nodes below `node`
+#'
+#' Functions end with `;`, so that the text after them doesn't continue the call.
+#' @param node a commonmark XML node.
+#' @param cell `integer(2)`: row and column of the cell, for errors.
+#' @noRd
+.typst_inlines <- function(node, cell) {
+    parts <- lapply(xml2::xml_children(node), \(x) {
+        name <- xml2::xml_name(x)
+        fun <- c(strong = "strong", emph = "emph", strikethrough = "strike")[name]
+        if (!is.na(fun)) {
+            return(sprintf("#%s[%s];", fun, .typst_inlines(x, cell)))
+        }
+        switch(
+            name,
+            text = .typst_text(xml2::xml_text(x)),
+            softbreak = " ",
+            linebreak = "#linebreak();",
+            .cell_markdown_error(name, cell, "typst")
+        )
+    })
+    paste(unlist(parts), collapse = "")
 }
 
 

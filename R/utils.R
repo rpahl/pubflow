@@ -92,3 +92,54 @@
 .is_locked <- function(x) {
     isTRUE(param_attr(x, "locked"))
 }
+
+#' Paragraphs of the Markdown of a table cell, as commonmark XML nodes
+#'
+#' The table writers that translate Markdown cells themselves (Word, Typst) read them
+#' with strikethrough as pandoc does. They support paragraphs of text with strong,
+#' emphasis, strikethrough and line breaks; other Markdown is an error naming the cell
+#' (see `.cell_markdown_error()`).
+#' @param text `character(1)`: the Markdown of the cell.
+#' @param cell `integer(2)`: row and column of the cell, for errors.
+#' @param format `"docx"` or `"typst"`, for errors.
+#' @return `xml_nodeset` of the paragraphs.
+#' @noRd
+.cell_markdown_blocks <- function(text, cell, format) {
+    xml <- xml2::read_xml(
+        # commonmark's XML writer would turn control characters into U+FFFD
+        commonmark::markdown_xml(.strip_control(text), extensions = "strikethrough")
+    )
+    blocks <- xml2::xml_children(xml)
+    for (name in setdiff(xml2::xml_name(blocks), "paragraph")) {
+        .cell_markdown_error(name, cell, format)
+    }
+    blocks
+}
+
+#' Signal a render error for unsupported Markdown in a table cell
+#' @param name the name of the commonmark node.
+#' @param cell `integer(2)`: row and column of the cell.
+#' @param format `"docx"` or `"typst"`.
+#' @noRd
+.cell_markdown_error <- function(name, cell, format) {
+    rlang::cnd_signal(.render_error(
+        sprintf(
+            paste(
+                "Can't write table cell [%d, %d] to %s: Markdown cells may",
+                "only use strong, emphasis and strikethrough (found %s)."
+            ),
+            cell[[1L]],
+            cell[[2L]],
+            c(docx = "Word", typst = "Typst")[[format]],
+            gsub("_", " ", name)
+        ),
+        format = format
+    ))
+}
+
+#' Drop the control characters that XML 1.0 does not allow
+#' @param x `character`.
+#' @noRd
+.strip_control <- function(x) {
+    gsub("[\x01-\x08\x0B\x0C\x0E-\x1F]", "", x, perl = TRUE)
+}
