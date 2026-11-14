@@ -42,9 +42,10 @@ made with xelatex, or \code{NULL}.}
 \item{typst_template}{Path of the pandoc template of PDF reports made with Typst, or
 \code{NULL} (pubflow's).}
 
-\item{front_matter}{\verb{function(doc, format)} returning the front matter, or \code{NULL}
-(the title block: title, subtitle, author and time; shown only with a title,
-subtitle or author).}
+\item{front_matter}{\verb{function(doc, format)} returning the front matter (\code{NULL}: the
+title block, \code{list()}: none), or \code{NULL} (the document's front matter, else the
+title block: title, subtitle, author and time; shown only with a title, subtitle
+or author).}
 
 \item{toc}{\code{TRUE}: add a table of contents (see Details).}
 
@@ -129,6 +130,8 @@ edit afterwards (\code{spec$toc <- FALSE}) is checked only when the spec is used
 title page with a signature table. It replaces the title block (in HTML the header)
 in every format; the title and author stay in the file's properties.
 \itemize{
+\item Without it, the document's front matter is used (see "Front matter" in
+\code{\link[=pub_doc]{pub_doc()}}), which the viewer shows too.
 \item It returns what a document can hold: sections, outputs or lists of them (see
 \code{\link[=pub_doc]{pub_doc()}}).
 \item \code{doc} is the document with the render-time metadata (see \code{\link[=pub_render]{pub_render()}}) and

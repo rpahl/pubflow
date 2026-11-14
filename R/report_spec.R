@@ -57,6 +57,8 @@
 #' * `front_matter`: a `function(doc, format)` that returns the front matter, e.g. a
 #'   title page with a signature table. It replaces the title block (in HTML the header)
 #'   in every format; the title and author stay in the file's properties.
+#'   * Without it, the document's front matter is used (see "Front matter" in
+#'     [pub_doc()]), which the viewer shows too.
 #'   * It returns what a document can hold: sections, outputs or lists of them (see
 #'     [pub_doc()]).
 #'   * `doc` is the document with the render-time metadata (see [pub_render()]) and
@@ -142,9 +144,10 @@
 #'   made with xelatex, or `NULL`.
 #' @param typst_template Path of the pandoc template of PDF reports made with Typst, or
 #'   `NULL` (pubflow's).
-#' @param front_matter `function(doc, format)` returning the front matter, or `NULL`
-#'   (the title block: title, subtitle, author and time; shown only with a title,
-#'   subtitle or author).
+#' @param front_matter `function(doc, format)` returning the front matter (`NULL`: the
+#'   title block, `list()`: none), or `NULL` (the document's front matter, else the
+#'   title block: title, subtitle, author and time; shown only with a title, subtitle
+#'   or author).
 #' @param toc `TRUE`: add a table of contents (see Details).
 #' @param toc_depth `integer(1)` deepest heading level in it (1-6).
 #' @param number_sections `TRUE`: number the sections.
@@ -382,7 +385,7 @@ print.pub_page <- function(x, ...) {
     c(
         files,
         front_matter = if (is.null(x$front_matter)) {
-            "title block"
+            "document's or title block"
         } else {
             "function"
         },
@@ -834,7 +837,8 @@ print.pub_page <- function(x, ...) {
 # ------------
 # Front matter
 # ------------
-#' Nodes of the front matter, or `NULL` without a `front_matter` function
+#' Nodes of the front matter: of the spec's `front_matter` function, else the
+#' document's (`NULL` if neither has one)
 #' @param settings settings of the target (`.render_settings()`).
 #' @param doc the `pub_doc` (with the render-time metadata).
 #' @param call the environment of the caller, for the error message.
@@ -842,10 +846,13 @@ print.pub_page <- function(x, ...) {
 .front_nodes <- function(settings, doc, call = rlang::caller_env()) {
     fun <- settings$front_matter
     if (is.null(fun)) {
-        return(NULL)
+        return(doc$front_matter)
     }
     tryCatch(
-        .as_children(list(fun(doc, settings$format))),
+        {
+            front <- fun(doc, settings$format)
+            if (!is.null(front)) .as_children(list(front))
+        },
         error = function(e) {
             rlang::cnd_signal(.render_error(
                 "`front_matter` failed.",

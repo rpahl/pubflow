@@ -193,7 +193,7 @@ The fields in short (`?pub_report_spec` has the details):
 | Field | What it sets |
 |---|---|
 | `reference_docx`, `latex_preamble`, `typst_template` | The template of DOCX, of PDF via LaTeX, of PDF via Typst |
-| `front_matter` | A function that returns what replaces the title block, e.g. a title page |
+| `front_matter` | A function that returns what replaces the title block, e.g. a title page (default: the document's front matter) |
 | `toc`, `toc_depth` | A table of contents after the front matter, and its depth |
 | `number_sections` | Number the headings or not |
 | `labels` | The words before the caption numbers |
@@ -229,6 +229,26 @@ spec <- pub_report_spec(
     labels = list(table = "Tab.", figure = "Fig.")
 )
 spec
+```
+
+The viewer doesn't show the front matter of a spec. A front matter that should
+be previewed too belongs to the document: `pub_doc(front_matter = )` takes the
+same outputs as the body and replaces the title block in the viewer and in every
+format. The spec's function then is only needed for front matter of one format
+(or with the render-time metadata); it replaces the document's and can build on
+it with `doc$front_matter`:
+
+```{r doc-front}
+doc_front <- pub_doc(
+    pub_section("Results", "Ozone peaks in July and August."),
+    title = "Ozone report",
+    front_matter = list(
+        pub_section("Approval", "Signed by the analyst."),
+        pub_pagebreak(),
+        pub_toc()
+    )
+)
+doc_front
 ```
 
 A document that places `pub_toc()` itself (`what = "sections"`) gets no second

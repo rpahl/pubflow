@@ -77,9 +77,9 @@
 #'
 #' ## Title block and table of contents
 #'
-#' The title block appears only if the document has a title, subtitle or author. A table
-#' of contents follows it if the document has sections, unless the document places one
-#' itself.
+#' The title block appears only if the document has a title, subtitle or author, and
+#' a front matter (of the document or the spec) replaces it. A table of contents
+#' follows it if the document has sections, unless the document places one itself.
 #'
 #' ## Render-time metadata
 #'

@@ -45,7 +45,8 @@ their own sections and, if the spec locks, tables and figures are locked.
 as LaTeX or Typst code that breaks across pages and repeats the header rows.
 Figures are PNG images unless the spec's \code{figure} asks for \code{"pdf"} (LaTeX) or
 \code{"svg"} (Typst).
-\item \code{"md"}: a plain Markdown document with a YAML front matter that holds the header,
+\item \code{"md"}: a plain Markdown document with a YAML front matter that holds the header
+(unless a front matter replaces it),
 numbered headings, tables as Pandoc multiline tables and images. Page breaks,
 landscape parts and tables of contents are left out.
 }
@@ -76,10 +77,11 @@ error.
 
 \subsection{Report spec}{
 
-The report spec (see \code{\link[=pub_report_spec]{pub_report_spec()}}) adds the front matter, table of contents,
-section numbers, caption labels, figure devices and page. \code{\link[=pub_render]{pub_render()}} calls
-\code{pub_markdown()} with its spec. The document's metadata is used as-is (no
-render-time metadata), so the Markdown of a document is always the same.
+The report spec (see \code{\link[=pub_report_spec]{pub_report_spec()}}) adds the front matter (by default the
+document's, see \code{\link[=pub_doc]{pub_doc()}}), table of contents, section numbers, caption labels,
+figure devices and page. \code{\link[=pub_render]{pub_render()}} calls \code{pub_markdown()} with its spec. The
+document's metadata is used as-is (no render-time metadata), so the Markdown of a
+document is always the same.
 }
 }
 \examples{

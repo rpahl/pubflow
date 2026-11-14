@@ -577,8 +577,31 @@ describe(".front_nodes()", {
         expect_identical(nodes[[1L]]$object, pub_text("T by A (pdf)"))
         expect_identical(nodes[[2L]]$type, "pagebreak")
         expect_null(.front_nodes(default_settings("md"), doc))
-        empty <- pub_report_spec("md", front_matter = \(doc, format) NULL)
+        empty <- pub_report_spec("md", front_matter = \(doc, format) list())
         expect_identical(.front_nodes(.render_settings(empty, "md"), doc), list())
+        none <- pub_report_spec("md", front_matter = \(doc, format) doc$front_matter)
+        expect_null(.front_nodes(.render_settings(none, "md"), doc))
+    })
+
+    it("takes the document's front matter unless the spec has a function", {
+        fronted <- pub_doc(front_matter = list("Cover", pub_pagebreak()))
+        combine <- pub_report_spec("md", front_matter = function(doc, format) {
+            list(doc$front_matter, pub_text(format))
+        })
+        replace <- pub_report_spec("md", front_matter = \(doc, format) "Own")
+
+        expect_identical(
+            .front_nodes(default_settings("md"), fronted),
+            fronted$front_matter
+        )
+        nodes <- .front_nodes(.render_settings(combine, "md"), fronted)
+        expect_identical(
+            vapply(nodes, \(x) x$type, ""),
+            c("text", "pagebreak", "text")
+        )
+        nodes <- .front_nodes(.render_settings(replace, "md"), fronted)
+        expect_identical(nodes[[1L]]$object, pub_text("Own"))
+        expect_length(nodes, 1L)
     })
 
     it("wraps errors of the front matter in a render error", {

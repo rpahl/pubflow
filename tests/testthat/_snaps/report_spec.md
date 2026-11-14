@@ -5,7 +5,7 @@
     Output
       <pubflow report spec: docx>
         reference_docx    default
-        front_matter      title block
+        front_matter      document's or title block
         toc               depth 3
         number_sections   yes
         page              reference document
@@ -23,7 +23,7 @@
       <pubflow report spec: pdf>
         latex_preamble    none
         typst_template    default
-        front_matter      title block
+        front_matter      document's or title block
         toc               no
         number_sections   yes
         page              Letter portrait, margins top 2.5, bottom 2, left 2.5, right 2.5 cm

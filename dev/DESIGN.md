@@ -3,7 +3,7 @@
 The agreed design of pubflow and the reasons behind it. `ARCHITECTURE.md` maps the
 code; `PLAN.md` lists the open work; the help pages and vignettes document the API.
 This file keeps what none of them show: **why** things are the way they are. Cite a
-decision by its number (D1-D55) in code comments, commits and PRs, and add a new one
+decision by its number (D1-D56) in code comments, commits and PRs, and add a new one
 here (not a renumbering) when a change settles a design question.
 
 ## 1. Purpose and scope
@@ -156,6 +156,7 @@ results in the PR (`reference/benchmarks.md` has the measurements behind the dec
 | D31 | **Trace stamp**: `pub_trace_stamp(meta)` = `"<author> at <dd-Mon-YYYY HH:MM:SS UTC> (<app> v<version>)"`. An error without `author` (no guessing from `Sys.info()`); English month names whatever the locale. `{trace}` in header/footer lines expands to it. |
 | D32 | **Report spec** (`pub_report_spec()`): `NULL` means the format default; a field set for a format that can't use it is an error. `error_items = c("refuse", "show")` ("show" writes error boxes and warns). There is no `table_theme`: documents hold finished huxtables, so the theme is chosen where tables are made. Front matter and table of contents are optional; an explicit `pub_page()` overrides a reference document's page. |
 | D33 | **DOCX post-processors** edit the parts with **xml2, not officer** (officer took 10 s per report, put header text outside `w:t`, rewrote most parts and wrote local time with "Z"). Header and footer lines go to six bookmarks of the reference docx (`header_left` ... `footer_right`); a non-empty line without its bookmark is an error. **Tables and figures are locked natively by `pub_markdown()`** (content controls `w:sdt` with `sdtContentLocked`, no marker paragraphs); `lock = TRUE` locks every table and figure plus header and footer, otherwise only items with `pub_set_meta(locked = TRUE)`; nothing is locked by default. The locks guard against accidental edits only (Word lets users remove them), which suffices when the PDF is the deliverable; Word's document protection is not used. |
+| D56 | **The document carries its front matter**: `pub_doc(front_matter = )` takes what the body takes and replaces the title block (HTML header) in the viewer, `pub_html()` and every format, with the rules of the spec's front matter (unnumbered sections, counted captions, spec TOC after it), so a front matter that should be previewed lives in one place. The spec's `front_matter` function stays for format-specific front matter and the render-time metadata; it replaces the document's (no implicit merge) and gets `doc`, so it can combine with `doc$front_matter`. `list()` drops the title block without a replacement. |
 
 ## 6. Glossary
 

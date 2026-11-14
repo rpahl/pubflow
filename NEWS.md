@@ -1,3 +1,15 @@
+# pubflow 0.0.0.9056
+
+* `pub_doc()` has a new argument `front_matter` (e.g. a title page, a signature table
+  and `pub_toc()`) that replaces the title block in the viewer, in `pub_html()` and in
+  every format of `pub_render()`, with unnumbered sections (#18, D56). The
+  `front_matter` function of `pub_report_spec()` replaces it and can build on it
+  (`doc$front_matter`); so a spec of `\(doc, format) list()` is no longer needed to
+  drop the title block when the document holds its own front matter.
+* A `front_matter` function of `pub_report_spec()` that returns `NULL` now keeps the
+  title block; return `list()` to drop it.
+* `pub_html()` adds no table of contents if the document places one (`pub_toc()`).
+
 # pubflow 0.0.0.9055
 
 * New `pub_layout_sections()` makes the function of a layout step whose document has

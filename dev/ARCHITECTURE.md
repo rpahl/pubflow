@@ -3,7 +3,7 @@
 Audience: developers (human or agent) who want to understand how pubflow's
 parts fit together before working on it.
 Companion documents: `DESIGN.md` is the agreed design with the reasons
-(decision log D1-D55); `PLAN.md` the open work; `reference/` the research
+(decision log D1-D56); `PLAN.md` the open work; `reference/` the research
 behind both. This document is the map: what the parts are, how data flows
 between them and where to look in the code. It cites decisions (D) instead
 of repeating them; "§n below" refers to this document.
@@ -97,7 +97,7 @@ flowchart TB
     I -- "stamps figures" --> O
     V --> R
     Rep --> R
-    Rep -- "front matter" --> D
+    Rep -- "front matter<br/>(else the doc's)" --> D
     R --> D
     R --> O
     D --> O
@@ -418,7 +418,7 @@ skips identical param values), so only the affected steps re-run.
 flowchart TB
     doc[("pub_doc")]
     subgraph html["HTML path (htmltools, no pandoc)"]
-        parts[".html_parts(): walk the tree<br/>→ header, body, outline, deps"]
+        parts[".html_parts(): walk the tree<br/>→ header (or front matter), body, outline, deps"]
         pubhtml["pub_html()<br/>HTML fragment"]
         vw["viewer: .viewer_render()"]
         file1[".render_html_file():<br/>standalone page, assets inlined"]
@@ -455,7 +455,7 @@ flowchart TB
     b[".check_report_spec(): spec fits the format"]
     c[".render_doc(): merge render-time meta,<br/>time = now unless given (D30)"]
     d[".render_settings(spec, target):<br/>templates, page, figure device, labels, ..."]
-    e[".front_nodes(): spec's front_matter(doc, format)"]
+    e[".front_nodes(): spec's front_matter(doc, format),<br/>else doc$front_matter (D56)"]
     f[".guard_error_items(): refuse<br/>or show + warn (D32)"]
     g["fresh temp work directory"]
     h{"format"}
