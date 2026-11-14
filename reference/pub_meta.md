@@ -76,7 +76,7 @@ afterwards.
 
 An `id` must be unique in a document. It starts with a letter, ends with
 a letter or digit and has only letters, digits, `_` and `-` in between,
-e.g. `"slopes-1"`.
+e.g. `"ozone-1"`.
 
 You can also add keys of your own. pubflow keeps them but does not use
 them.
@@ -120,9 +120,9 @@ pub_meta(x)
 #> [1] "Data"
 #> 
 
-# the target of the cross-reference `@tab:slopes` in a text
-tab <- pub_table(data.frame(a = 1:2), caption = "Slopes")
-tab <- pub_set_meta(tab, id = "slopes")
+# the target of the cross-reference `@tab:ozone` in a text
+tab <- pub_table(airquality[1:4, c("Month", "Day", "Ozone")], caption = "Ozone")
+tab <- pub_set_meta(tab, id = "ozone")
 pub_meta(tab, "id")
-#> [1] "slopes"
+#> [1] "ozone"
 ```

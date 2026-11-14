@@ -218,7 +218,7 @@ installation (found by `QUARTO_PATH` or on the PATH).
 
 ``` r
 doc <- pub_doc(
-    pub_section("Results", pub_text("All batches meet the limits.")),
+    pub_section("Results", pub_text("Ozone is highest in July and August.")),
     title = "Demo report"
 )
 noon <- as.POSIXct("2026-10-05 12:00:00", tz = "UTC")

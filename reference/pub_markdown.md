@@ -125,9 +125,9 @@ the same.
 doc <- pub_doc(
     pub_section(
         "Results",
-        pub_text("The slope is **negative** ($b < 0$)."),
-        pub_table(data.frame(batch = c("A", "B"), slope = c(-0.26, -0.25)),
-                  caption = "Slopes", digits = c(slope = 2L))
+        pub_text("Mean ozone peaks in **August** ($x_8 = 60$ ppb)."),
+        pub_table(aggregate(Ozone ~ Month, data = airquality, FUN = mean),
+                  caption = "Mean ozone", digits = c(Ozone = 1L))
     ),
     title = "Demo"
 )
@@ -138,15 +138,21 @@ cat(pub_markdown(doc, "md", assets_dir = tempfile()))
 #> 
 #> # 1 Results
 #> 
-#> The slope is **negative** ($b < 0$).
+#> Mean ozone peaks in **August** ($x_8 = 60$ ppb).
 #> 
-#> Table 1: Slopes
+#> Table 1: Mean ozone
 #> 
 #> -----------------------
-#>  **batch**   **slope** 
+#>   **Month**  **Ozone** 
 #> ----------- -----------
-#>  A               -0.26 
+#>           5       23.6 
 #>                        
-#>  B               -0.25 
+#>           6       29.4 
+#>                        
+#>           7       59.1 
+#>                        
+#>           8       60.0 
+#>                        
+#>           9       31.4 
 #> -----------------------
 ```

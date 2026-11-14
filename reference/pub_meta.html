@@ -108,7 +108,7 @@ functions to read or change it afterwards.</p>
 <div class="section">
 <h3 id="keys">Keys<a class="anchor" aria-label="anchor" href="#keys"></a></h3>
 <table class="table table"><tr><td>Key</td><td>Applies to</td><td>Meaning</td></tr><tr><td><code>title</code></td><td>any item</td><td>heading above the item</td></tr><tr><td><code>caption</code></td><td>table, figure</td><td>numbered caption ("Table 1: ..."); <code>""</code> for none</td></tr><tr><td><code>id</code></td><td>table, figure</td><td>name for cross-references (see <code><a href="pub_text.html">pub_text()</a></code>)</td></tr><tr><td><code>width</code>, <code>height</code></td><td>figure</td><td>size in inches (default 8 x 6)</td></tr><tr><td><code>out_width</code></td><td>figure</td><td>width relative to the text width, e.g. <code>"90%"</code></td></tr><tr><td><code>font_size</code></td><td>table</td><td>font size in pt</td></tr><tr><td><code>landscape</code></td><td>table, figure</td><td>place on landscape pages (DOCX, PDF)</td></tr><tr><td><code>locked</code></td><td>table, figure</td><td>lock in DOCX against accidental edits</td></tr><tr><td><code>fallback</code></td><td>widget</td><td>static figure shown where HTML is not available</td></tr><tr><td><code>stamp</code></td><td>figure</td><td>set when a step returns a plot, not a rendered one</td></tr></table><p>An <code>id</code> must be unique in a document. It starts with a letter, ends with a letter or
-digit and has only letters, digits, <code>_</code> and <code>-</code> in between, e.g. <code>"slopes-1"</code>.</p>
+digit and has only letters, digits, <code>_</code> and <code>-</code> in between, e.g. <code>"ozone-1"</code>.</p>
 <p>You can also add keys of your own. pubflow keeps them but does not use them.</p>
 </div>
 
@@ -151,11 +151,11 @@ final table.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Data"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># the target of the cross-reference `@tab:slopes` in a text</span></span></span>
-<span class="r-in"><span><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="pub_table.html">pub_table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span>, caption <span class="op">=</span> <span class="st">"Slopes"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu">pub_set_meta</span><span class="op">(</span><span class="va">tab</span>, id <span class="op">=</span> <span class="st">"slopes"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># the target of the cross-reference `@tab:ozone` in a text</span></span></span>
+<span class="r-in"><span><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="pub_table.html">pub_table</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Month"</span>, <span class="st">"Day"</span>, <span class="st">"Ozone"</span><span class="op">)</span><span class="op">]</span>, caption <span class="op">=</span> <span class="st">"Ozone"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tab</span> <span class="op">&lt;-</span> <span class="fu">pub_set_meta</span><span class="op">(</span><span class="va">tab</span>, id <span class="op">=</span> <span class="st">"ozone"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">pub_meta</span><span class="op">(</span><span class="va">tab</span>, <span class="st">"id"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "slopes"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "ozone"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

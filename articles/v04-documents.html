@@ -231,7 +231,7 @@ with the steps that don’t depend on <code>fit</code>:</p>
 <span><span class="co"># 7:              [NULL]</span></span>
 <span><span class="co"># 8:        &lt;pub_doc[2]&gt;</span></span>
 <span><span class="co"># --------------------------</span></span>
-<span><span class="co"># &lt;continued&gt; last run: 2026-11-14 14:33:25 (0.046 s)</span></span>
+<span><span class="co"># &lt;continued&gt; last run: 2026-11-14 15:23:17 (0.066 s)</span></span>
 <span><span class="co"># steps: 4 done, 1 failed, 3 new</span></span></code></pre></div>
 <p>The run warns (class <code>pipeflow_run_failed</code>), but the
 document is there. The steps <code>coef_table</code>, <code>plot</code>
@@ -395,7 +395,7 @@ failed:</p>
 <span><span class="co"># 7: The model explains **49%** of the varian...</span></span>
 <span><span class="co"># 8:                                &lt;pub_doc[2]&gt;</span></span>
 <span><span class="co"># --------------------------</span></span>
-<span><span class="co"># &lt;ready&gt; last run: 2026-11-14 14:33:25 (0.039 s)</span></span>
+<span><span class="co"># &lt;ready&gt; last run: 2026-11-14 15:23:18 (0.059 s)</span></span>
 <span><span class="co"># steps: 8 done</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -456,7 +456,7 @@ steps, and a run of a view computes just what its report needs:</p>
 <span><span class="co">#  9:                                &lt;pub_doc[2]&gt;           </span></span>
 <span><span class="co"># 10:                                      [NULL]           </span></span>
 <span><span class="co"># ---------------------------</span></span>
-<span><span class="co"># &lt;ready&gt; last run: 2026-11-14 14:33:25 (0.016 s)</span></span>
+<span><span class="co"># &lt;ready&gt; last run: 2026-11-14 15:23:18 (0.027 s)</span></span>
 <span><span class="co"># steps: 6 done, 4 new</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/methods/show.html" class="external-link">show</a></span><span class="op">(</span><span class="va">tagged</span><span class="op">[[</span><span class="st">"short"</span>, <span class="st">"out"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <div style="border: 1px solid #ccc; border-radius: 4px; padding: 0 1em;"><div class="pubflow-doc">
@@ -664,7 +664,7 @@ step that a param switches off returns <code>NULL</code>.</p>
 <h3 id="layouts-that-change-with-the-data">Layouts that change with the data<a class="anchor" aria-label="anchor" href="#layouts-that-change-with-the-data"></a>
 </h3>
 <p>The structure of a document often depends on the data: one section
-per batch, per site, per month. Choose among three ways, from the
+per month, per site, per variable. Choose among three ways, from the
 simplest.</p>
 <div class="section level4">
 <h4 id="a-step-that-returns-a-named-list">A step that returns a named list<a class="anchor" aria-label="anchor" href="#a-step-that-returns-a-named-list"></a>
@@ -844,10 +844,10 @@ all sections fail together, and the pipeline can’t cache or re-run a
 single section.</p>
 </div>
 <div class="section level4">
-<h4 id="split-steps-one-partition-per-batch">Split steps: one partition per batch<a class="anchor" aria-label="anchor" href="#split-steps-one-partition-per-batch"></a>
+<h4 id="split-steps-one-partition-per-month">Split steps: one partition per month<a class="anchor" aria-label="anchor" href="#split-steps-one-partition-per-month"></a>
 </h4>
-<p>If each batch needs its own chain of steps (a fit, a table and a
-figure per batch), use pipeflow’s split steps: a step with
+<p>If each month needs its own chain of steps (a fit, a table and a
+figure per month), use pipeflow’s split steps: a step with
 <code>exec = "split"</code> returns a list, and every step downstream
 runs once per element, the <em>partitions</em>, until a step with
 <code>exec = "reduce"</code> takes them all. A layout step downstream of
@@ -907,7 +907,7 @@ section the step returned:</p>
 <span><span class="co"># 6: section data,table,plot months,table,plot  done           &lt;list[5]&gt;   auto</span></span>
 <span><span class="co"># 7:     doc        sections           section  done        &lt;pub_doc[2]&gt; reduce</span></span>
 <span><span class="co"># -----------------------------</span></span>
-<span><span class="co"># &lt;ready&gt; last run: 2026-11-14 14:33:26 (0.066 s)</span></span>
+<span><span class="co"># &lt;ready&gt; last run: 2026-11-14 15:23:19 (0.114 s)</span></span>
 <span><span class="co"># steps: 7 done</span></span></code></pre></div>
 <div style="border: 1px solid #ccc; border-radius: 4px; padding: 0 1em;"><div class="pubflow-doc">
 <header class="pubflow-doc-header"><h2 data-toc-skip class="pubflow-title">Ozone by month</h2>
@@ -1114,16 +1114,16 @@ section the step returned:</p>
 </div></div>
 <p>Pipeflow’s split steps fail per partition. If the table of one month
 fails, its section shows an error box and the other months are complete.
-A failed batch is also the only one that runs again in the next run, as
+A failed month is also the only one that runs again in the next run, as
 long as the failed step’s params, exec mode and inputs are unchanged, no
 input ran again and the run is not forced. Note that a param change
 outdates a whole step: all its partitions run again, not only some.</p>
 <p>Choose between the two like this: the named list is easiest if the
 content of a section is made in one step. Split steps pay off when the
-chain per batch is long, when it can fail, or when its results are
+chain per month is long, when it can fail, or when its results are
 expensive to recompute after a failure. A third way, <em>nested
 pipelines</em> (a pipeline that is a step function through
-<code><a href="https://rdrr.io/r/base/as.function.html" class="external-link">as.function()</a></code>), is for batches that share one param set but
+<code><a href="https://rdrr.io/r/base/as.function.html" class="external-link">as.function()</a></code>), is for groups that share one param set but
 are computed by a pipeline of their own; see pipeflow’s vignette <a href="https://cran.r-project.org/package=pipeflow/vignettes/v05b-nested-pipeline.html" class="external-link">Nested
 pipelines</a>.</p>
 </div>
@@ -1131,18 +1131,18 @@ pipelines</a>.</p>
 <h4 id="what-does-not-work-add-steps-while-running">What does not work: add steps while running<a class="anchor" aria-label="anchor" href="#what-does-not-work-add-steps-while-running"></a>
 </h4>
 <p>A step that adds steps to the pipeline in the course of a run (a step
-function that calls <code>pip_add(.self, ...)</code> for every batch it
+function that calls <code>pip_add(.self, ...)</code> for every month it
 finds) does not work for documents: the layout step can’t name a step
 that does not exist when it is added, because <code><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add()</a></code>
 rejects unknown <code>~step</code> references, and
 <code><a href="../reference/pub_layout_inputs.html">pub_layout_inputs()</a></code> lists the steps present at that moment.
 Use a named list or a split step instead; both have as many outputs as
-there are batches.</p>
+there are months.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_new.html" class="external-link">pip_new</a></span><span class="op">(</span><span class="st">"tmp"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"report"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">table</span> <span class="op">=</span> <span class="op">~</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="va">batch_a_table</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="../reference/pub_doc.html">pub_doc</a></span><span class="op">(</span><span class="va">table</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"report"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">table</span> <span class="op">=</span> <span class="op">~</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="va">may_table</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="../reference/pub_doc.html">pub_doc</a></span><span class="op">(</span><span class="va">table</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
-<span><span class="co"># <span style="color: #BBBB00;">!</span> while adding step 'report' - cannot reference unknown steps: 'batch_a_table'</span></span></code></pre></div>
+<span><span class="co"># <span style="color: #BBBB00;">!</span> while adding step 'report' - cannot reference unknown steps: 'may_table'</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -1150,10 +1150,10 @@ there are batches.</p>
 </h3>
 <p>Groups that have their own params, their own inputs or their own runs
 are better as <em>independent pipelines</em> made by one constructor
-than as one pipeline with partitions. A study can have one pipeline per
-test (assay, water content, …), each with its own specification limits,
-its own parameter tab and its own run, possibly in a parallel worker.
-The report puts the parts together.</p>
+than as one pipeline with partitions. A report can have one pipeline per
+month or per site, each with its own limits, its own parameter tab and
+its own run, possibly in a parallel worker. The report puts the parts
+together.</p>
 <p>A constructor for a group’s pipeline. The layout step
 <code>content</code> makes the part of the report for this group. It
 takes a plain <code>~table</code>, so it is skipped when the table
@@ -1204,7 +1204,7 @@ pipeline:</p>
 <span><span class="co"># 3:   table        res    mean  done    &lt;huxtable[3x2]&gt;</span></span>
 <span><span class="co"># 4: content      table   table  done          &lt;list[1]&gt;</span></span>
 <span><span class="co"># ------------------------</span></span>
-<span><span class="co"># &lt;ready&gt; last run: 2026-11-14 14:33:26 (0.008 s)</span></span>
+<span><span class="co"># &lt;ready&gt; last run: 2026-11-14 15:23:20 (0.013 s)</span></span>
 <span><span class="co"># steps: 4 done</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="read-the-parts-with-pub_out">Read the parts with <code>pub_out()</code><a class="anchor" aria-label="anchor" href="#read-the-parts-with-pub_out"></a>
@@ -1253,7 +1253,7 @@ not change don’t outdate anything:</p>
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_new.html" class="external-link">pip_new</a></span><span class="op">(</span><span class="st">"report"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"parts"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">parts</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="va">parts</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"doc"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">parts</span> <span class="op">=</span> <span class="op">~</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="va">parts</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>        <span class="fu"><a href="../reference/pub_doc.html">pub_doc</a></span><span class="op">(</span><span class="fu"><a href="../reference/pub_doc.html">pub_section</a></span><span class="op">(</span><span class="st">"Ozone by month"</span>, <span class="va">parts</span><span class="op">)</span>, title <span class="op">=</span> <span class="st">"Study report"</span><span class="op">)</span></span>
+<span>        <span class="fu"><a href="../reference/pub_doc.html">pub_doc</a></span><span class="op">(</span><span class="fu"><a href="../reference/pub_doc.html">pub_section</a></span><span class="op">(</span><span class="st">"Ozone by month"</span>, <span class="va">parts</span><span class="op">)</span>, title <span class="op">=</span> <span class="st">"Ozone report"</span><span class="op">)</span></span>
 <span>    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>The parts are a named list, so each group becomes a section titled by
 its name. A group whose pipeline failed is shown as an error box in its
@@ -1264,7 +1264,7 @@ section, and the other groups’ results are in the document:</p>
 <span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_run.html" class="external-link">pip_run</a></span><span class="op">(</span><span class="va">report</span>, lgr <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/methods/show.html" class="external-link">show</a></span><span class="op">(</span><span class="va">report</span><span class="op">[[</span><span class="st">"doc"</span>, <span class="st">"out"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <div style="border: 1px solid #ccc; border-radius: 4px; padding: 0 1em;"><div class="pubflow-doc">
-<header class="pubflow-doc-header"><h2 data-toc-skip class="pubflow-title">Study report</h2>
+<header class="pubflow-doc-header"><h2 data-toc-skip class="pubflow-title">Ozone report</h2>
 </header><nav class="pubflow-toc"><ul>
 <li>
 <a href="#pubflow-sec-1"><span class="pubflow-section-number">1</span> Ozone by month</a>
@@ -1357,7 +1357,7 @@ pipeline gets the new part:</p>
 <span><span class="co"># 1: parts  parts          done    &lt;list[3]&gt;</span></span>
 <span><span class="co"># 2:   doc  parts   parts  done &lt;pub_doc[2]&gt;</span></span>
 <span><span class="co"># ---------------------------</span></span>
-<span><span class="co"># &lt;ready&gt; last run: 2026-11-14 14:33:27 (0.003 s)</span></span>
+<span><span class="co"># &lt;ready&gt; last run: 2026-11-14 15:23:20 (0.004 s)</span></span>
 <span><span class="co"># steps: 2 done</span></span></code></pre></div>
 <p>Two things to know when a worker runs the group’s pipeline:</p>
 <ul>

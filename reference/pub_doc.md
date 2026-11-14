@@ -179,8 +179,8 @@ doc
 pub_doc(
     pub_section(
         "Introduction",
-        pub_text("The study has **three** batches."),
-        data.frame(batch = c("A", "B", "C"), n = c(4L, 4L, 4L))
+        pub_text("The data cover **153** days, from May to September."),
+        as.data.frame(table(Month = airquality$Month), responseName = "Days")
     ),
     pub_section("Annex", pub_session_info(), numbered = FALSE),
     title = "Analysis report",
@@ -188,7 +188,7 @@ pub_doc(
 )
 #> <pubflow document> "Analysis report"
 #> # Introduction
-#>   text "The study has **three** batches."
+#>   text "The data cover **153** days, from May..."
 #>   table
 #> # Annex [unnumbered]
 #>   ## Session info

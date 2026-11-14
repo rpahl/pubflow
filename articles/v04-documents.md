@@ -153,7 +153,7 @@ depend on `fit`:
 `# 7:              [NULL]`\
 `# 8:        <pub_doc[2]>`\
 `# --------------------------`\
-`# <continued> last run: 2026-11-14 14:33:25 (0.046 s)`\
+`# <continued> last run: 2026-11-14 15:23:17 (0.066 s)`\
 `# steps: 4 done, 1 failed, 3 new`
 
 The run warns (class `pipeflow_run_failed`), but the document is there.
@@ -261,7 +261,7 @@ Set the param back and the next run repairs the steps that failed:
 `# 7: The model explains **49%** of the varian...`\
 `# 8:                                <pub_doc[2]>`\
 `# --------------------------`\
-`# <ready> last run: 2026-11-14 14:33:25 (0.039 s)`\
+`# <ready> last run: 2026-11-14 15:23:18 (0.059 s)`\
 `# steps: 8 done`
 
 ### Select the steps of a report by tags
@@ -329,7 +329,7 @@ view computes just what its report needs:
 `#  9:                                <pub_doc[2]>           `\
 `# 10:                                      [NULL]           `\
 `# ---------------------------`\
-`# <ready> last run: 2026-11-14 14:33:25 (0.016 s)`\
+`# <ready> last run: 2026-11-14 15:23:18 (0.027 s)`\
 `# steps: 6 done, 4 new`\
 [`show`](https://rdrr.io/r/methods/show.html)`(``tagged``[[``"short"``, ``"out"``]``]``)`
 
@@ -426,7 +426,8 @@ param switches off returns `NULL`.
 ### Layouts that change with the data
 
 The structure of a document often depends on the data: one section per
-batch, per site, per month. Choose among three ways, from the simplest.
+month, per site, per variable. Choose among three ways, from the
+simplest.
 
 #### A step that returns a named list
 
@@ -530,10 +531,10 @@ made in one step. A step that returns a list is one step: if it fails,
 all sections fail together, and the pipeline can’t cache or re-run a
 single section.
 
-#### Split steps: one partition per batch
+#### Split steps: one partition per month
 
-If each batch needs its own chain of steps (a fit, a table and a figure
-per batch), use pipeflow’s split steps: a step with `exec = "split"`
+If each month needs its own chain of steps (a fit, a table and a figure
+per month), use pipeflow’s split steps: a step with `exec = "split"`
 returns a list, and every step downstream runs once per element, the
 *partitions*, until a step with `exec = "reduce"` takes them all. A
 layout step downstream of a split step runs once per partition and
@@ -595,7 +596,7 @@ by its key, around the section the step returned:
 `# 6: section data,table,plot months,table,plot  done           <list[5]>   auto`\
 `# 7:     doc        sections           section  done        <pub_doc[2]> reduce`\
 `# -----------------------------`\
-`# <ready> last run: 2026-11-14 14:33:26 (0.066 s)`\
+`# <ready> last run: 2026-11-14 15:23:19 (0.114 s)`\
 `# steps: 7 done`
 
 ## Ozone by month
@@ -691,47 +692,46 @@ Figure 5: Linear model fit
 
 Pipeflow’s split steps fail per partition. If the table of one month
 fails, its section shows an error box and the other months are complete.
-A failed batch is also the only one that runs again in the next run, as
+A failed month is also the only one that runs again in the next run, as
 long as the failed step’s params, exec mode and inputs are unchanged, no
 input ran again and the run is not forced. Note that a param change
 outdates a whole step: all its partitions run again, not only some.
 
 Choose between the two like this: the named list is easiest if the
 content of a section is made in one step. Split steps pay off when the
-chain per batch is long, when it can fail, or when its results are
+chain per month is long, when it can fail, or when its results are
 expensive to recompute after a failure. A third way, *nested pipelines*
 (a pipeline that is a step function through
 [`as.function()`](https://rdrr.io/r/base/as.function.html)), is for
-batches that share one param set but are computed by a pipeline of their
+groups that share one param set but are computed by a pipeline of their
 own; see pipeflow’s vignette [Nested
 pipelines](https://cran.r-project.org/package=pipeflow/vignettes/v05b-nested-pipeline.html).
 
 #### What does not work: add steps while running
 
 A step that adds steps to the pipeline in the course of a run (a step
-function that calls `pip_add(.self, ...)` for every batch it finds) does
+function that calls `pip_add(.self, ...)` for every month it finds) does
 not work for documents: the layout step can’t name a step that does not
 exist when it is added, because
 [`pip_add()`](https://rpahl.github.io/pipeflow/reference/pip_add.html)
 rejects unknown `~step` references, and
 [`pub_layout_inputs()`](https://rpahl.github.io/pubflow/reference/pub_layout_inputs.md)
 lists the steps present at that moment. Use a named list or a split step
-instead; both have as many outputs as there are batches.
+instead; both have as many outputs as there are months.
 
 \
 [`pip_new`](https://rpahl.github.io/pipeflow/reference/pip_new.html)`(``"tmp"``)`` ``|>`\
-`    `[`pip_add`](https://rpahl.github.io/pipeflow/reference/pip_add.html)`(``"report"``, ``function``(``table`` ``=`` ``~`` `[`try`](https://rdrr.io/r/base/try.html)`(``batch_a_table``)``)`` `[`pub_doc`](https://rpahl.github.io/pubflow/reference/pub_doc.md)`(``table``)``)`\
+`    `[`pip_add`](https://rpahl.github.io/pipeflow/reference/pip_add.html)`(``"report"``, ``function``(``table`` ``=`` ``~`` `[`try`](https://rdrr.io/r/base/try.html)`(``may_table``)``)`` `[`pub_doc`](https://rpahl.github.io/pubflow/reference/pub_doc.md)`(``table``)``)`\
 `# ``Error``:`\
-`# ``!`` while adding step 'report' - cannot reference unknown steps: 'batch_a_table'`
+`# ``!`` while adding step 'report' - cannot reference unknown steps: 'may_table'`
 
 ### Documents across pipelines
 
 Groups that have their own params, their own inputs or their own runs
 are better as *independent pipelines* made by one constructor than as
-one pipeline with partitions. A study can have one pipeline per test
-(assay, water content, …), each with its own specification limits, its
-own parameter tab and its own run, possibly in a parallel worker. The
-report puts the parts together.
+one pipeline with partitions. A report can have one pipeline per month
+or per site, each with its own limits, its own parameter tab and its own
+run, possibly in a parallel worker. The report puts the parts together.
 
 A constructor for a group’s pipeline. The layout step `content` makes
 the part of the report for this group. It takes a plain `~table`, so it
@@ -785,7 +785,7 @@ in a parallel worker, which does the same and returns the pipeline:
 `# 3:   table        res    mean  done    <huxtable[3x2]>`\
 `# 4: content      table   table  done          <list[1]>`\
 `# ------------------------`\
-`# <ready> last run: 2026-11-14 14:33:26 (0.008 s)`\
+`# <ready> last run: 2026-11-14 15:23:20 (0.013 s)`\
 `# steps: 4 done`
 
 #### Read the parts with `pub_out()`
@@ -838,7 +838,7 @@ so parts that did not change don’t outdate anything:
 `report`` ``<-`` `[`pip_new`](https://rpahl.github.io/pipeflow/reference/pip_new.html)`(``"report"``)`` ``|>`\
 `    `[`pip_add`](https://rpahl.github.io/pipeflow/reference/pip_add.html)`(``"parts"``, ``function``(``parts`` ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``)``)`` ``parts``)`` ``|>`\
 `    `[`pip_add`](https://rpahl.github.io/pipeflow/reference/pip_add.html)`(``"doc"``, ``function``(``parts`` ``=`` ``~`` `[`try`](https://rdrr.io/r/base/try.html)`(``parts``)``)`` ``{`\
-`        `[`pub_doc`](https://rpahl.github.io/pubflow/reference/pub_doc.md)`(`[`pub_section`](https://rpahl.github.io/pubflow/reference/pub_doc.md)`(``"Ozone by month"``, ``parts``)``, title ``=`` ``"Study report"``)`\
+`        `[`pub_doc`](https://rpahl.github.io/pubflow/reference/pub_doc.md)`(`[`pub_section`](https://rpahl.github.io/pubflow/reference/pub_doc.md)`(``"Ozone by month"``, ``parts``)``, title ``=`` ``"Ozone report"``)`\
 `    ``}``)`
 
 The parts are a named list, so each group becomes a section titled by
@@ -851,7 +851,7 @@ section, and the other groups’ results are in the document:
 [`pip_run`](https://rpahl.github.io/pipeflow/reference/pip_run.html)`(``report``, lgr ``=`` ``NULL``)`\
 [`show`](https://rdrr.io/r/methods/show.html)`(``report``[[``"doc"``, ``"out"``]``]``)`
 
-## Study report
+## Ozone report
 
 - [1 Ozone by month](#pubflow-sec-1)
   - [1.1 May](#pubflow-sec-1-1)
@@ -907,7 +907,7 @@ gets the new part:
 `# 1: parts  parts          done    <list[3]>`\
 `# 2:   doc  parts   parts  done <pub_doc[2]>`\
 `# ---------------------------`\
-`# <ready> last run: 2026-11-14 14:33:27 (0.003 s)`\
+`# <ready> last run: 2026-11-14 15:23:20 (0.004 s)`\
 `# steps: 2 done`
 
 Two things to know when a worker runs the group’s pipeline:

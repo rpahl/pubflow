@@ -94,13 +94,13 @@ failed), <code>message</code> (its error message) and, for an item of <code><a h
 <span class="r-in"><span>    <span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"fit"</span>, \<span class="op">(</span><span class="va">data</span> <span class="op">=</span> <span class="op">~</span><span class="va">data</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"too few values"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"table"</span>, \<span class="op">(</span><span class="va">fit</span> <span class="op">=</span> <span class="op">~</span><span class="va">fit</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_run.html" class="external-link">pip_run</a></span><span class="op">(</span><span class="va">p</span>, on_error <span class="op">=</span> <span class="st">"continue"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> info [2026-11-14 14:32:58.625 UTC]: Starting run of pipeflow 'air'</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> info [2026-11-14 14:32:58.625 UTC]: Step 1/3 data</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> info [2026-11-14 14:32:58.626 UTC]: Step 2/3 fit</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> error [2026-11-14 14:32:58.626 UTC]: too few values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> info [2026-11-14 14:32:58.627 UTC]: Step 3/3 table - skipping step, input 'fit' failed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> info [2026-11-14 14:32:58.627 UTC]: Finished in 0.002 s (1 done, 1 skipped, 1 failed)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> warn [2026-11-14 14:32:58.627 UTC]: Run of pipeline 'air' continued after 1 failed step:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> info [2026-11-14 15:22:35.555 UTC]: Starting run of pipeflow 'air'</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> info [2026-11-14 15:22:35.555 UTC]: Step 1/3 data</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> info [2026-11-14 15:22:35.556 UTC]: Step 2/3 fit</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> error [2026-11-14 15:22:35.557 UTC]: too few values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> info [2026-11-14 15:22:35.558 UTC]: Step 3/3 table - skipping step, input 'fit' failed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> info [2026-11-14 15:22:35.558 UTC]: Finished in 0.003 s (1 done, 1 skipped, 1 failed)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> warn [2026-11-14 15:22:35.559 UTC]: Run of pipeline 'air' continued after 1 failed step:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   'fit': too few values</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Steps not run because an input failed: 'table'</span>
 <span class="r-in"><span></span></span>

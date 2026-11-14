@@ -55,5 +55,5 @@ files) are removed.
 ``` r
 cache <- pub_cache()
 cache
-#> <pubflow render cache> 0 of at most 500 entries, files in '/tmp/Rtmp4Uexz3/pubflow-cache-1c9e5a96a851'
+#> <pubflow render cache> 0 of at most 500 entries, files in '/tmp/Rtmpl7zVL6/pubflow-cache-1d6f5c5e9f59'
 ```

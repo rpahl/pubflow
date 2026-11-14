@@ -148,7 +148,7 @@ failed key.</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">test_pipeline</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name</span>, <span class="va">values</span><span class="op">)</span> <span class="op">{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">mean_pipeline</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">name</span>, <span class="va">values</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>    <span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_new.html" class="external-link">pip_new</a></span><span class="op">(</span><span class="va">name</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>        <span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"data"</span>, \<span class="op">(</span><span class="va">values</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="va">values</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>        <span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"mean"</span>, \<span class="op">(</span><span class="va">x</span> <span class="op">=</span> <span class="op">~</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span></span>
@@ -156,35 +156,36 @@ failed key.</p></li>
 <span class="r-in"><span>            <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-in"><span>        <span class="op">}</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>        <span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"content"</span>, \<span class="op">(</span><span class="va">m</span> <span class="op">=</span> <span class="op">~</span><span class="va">mean</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>            <span class="fu"><a href="pub_text.html">pub_text</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Mean:"</span>, <span class="fu"><a href="pub_round.html">pub_format_num</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>            <span class="fu"><a href="pub_text.html">pub_text</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Mean:"</span>, <span class="fu"><a href="pub_round.html">pub_format_num</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>        <span class="op">}</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>        <span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_set_params.html" class="external-link">pip_set_params</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">values</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-in"><span><span class="va">tests</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    Assay <span class="op">=</span> <span class="fu">test_pipeline</span><span class="op">(</span><span class="st">"Assay"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">99.1</span>, <span class="fl">98.7</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    Water <span class="op">=</span> <span class="fu">test_pipeline</span><span class="op">(</span><span class="st">"Water"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Ozone has missing values, so its mean fails</span></span></span>
+<span class="r-in"><span><span class="va">measures</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    Temperature <span class="op">=</span> <span class="fu">mean_pipeline</span><span class="op">(</span><span class="st">"Temperature"</span>, <span class="va">airquality</span><span class="op">$</span><span class="va">Temp</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    Ozone <span class="op">=</span> <span class="fu">mean_pipeline</span><span class="op">(</span><span class="st">"Ozone"</span>, <span class="va">airquality</span><span class="op">$</span><span class="va">Ozone</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">p</span> <span class="kw">in</span> <span class="va">tests</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">p</span> <span class="kw">in</span> <span class="va">measures</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>        <span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_run.html" class="external-link">pip_run</a></span><span class="op">(</span><span class="va">p</span>, lgr <span class="op">=</span> <span class="cn">NULL</span>, on_error <span class="op">=</span> <span class="st">"continue"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">pub_out</span><span class="op">(</span><span class="va">tests</span><span class="op">$</span><span class="va">Assay</span>, <span class="st">"content"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Mean: 98.90"</span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu">pub_out</span><span class="op">(</span><span class="va">tests</span><span class="op">$</span><span class="va">Water</span>, <span class="st">"content"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Error in pub_out(tests$Water, "content") : </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   The output of step 'content' of pipeline 'Water' is not up to date (state "new").</span>
+<span class="r-in"><span><span class="fu">pub_out</span><span class="op">(</span><span class="va">measures</span><span class="op">$</span><span class="va">Temperature</span>, <span class="st">"content"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Mean: 77.9"</span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu">pub_out</span><span class="op">(</span><span class="va">measures</span><span class="op">$</span><span class="va">Ozone</span>, <span class="st">"content"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Error in pub_out(measures$Ozone, "content") : </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   The output of step 'content' of pipeline 'Ozone' is not up to date (state "new").</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Step 'mean' failed: missing values</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># One section per test; the failed one shows an error box</span></span></span>
-<span class="r-in"><span><span class="va">parts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">tests</span>, <span class="va">pub_out</span>, step <span class="op">=</span> <span class="st">"content"</span>, on_error <span class="op">=</span> <span class="st">"item"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="pub_doc.html">pub_doc</a></span><span class="op">(</span><span class="va">parts</span>, title <span class="op">=</span> <span class="st">"Tests"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;pubflow document&gt; "Tests"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Assay</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   text "Mean: 98.90"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Water</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   error "step 'mean' of pipeline 'Water' failed: missing values"</span>
+<span class="r-in"><span><span class="co"># One section per measure; the failed one shows an error box</span></span></span>
+<span class="r-in"><span><span class="va">parts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">measures</span>, <span class="va">pub_out</span>, step <span class="op">=</span> <span class="st">"content"</span>, on_error <span class="op">=</span> <span class="st">"item"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="pub_doc.html">pub_doc</a></span><span class="op">(</span><span class="va">parts</span>, title <span class="op">=</span> <span class="st">"Means"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;pubflow document&gt; "Means"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Temperature</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   text "Mean: 77.9"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Ozone</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   error "step 'mean' of pipeline 'Ozone' failed: missing values"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

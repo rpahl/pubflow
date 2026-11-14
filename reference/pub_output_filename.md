@@ -44,8 +44,8 @@ The name has the form `<YYYYMMDDTHHMMSSZ>_<title>.<ext>`:
 ## Examples
 
 ``` r
-meta <- list(title = "Analysis report: batch A",
+meta <- list(title = "Ozone report: May",
              time = as.POSIXct("2026-10-05 14:30:00", tz = "UTC"))
 pub_output_filename(meta, "docx")
-#> [1] "20261005T143000Z_analysis_report_batch_a.docx"
+#> [1] "20261005T143000Z_ozone_report_may.docx"
 ```

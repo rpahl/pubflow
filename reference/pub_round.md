@@ -102,6 +102,7 @@ pub_format_num(12.25, "%.1f %%")
 #> [1] "12.3 %"
 
 # Numbers in text
-pub_format_num(mean(c(98.25, 99.1)), "Mean assay: %.2f %%")
-#> [1] "Mean assay: 98.68 %"
+high <- mean(airquality$Ozone > 60, na.rm = TRUE)
+pub_format_num(100 * high, "Days above 60 ppb: %.1f %%")
+#> [1] "Days above 60 ppb: 26.7 %"
 ```

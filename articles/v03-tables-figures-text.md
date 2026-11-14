@@ -211,7 +211,7 @@ number formats are set:
 `)`\
 `tabRuns`` ``<-`` `[`pub_table`](https://rpahl.github.io/pubflow/reference/pub_table.md)`(`\
 `    ``runs``[``, `[`c`](https://rdrr.io/r/base/c.html)`(``"sample"``, ``"result"``)``]``,`\
-`    caption ``=`` ``"Assay results"``,`\
+`    caption ``=`` ``"Sample results"``,`\
 `    digits ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``result ``=`` ``2L``)`\
 `)`\
 `rows`` ``<-`` `[`pub_table_rows`](https://rpahl.github.io/pubflow/reference/pub_table_rows.md)`(``tabRuns``)``$``body``[``runs``$``excluded``]`\
@@ -222,7 +222,7 @@ number formats are set:
 
 [TABLE]
 
-Table 1: Assay results {#tab:strikeout .table .huxtable
+Table 1: Sample results {#tab:strikeout .table .huxtable
 quarto-disable-processing="true"
 style="margin-left: auto; margin-right: auto;   break-inside: avoid; page-break-inside: avoid;"}
 
@@ -232,10 +232,10 @@ underline.
 ### Combining tables
 
 Combine the *data* and build the table once, rather than gluing finished
-tables together: bind the data of several batches with
+tables together: bind the data of several months with
 [`rbind()`](https://rdrr.io/r/base/cbind.html) and give
-`pub_table(merge = "batch")`, or subset the data to get one table per
-batch.
+`pub_table(merge = "Month")`, or subset the data to get one table per
+month.
 
 If you do combine finished tables with huxtable’s
 [`rbind()`](https://rdrr.io/r/base/cbind.html),
@@ -275,8 +275,9 @@ in a text and it matches the table:
 \
 [`pub_format_num`](https://rpahl.github.io/pubflow/reference/pub_round.md)`(``x``, ``2``)`\
 `# [1] "0.13"  "2.68"  "-2.68" "10.00"`\
-[`pub_format_num`](https://rpahl.github.io/pubflow/reference/pub_round.md)`(`[`mean`](https://rdrr.io/r/base/mean.html)`(`[`c`](https://rdrr.io/r/base/c.html)`(``98.25``, ``99.1``)``)``, ``"Mean assay: %.2f %%"``)`\
-`# [1] "Mean assay: 98.68 %"`
+`high`` ``<-`` `[`mean`](https://rdrr.io/r/base/mean.html)`(``airquality``$``Ozone`` ``>`` ``60``, na.rm ``=`` ``TRUE``)`\
+[`pub_format_num`](https://rpahl.github.io/pubflow/reference/pub_round.md)`(``100`` ``*`` ``high``, ``"Days above 60 ppb: %.1f %%"``)`\
+`# [1] "Days above 60 ppb: 26.7 %"`
 
 A format is a number of decimal places or a
 [`sprintf()`](https://rdrr.io/r/base/sprintf.html) format with exactly
