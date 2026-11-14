@@ -174,11 +174,12 @@ with \code{pub_set_meta(locked = TRUE)}, and the header and footer if \code{post
 lists \code{\link[=pub_pp_docx_lock]{pub_pp_docx_lock()}}. \code{FALSE} locks nothing, and \code{post_process} can't list
 \code{\link[=pub_pp_docx_lock]{pub_pp_docx_lock()}}.
 \item \code{error_items}: what \code{\link[=pub_render]{pub_render()}} does with error items (failed steps placed by a
-layout step run with \code{on_error = "continue"}, see \code{\link[=pub_doc]{pub_doc()}}):
+layout step run with \code{on_error = "continue"}, see \code{\link[=pub_doc]{pub_doc()}}) and missing parts
+(\code{\link[=pub_missing]{pub_missing()}}):
 \itemize{
 \item \code{"refuse"} (default) signals a \code{pubflow_render_error};
-\item \code{"show"} writes their error boxes and warns (\code{pubflow_render_warning}), naming
-the failed steps.
+\item \code{"show"} writes their error boxes and placeholders and warns
+(\code{pubflow_render_warning}), naming the failed steps and missing parts.
 }
 \item \code{post_process}: a list of functions \verb{function(path, doc, spec)} that change the
 rendered file before it is copied to its destination.

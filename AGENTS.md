@@ -16,7 +16,7 @@ The development documents live in `dev/` (excluded from the build).
   diagrams; start here if the code is new to you. Update it in the PR that changes the
   structure (new file, part or data flow).
 - `dev/DESIGN.md` — the agreed design (source of truth): principles and the decision
-  log (D1-D57) with the reasons. Add a decision there when a change settles a design
+  log (D1-D58) with the reasons. Add a decision there when a change settles a design
   question.
 - `dev/PLAN.md` — the open work of v0.1 with acceptance criteria. Work on one PR per
   session/branch. Its last section lists open problems of building documents in layout

@@ -236,6 +236,7 @@ pub_set_meta <- function(x, ...) {
 #' | `"widget"` | an htmlwidget |
 #' | `"raw"`, `"pagebreak"`, `"toc"` | see [pub_raw()], [pub_pagebreak()], [pub_toc()] |
 #' | `"error"` | a failed step or an error item of [pub_out()] (an error box) |
+#' | `"missing"` | a missing part ([pub_missing()], a placeholder) |
 #' | `"null"` | `NULL`, skipped |
 #'
 #' Objects of any other class are converted with [as_pub_output()] first.
@@ -299,7 +300,8 @@ pub_type <- function(x) {
         recordedplot = "figure",
         htmlwidget = "widget",
         pipeflow_failure = "error",
-        pub_error = "error"
+        pub_error = "error",
+        pub_missing = "missing"
     )
     hit <- cls[vapply(names(cls), \(cl) inherits(x, cl), logical(1))]
     if (length(hit) > 0L) {
@@ -471,6 +473,46 @@ print.pub_toc <- function(x, ...) {
 #' @export
 print.pub_raw <- function(x, ...) {
     cat(sprintf("<pubflow raw content for %s>\n", toString(names(x))))
+    invisible(x)
+}
+
+
+# -------------
+# Missing parts
+# -------------
+#' Placeholder for a missing part
+#'
+#' `pub_missing()` stands in for a part of a document that doesn't exist yet, e.g. the
+#' results of an analysis that has not been run. It is neither content nor an error:
+#' the viewer shows the message as a neutral placeholder, while [pub_render()] refuses
+#' a document with missing parts, like one with error items. [pub_error_items()] finds
+#' both before rendering.
+#'
+#' Place it like any other output (see [pub_doc()]), e.g. in a layout step for a part
+#' whose input is not available. For drafts, `pub_report_spec(error_items = "show")`
+#' renders missing parts as an italic paragraph.
+#'
+#' @param message `character(1)` what is missing and how to get it, as plain text on
+#'   one line (line breaks become spaces in documents).
+#' @return An object of class `pub_missing`.
+#' @seealso [pub_error_items()], [pub_type()]
+#' @examples
+#' x <- pub_missing("Run the analysis first.")
+#' pub_type(x)
+#'
+#' doc <- pub_doc(pub_section("Results", x))
+#' pub_error_items(doc)[[1]]$message
+#' @export
+pub_missing <- function(message) {
+    if (!rlang::is_string(message) || !grepl("[^[:space:]]", message)) {
+        rlang::abort("`message` must be a non-blank string.")
+    }
+    structure(list(message = message), class = "pub_missing")
+}
+
+#' @export
+print.pub_missing <- function(x, ...) {
+    cat(sprintf("<pubflow missing part> %s\n", encodeString(x$message, quote = "\"")))
     invisible(x)
 }
 

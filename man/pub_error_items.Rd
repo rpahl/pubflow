@@ -2,27 +2,34 @@
 % Please edit documentation in R/doc.R
 \name{pub_error_items}
 \alias{pub_error_items}
-\title{Error items of a document or of step outputs}
+\title{Error items and missing parts of a document or of step outputs}
 \usage{
-pub_error_items(x)
+pub_error_items(x, type = c("error", "missing"))
 }
 \arguments{
 \item{x}{A document (\code{\link[=pub_doc]{pub_doc()}}), a section (\code{\link[=pub_section]{pub_section()}}) or step outputs:
 failure objects of failed steps, error items of \code{\link[=pub_out]{pub_out()}}, other outputs and
 lists of them (nested). Objects of other classes are converted with
 \code{\link[=as_pub_output]{as_pub_output()}} first, as in a document.}
+
+\item{type}{The items to find: \code{"error"} (error items), \code{"missing"} (missing parts)
+or both (default).}
 }
 \value{
-A list of error items (class \code{pub_error}, as returned by \code{\link[=pub_out]{pub_out()}}), in
-document order; empty if there are none. An error item is a list with the
-elements \code{step} (the step whose output it replaces), \code{failed_step} (the step that
-failed), \code{message} (its error message) and, for an item of \code{\link[=pub_out]{pub_out()}}, \code{pipeline}
-(the pipeline of the steps).
+A list of the items found, in document order; empty if there are none:
+\itemize{
+\item error items (class \code{pub_error}, as returned by \code{\link[=pub_out]{pub_out()}}): lists with the
+elements \code{step} (the step whose output it replaces), \code{failed_step} (the step
+that failed), \code{message} (its error message) and, for an item of \code{\link[=pub_out]{pub_out()}},
+\code{pipeline} (the pipeline of the steps);
+\item missing parts (class \code{pub_missing}): lists with the element \code{message}.
+}
 }
 \description{
-Finds the failed steps in a document or in the outputs placed into one, e.g. to
-check a report before it is rendered (\code{\link[=pub_render]{pub_render()}} refuses error items) or to list
-its problems in an app.
+Finds the failed steps and the missing parts (\code{\link[=pub_missing]{pub_missing()}}) in a document or in
+the outputs placed into one, e.g. to check a report before it is rendered
+(\code{\link[=pub_render]{pub_render()}} refuses both) or to list its problems in an app. With \code{type}, it
+finds only one of the two kinds.
 }
 \examples{
 p <- pipeflow::pip_new("air") |>
@@ -33,14 +40,17 @@ suppressWarnings(pipeflow::pip_run(p, on_error = "continue"))
 
 parts <- list(
     Data = head(airquality),
-    Fit = pub_out(p, "table", on_error = "item")
+    Fit = pub_out(p, "table", on_error = "item"),
+    Trend = pub_missing("Run the trend analysis first.")
 )
-errors <- pub_error_items(parts)
-length(errors)
-errors[[1]]$message
+# Both kinds, told apart by their class: the report can't be rendered yet
+items <- pub_error_items(parts)
+vapply(items, \(x) class(x)[[1]], character(1))
+vapply(items, \(x) x$message, character(1))
 
-pub_error_items(pub_doc(parts))[[1]]$failed_step
+# Only the failed steps
+pub_error_items(pub_doc(parts), type = "error")[[1]]$failed_step
 }
 \seealso{
-\code{\link[=pub_out]{pub_out()}}
+\code{\link[=pub_out]{pub_out()}}, \code{\link[=pub_missing]{pub_missing()}}
 }

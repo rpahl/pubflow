@@ -1,3 +1,13 @@
+# pubflow 0.0.0.9058
+
+* New `pub_missing()` stands in for a part of a document that doesn't exist yet, e.g.
+  the results of an analysis not run: the viewer shows its message as a neutral
+  placeholder, and `pub_render()` refuses it like an error item (or, with
+  `pub_report_spec(error_items = "show")`, shows it as an italic paragraph).
+  `pub_error_items()` now finds these parts too, so it lists everything
+  `pub_render()` refuses; its new argument `type` picks one kind (`"error"` or
+  `"missing"`) (#17, D58).
+
 # pubflow 0.0.0.9057
 
 * While the document is made again (e.g. while `doc()` runs the pipeline), the viewer

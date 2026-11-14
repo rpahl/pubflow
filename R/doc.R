@@ -36,6 +36,7 @@
 #' | [pub_pagebreak()] | a page break (DOCX, PDF) |
 #' | [pub_toc()] | a table of contents |
 #' | failed step, error item of [pub_out()] | an error box |
+#' | [pub_missing()] | a placeholder for a missing part |
 #' | `NULL`, empty text | nothing |
 #' | pipeline | an error (place the outputs of its steps instead) |
 #'
@@ -611,22 +612,26 @@ pub_section <- function(
 # -----------
 # Error items
 # -----------
-#' Error items of a document or of step outputs
+#' Error items and missing parts of a document or of step outputs
 #'
-#' Finds the failed steps in a document or in the outputs placed into one, e.g. to
-#' check a report before it is rendered ([pub_render()] refuses error items) or to list
-#' its problems in an app.
+#' Finds the failed steps and the missing parts ([pub_missing()]) in a document or in
+#' the outputs placed into one, e.g. to check a report before it is rendered
+#' ([pub_render()] refuses both) or to list its problems in an app. With `type`, it
+#' finds only one of the two kinds.
 #'
 #' @param x A document ([pub_doc()]), a section ([pub_section()]) or step outputs:
 #'   failure objects of failed steps, error items of [pub_out()], other outputs and
 #'   lists of them (nested). Objects of other classes are converted with
 #'   [as_pub_output()] first, as in a document.
-#' @return A list of error items (class `pub_error`, as returned by [pub_out()]), in
-#'   document order; empty if there are none. An error item is a list with the
-#'   elements `step` (the step whose output it replaces), `failed_step` (the step that
-#'   failed), `message` (its error message) and, for an item of [pub_out()], `pipeline`
-#'   (the pipeline of the steps).
-#' @seealso [pub_out()]
+#' @param type The items to find: `"error"` (error items), `"missing"` (missing parts)
+#'   or both (default).
+#' @return A list of the items found, in document order; empty if there are none:
+#'   * error items (class `pub_error`, as returned by [pub_out()]): lists with the
+#'     elements `step` (the step whose output it replaces), `failed_step` (the step
+#'     that failed), `message` (its error message) and, for an item of [pub_out()],
+#'     `pipeline` (the pipeline of the steps);
+#'   * missing parts (class `pub_missing`): lists with the element `message`.
+#' @seealso [pub_out()], [pub_missing()]
 #' @examples
 #' p <- pipeflow::pip_new("air") |>
 #'     pipeflow::pip_add("data", \() airquality) |>
@@ -636,31 +641,51 @@ pub_section <- function(
 #'
 #' parts <- list(
 #'     Data = head(airquality),
-#'     Fit = pub_out(p, "table", on_error = "item")
+#'     Fit = pub_out(p, "table", on_error = "item"),
+#'     Trend = pub_missing("Run the trend analysis first.")
 #' )
-#' errors <- pub_error_items(parts)
-#' length(errors)
-#' errors[[1]]$message
+#' # Both kinds, told apart by their class: the report can't be rendered yet
+#' items <- pub_error_items(parts)
+#' vapply(items, \(x) class(x)[[1]], character(1))
+#' vapply(items, \(x) x$message, character(1))
 #'
-#' pub_error_items(pub_doc(parts))[[1]]$failed_step
+#' # Only the failed steps
+#' pub_error_items(pub_doc(parts), type = "error")[[1]]$failed_step
 #' @export
-pub_error_items <- function(x) {
+pub_error_items <- function(x, type = c("error", "missing")) {
+    if (length(type) == 0L) {
+        rlang::abort("`type` must name at least one item type.")
+    }
+    type <- rlang::arg_match(type, c("error", "missing"), multiple = TRUE)
+    .find_items(x, type, call = environment())
+}
+
+#' The objects of the items of some types, in document order
+#' @param x see `pub_error_items()`.
+#' @param type `character` item types: `"error"`, `"missing"`.
+#' @param call the environment of `pub_error_items()`, for the error message.
+#' @return `list` of `pub_error` and `pub_missing` objects.
+#' @noRd
+.find_items <- function(x, type, call) {
     if (inherits(x, c("pub_doc", "pub_section"))) {
-        return(pub_error_items(c(x$front_matter, x$children)))
+        return(.find_items(c(x$front_matter, x$children), type, call))
     }
     if (inherits(x, "pub_item")) {
-        return(if (x$type == "error") list(x$object) else list())
+        return(if (x$type %in% type) list(x$object) else list())
     }
     if (inherits(x, "pipeflow")) {
-        .signal_pipeline_output(character(), call = environment())
+        .signal_pipeline_output(character(), call = call)
     }
-    out <- .convert_output(x)
+    out <- .convert_output(x, call = call)
     switch(
         out$type,
-        error = list(.as_error(out$x)),
-        list = .flatten_nodes(lapply(out$x, pub_error_items)),
-        section = pub_error_items(out$x),
-        list()
+        list = .flatten_nodes(lapply(out$x, .find_items, type = type, call = call)),
+        section = .find_items(out$x, type, call),
+        if (out$type %in% type) {
+            list(if (out$type == "error") .as_error(out$x) else out$x)
+        } else {
+            list()
+        }
     )
 }
 
@@ -761,7 +786,10 @@ print.pub_item <- function(x, ...) {
         label <- .first_line(x$object, 40L)
     }
     if (x$type == "error") {
-        label <- .first_line(.error_text(x$object), 60L)
+        label <- .first_line(.item_problem(x$object), 60L)
+    }
+    if (x$type == "missing") {
+        label <- .first_line(x$object$message, 60L)
     }
     if (is.null(label)) {
         return(x$type)
@@ -769,11 +797,14 @@ print.pub_item <- function(x, ...) {
     paste(x$type, encodeString(label, quote = "\""))
 }
 
-#' Text of an error item: failed step and message
-#' @param x a `pub_error`.
+#' Text of an error item or a missing part, e.g. for messages
+#' @param x a `pub_error` or a `pub_missing`.
 #' @return `character(1)`.
 #' @noRd
-.error_text <- function(x) {
+.item_problem <- function(x) {
+    if (inherits(x, "pub_missing")) {
+        return(sprintf("missing: %s", x$message))
+    }
     sprintf("step %s failed: %s", .failed_label(x), x$message)
 }
 

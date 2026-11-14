@@ -64,6 +64,7 @@ The children (\code{...}) are interpreted as follows:\tabular{ll}{
    \code{\link[=pub_pagebreak]{pub_pagebreak()}} \tab a page break (DOCX, PDF) \cr
    \code{\link[=pub_toc]{pub_toc()}} \tab a table of contents \cr
    failed step, error item of \code{\link[=pub_out]{pub_out()}} \tab an error box \cr
+   \code{\link[=pub_missing]{pub_missing()}} \tab a placeholder for a missing part \cr
    \code{NULL}, empty text \tab nothing \cr
    pipeline \tab an error (place the outputs of its steps instead) \cr
 }

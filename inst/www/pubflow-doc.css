@@ -182,6 +182,16 @@
   font-size: 0.875em;
 }
 
+/* Missing parts (pub_missing()): a neutral placeholder */
+.pubflow-doc .pubflow-missing {
+  border: 1px dashed #adb5bd;
+  border-radius: 3px;
+  background: #f8f9fa;
+  color: #495057;
+  font-style: italic;
+  padding: 0.5em 0.75em;
+}
+
 /* Standalone HTML files (pub_render()) */
 .pubflow-page {
   max-width: 60rem;
@@ -201,7 +211,8 @@
   }
   .pubflow-doc figure,
   .pubflow-doc .pubflow-table,
-  .pubflow-doc .pubflow-error {
+  .pubflow-doc .pubflow-error,
+  .pubflow-doc .pubflow-missing {
     break-inside: avoid;
     page-break-inside: avoid;
   }

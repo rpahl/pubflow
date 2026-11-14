@@ -107,6 +107,9 @@
 #' `pub_report_spec(error_items = "show")`. The document is then rendered, with the
 #' error items shown as error boxes and a warning.
 #'
+#' Missing parts ([pub_missing()]) are treated the same way: refused by default, shown
+#' as an italic placeholder paragraph with `error_items = "show"`.
+#'
 #' ## Good to know
 #'
 #' * Rendering needs neither the pipeline nor a Shiny session.
@@ -333,38 +336,38 @@ pub_output_filename <- function(meta, ext) {
 # -----------
 # Error items
 # -----------
-#' Refuse or show error items, as the spec says
+#' Refuse or show error items and missing parts, as the spec says
+#'
+#' Looks in the front matter and the body; `"refuse"` signals a render error, `"show"`
+#' warns.
 #' @param nodes list of nodes (front matter and body).
 #' @param error_items `"refuse"` or `"show"` (the spec's `error_items`).
 #' @param format output format, for the error.
 #' @param call the environment of the caller, for the error message.
+#' @return `NULL`, invisibly, if the document may be rendered.
 #' @noRd
 .guard_error_items <- function(nodes, error_items, format, call = rlang::caller_env()) {
-    if (error_items == "refuse") {
-        .check_no_error_items(nodes, format, call = call)
-    } else {
-        .warn_error_items(nodes)
+    items <- pub_error_items(nodes)
+    if (length(items) == 0L) {
+        return(invisible())
     }
-}
-
-#' Refuse error items (in the front matter and the body)
-#' @param nodes list of nodes.
-#' @param format output format, for the error.
-#' @param call the environment of the caller, for the error message.
-#' @return `NULL`, invisibly, if there are none.
-#' @noRd
-.check_no_error_items <- function(nodes, format, call = rlang::caller_env()) {
-    errors <- pub_error_items(nodes)
-    if (length(errors) == 0L) {
+    if (error_items == "show") {
+        rlang::warn(
+            c(
+                "The report shows error items (failed steps) or missing parts:",
+                .error_bullets(items)
+            ),
+            class = "pubflow_render_warning"
+        )
         return(invisible())
     }
     rlang::cnd_signal(.render_error(
         c(
-            "Can't render a document with error items (failed steps):",
-            .error_bullets(errors),
+            "Can't render a document with error items (failed steps) or missing parts:",
+            .error_bullets(items),
             i = paste(
-                "Reports run the pipeline with `on_error = \"stop\"`;",
-                "error items are for the viewer."
+                "Reports run the pipeline with `on_error = \"stop\"` and have all",
+                "their parts; error items and missing parts are for the viewer."
             )
         ),
         format = format,
@@ -372,29 +375,14 @@ pub_output_filename <- function(meta, ext) {
     ))
 }
 
-#' Warn about the error items a report shows
-#' @param nodes list of nodes.
-#' @return `NULL`, invisibly.
-#' @noRd
-.warn_error_items <- function(nodes) {
-    errors <- pub_error_items(nodes)
-    if (length(errors) > 0L) {
-        rlang::warn(
-            c("The report shows error items (failed steps):", .error_bullets(errors)),
-            class = "pubflow_render_warning"
-        )
-    }
-    invisible()
-}
-
-#' Bullets (`x`) with the error texts of error items
-#' @param errors list of error items (`pub_error`).
+#' Bullets (`x`) with the texts of error items and missing parts
+#' @param items list of error items (`pub_error`) and missing parts (`pub_missing`).
 #' @return named character vector.
 #' @noRd
-.error_bullets <- function(errors) {
+.error_bullets <- function(items) {
     rlang::set_names(
-        vapply(errors, .error_text, character(1)),
-        rep("x", length(errors))
+        vapply(items, .item_problem, character(1)),
+        rep("x", length(items))
     )
 }
 

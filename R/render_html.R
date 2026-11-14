@@ -511,6 +511,7 @@ pub_html <- function(
         raw = x$object$html,
         toc = .html_toc_marker(x$object, ctx),
         error = .html_error(x$object),
+        missing = .esc(x$object$message),
         NULL
     )
     if (is.null(content)) {

@@ -126,6 +126,20 @@ describe("pub_html()", {
         expect_match(html, "Step 'table' was not run.", fixed = TRUE)
     })
 
+    it("shows missing parts as neutral placeholders, escaped", {
+        html <- as.character(pub_html(pub_doc(pub_missing("Run <fit> & co."))))
+
+        expect_match(
+            html,
+            paste0(
+                "<div class=\"pubflow-item pubflow-missing\">\n",
+                "Run &lt;fit&gt; &amp; co.\n</div>"
+            ),
+            fixed = TRUE
+        )
+        expect_no_match(html, "pubflow-error", fixed = TRUE)
+    })
+
     it("names the pipeline of an error item of pub_out()", {
         item <- structure(
             list(

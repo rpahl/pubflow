@@ -96,10 +96,11 @@
 #'   lists [pub_pp_docx_lock()]. `FALSE` locks nothing, and `post_process` can't list
 #'   [pub_pp_docx_lock()].
 #' * `error_items`: what [pub_render()] does with error items (failed steps placed by a
-#'   layout step run with `on_error = "continue"`, see [pub_doc()]):
+#'   layout step run with `on_error = "continue"`, see [pub_doc()]) and missing parts
+#'   ([pub_missing()]):
 #'   * `"refuse"` (default) signals a `pubflow_render_error`;
-#'   * `"show"` writes their error boxes and warns (`pubflow_render_warning`), naming
-#'     the failed steps.
+#'   * `"show"` writes their error boxes and placeholders and warns
+#'     (`pubflow_render_warning`), naming the failed steps and missing parts.
 #' * `post_process`: a list of functions `function(path, doc, spec)` that change the
 #'   rendered file before it is copied to its destination.
 #'   * They are called in order. `path` is the file, `doc` the document with the
