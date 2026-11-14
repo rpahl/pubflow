@@ -76,6 +76,7 @@ reference:
     desc: Arrange step outputs into documents in layout steps.
     contents:
       - pub_doc
+      - pub_error_items
       - pub_layout_inputs
       - pub_out
       - pub_pagebreak

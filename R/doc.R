@@ -583,6 +583,63 @@ pub_section <- function(
 }
 
 
+# -----------
+# Error items
+# -----------
+#' Error items of a document or of step outputs
+#'
+#' Finds the failed steps in a document or in the outputs placed into one, e.g. to
+#' check a report before it is rendered ([pub_render()] refuses error items) or to list
+#' its problems in an app.
+#'
+#' @param x A document ([pub_doc()]), a section ([pub_section()]) or step outputs:
+#'   failure objects of failed steps, error items of [pub_out()], other outputs and
+#'   lists of them (nested). Objects of other classes are converted with
+#'   [as_pub_output()] first, as in a document.
+#' @return A list of error items (class `pub_error`, as returned by [pub_out()]), in
+#'   document order; empty if there are none. An error item is a list with the
+#'   elements `step` (the step whose output it replaces), `failed_step` (the step that
+#'   failed), `message` (its error message) and, for an item of [pub_out()], `pipeline`
+#'   (the pipeline of the steps).
+#' @seealso [pub_out()]
+#' @examples
+#' p <- pipeflow::pip_new("air") |>
+#'     pipeflow::pip_add("data", \() airquality) |>
+#'     pipeflow::pip_add("fit", \(data = ~data) stop("too few values")) |>
+#'     pipeflow::pip_add("table", \(fit = ~fit) coef(fit))
+#' suppressWarnings(pipeflow::pip_run(p, on_error = "continue"))
+#'
+#' parts <- list(
+#'     Data = head(airquality),
+#'     Fit = pub_out(p, "table", on_error = "item")
+#' )
+#' errors <- pub_error_items(parts)
+#' length(errors)
+#' errors[[1]]$message
+#'
+#' pub_error_items(pub_doc(parts))[[1]]$failed_step
+#' @export
+pub_error_items <- function(x) {
+    if (inherits(x, c("pub_doc", "pub_section"))) {
+        return(pub_error_items(x$children))
+    }
+    if (inherits(x, "pub_item")) {
+        return(if (x$type == "error") list(x$object) else list())
+    }
+    if (inherits(x, "pipeflow")) {
+        .signal_pipeline_output(character(), call = environment())
+    }
+    out <- .convert_output(x)
+    switch(
+        out$type,
+        error = list(.as_error(out$x)),
+        list = .flatten_nodes(lapply(out$x, pub_error_items)),
+        section = pub_error_items(out$x),
+        list()
+    )
+}
+
+
 # ======================================================================================
 # Printing
 # ======================================================================================

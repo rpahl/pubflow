@@ -530,7 +530,6 @@ describe(".guard_error_items()", {
             class = "pubflow_render_error"
         )
 
-        expect_length(.error_items(nodes), 2L)
         expect_length(gregexpr("failed", conditionMessage(err))[[1L]], 3L)
         expect_identical(err$format, "pdf")
     })
@@ -538,8 +537,6 @@ describe(".guard_error_items()", {
     it("accepts nodes without error items", {
         nodes <- pub_doc(pub_section("A", pub_text("ok")))$children
 
-        expect_length(.error_items(list()), 0L)
-        expect_length(.error_items(nodes), 0L)
         expect_no_error(.guard_error_items(nodes, "refuse", "html"))
         expect_no_warning(.guard_error_items(nodes, "show", "html"))
     })

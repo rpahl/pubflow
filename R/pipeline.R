@@ -344,28 +344,37 @@ pub_get_params <- function(
 # ------------------
 # Up-to-date outputs
 # ------------------
-#' Output of a step that is up to date
+#' Get up-to-date step outputs from outside pipelines
 #'
+#' @description
 #' Returns the output of a step like `x[[step, "out"]]`, but only if the step is
-#' "done". After a failed run, a step keeps its earlier output and a step that never ran
-#' has none, so reading the output directly could put old or missing results into a
-#' document.
+#' "done", i.e. up to date in its own pipeline. Otherwise, it signals an error or
+#' returns an error item (see `on_error`).
 #'
-#' Use `pub_out()` to take parts of a document from other pipelines, e.g. from one
-#' pipeline per test whose layout steps make the parts of one report (see Examples).
+#' In a single pipeline, a *layout step* arranges the outputs of other steps into a
+#' document with [pub_doc()], and pipeflow handles inputs that failed or are outdated.
+#' When a document combines the outputs of several pipelines that are run separately,
+#' nothing does. `pub_out()` closes that gap, so that error objects, old results or
+#' missing outputs never end up in a document.
 #'
 #' @details
-#' ## A step that is not done
+#' ## Steps that are not done
+#'
+#' * A step that **failed** (state `"failed"`): its output is the error condition.
+#' * A step **skipped** because a step it depends on failed (state `"outdated"` or
+#'   `"new"`): it keeps its earlier output or has none.
+#' * A step that **did not run yet** after a change, e.g. of its parameters or of a step
+#'   it depends on (state `"outdated"`), or that was just added (state `"new"`): it
+#'   keeps its earlier output or has none.
+#'
+#' ## What `pub_out()` does then
 #'
 #' * `on_error = "stop"`: an error of class `pubflow_not_done` names the pipeline, the
 #'   step, its state and the failed steps it depends on.
-#' * `on_error = "item"`: an *error item* is returned if the step or a step it depends
-#'   on failed. A document shows it as an error box, like a failed input of a layout
-#'   step (see [pub_doc()]), while [pub_render()] refuses it unless the report spec
-#'   allows error items.
-#'
-#' A step that is not done for another reason (e.g. its pipeline was not run after a
-#' change) is always an error.
+#' * `on_error = "item"`: for the first two cases, an *error item* is returned. A
+#'   document shows it as an error box, like a failed input of a layout step (see
+#'   [pub_doc()]), while [pub_render()] refuses it unless the report spec allows error
+#'   items. The third case is always an error, as no failure is involved.
 #'
 #' The message is the one of the failed step's last attempt. A step that failed itself
 #' is named as the cause, otherwise the first failed step it depends on (failures

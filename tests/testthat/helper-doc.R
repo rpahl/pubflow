@@ -1,3 +1,15 @@
+# Register an as_pub_output() method for the current test only. Registering from a
+# non-namespace environment leaves pubflow's namespace info alone.
+local_as_pub_output_method <- function(cls, fun, frame = parent.frame()) {
+    registerS3method("as_pub_output", cls, fun, envir = environment())
+    table <- asNamespace("pubflow")[[".__S3MethodsTable__."]]
+    withr::defer(
+        rm(list = paste0("as_pub_output.", cls), envir = table),
+        envir = frame
+    )
+}
+
+
 # Checks of documents: no pipeline reachable from them.
 
 # TRUE if serialising `x` (as saveRDS() does) would include a pipeline. serialize()

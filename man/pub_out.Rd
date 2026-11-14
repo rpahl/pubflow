@@ -2,7 +2,7 @@
 % Please edit documentation in R/pipeline.R
 \name{pub_out}
 \alias{pub_out}
-\title{Output of a step that is up to date}
+\title{Get up-to-date step outputs from outside pipelines}
 \usage{
 pub_out(x, step, on_error = c("stop", "item"))
 }
@@ -21,25 +21,36 @@ an error item for each failed key.
 }
 \description{
 Returns the output of a step like \code{x[[step, "out"]]}, but only if the step is
-"done". After a failed run, a step keeps its earlier output and a step that never ran
-has none, so reading the output directly could put old or missing results into a
-document.
+"done", i.e. up to date in its own pipeline. Otherwise, it signals an error or
+returns an error item (see \code{on_error}).
+
+In a single pipeline, a \emph{layout step} arranges the outputs of other steps into a
+document with \code{\link[=pub_doc]{pub_doc()}}, and pipeflow handles inputs that failed or are outdated.
+When a document combines the outputs of several pipelines that are run separately,
+nothing does. \code{pub_out()} closes that gap, so that error objects, old results or
+missing outputs never end up in a document.
 }
 \details{
-Use \code{pub_out()} to take parts of a document from other pipelines, e.g. from one
-pipeline per test whose layout steps make the parts of one report (see Examples).
-\subsection{A step that is not done}{
+\subsection{Steps that are not done}{
+\itemize{
+\item A step that \strong{failed} (state \code{"failed"}): its output is the error condition.
+\item A step \strong{skipped} because a step it depends on failed (state \code{"outdated"} or
+\code{"new"}): it keeps its earlier output or has none.
+\item A step that \strong{did not run yet} after a change, e.g. of its parameters or of a step
+it depends on (state \code{"outdated"}), or that was just added (state \code{"new"}): it
+keeps its earlier output or has none.
+}
+}
+
+\subsection{What \code{pub_out()} does then}{
 \itemize{
 \item \code{on_error = "stop"}: an error of class \code{pubflow_not_done} names the pipeline, the
 step, its state and the failed steps it depends on.
-\item \code{on_error = "item"}: an \emph{error item} is returned if the step or a step it depends
-on failed. A document shows it as an error box, like a failed input of a layout
-step (see \code{\link[=pub_doc]{pub_doc()}}), while \code{\link[=pub_render]{pub_render()}} refuses it unless the report spec
-allows error items.
+\item \code{on_error = "item"}: for the first two cases, an \emph{error item} is returned. A
+document shows it as an error box, like a failed input of a layout step (see
+\code{\link[=pub_doc]{pub_doc()}}), while \code{\link[=pub_render]{pub_render()}} refuses it unless the report spec allows error
+items. The third case is always an error, as no failure is involved.
 }
-
-A step that is not done for another reason (e.g. its pipeline was not run after a
-change) is always an error.
 
 The message is the one of the failed step's last attempt. A step that failed itself
 is named as the cause, otherwise the first failed step it depends on (failures
