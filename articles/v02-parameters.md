@@ -382,7 +382,7 @@ outdated and run again:
 `# 6:                             <huxtable[5x3]>`\
 `# 7:                                <pub_doc[2]>`\
 `# --------------------------`\
-`# <ready> last run: 2026-11-14 11:12:52 (0.068 s)`\
+`# <ready> last run: 2026-11-14 12:03:33 (0.085 s)`\
 `# steps: 1 done, 6 outdated`
 
 ### One value per name
@@ -452,7 +452,7 @@ and descriptions. Other columns are the name or any attribute:
 `# [1,] "Name"   "Value"             "Area"`\
 `# [2,] "level"  "0.99"              ""    `\
 `# [3,] "xVar"   "Temp.Celsius"      ""    `\
-`# [4,] "window" "0, 30"             "data"`\
+`# [4,] "window" "From: 0, To: 30"   "data"`\
 `# [5,] "title"  "Ozone in New York" ""`
 
 The step `params_table` above puts the table into the document. It reads
@@ -495,7 +495,7 @@ style="margin-left: auto; margin-right: auto;   break-inside: avoid; page-break-
 |----|----|----|
 | Confidence level | 0.99 | Confidence level |
 | Predictor | Temp.Celsius | Variable that explains the ozone concentration |
-| Temperature range (°C) | 0, 30 | Temperature range (°C) |
+| Temperature range (°C) | From: 0, To: 30 | Temperature range (°C) |
 | Report title | Ozone in New York | Report title |
 
 Table 2: Parameters of the analysis {#tab:html-framed-2 .table .huxtable
