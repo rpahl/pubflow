@@ -20,7 +20,8 @@
 #'
 #' The result has:
 #'
-#' * a header with the title, subtitle and metadata;
+#' * a header with the title, subtitle and metadata, or the front matter of the
+#'   document instead (see [pub_doc()]);
 #' * an optional table of contents;
 #' * one `<section>` per section, with numbered headings.
 #'
@@ -101,7 +102,8 @@ pub_html <- function(
         cache,
         toc = toc,
         math = math,
-        figure = .check_figure_settings(figure)
+        figure = .check_figure_settings(figure),
+        front = doc$front_matter
     )
 }
 

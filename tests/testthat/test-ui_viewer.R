@@ -61,6 +61,21 @@ describe("pub_viewer_server()", {
         expect_match(res$toc, "<nav class=\"pubflow-toc\">", fixed = TRUE)
     })
 
+    it("shows the document's front matter instead of the header", {
+        doc <- pub_doc(
+            pub_section("Results", "x"),
+            title = "Report",
+            front_matter = list(pub_section("Cover", "Signed."), pub_toc())
+        )
+
+        res <- render_viewer(doc)
+
+        expect_false(grepl("pubflow-title", res$doc, fixed = TRUE))
+        expect_match(res$doc, sprintf("id=\"%s-sec-0-1\"", res$ns), fixed = TRUE)
+        expect_match(res$doc, "Signed.", fixed = TRUE)
+        expect_match(res$toc, "Cover</a>", fixed = TRUE)
+    })
+
     it("warns about unresolved cross-references and still shows the document", {
         expect_warning(
             res <- render_viewer(pub_doc("See @fig:nope.")),

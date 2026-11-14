@@ -290,6 +290,36 @@ describe("pub_render()", {
         expect_match(read_text(file), "^> \\*\\*Step 'fit' failed")
     })
 
+    it("renders the document's front matter and guards its error items", {
+        doc <- pub_doc(
+            pub_section("Results", "All sites meet the limits."),
+            title = "Demo report",
+            meta = list(time = noon),
+            front_matter = list(pub_section("Signatures", "Signed."), pub_pagebreak())
+        )
+        md <- withr::local_tempfile(fileext = ".md")
+        html <- withr::local_tempfile(fileext = ".html")
+
+        pub_render(doc, "md", file = md)
+        pub_render(doc, file = html)
+
+        text <- read_text(md)
+        expect_false(grepl("title: Demo report", text, fixed = TRUE))
+        expect_match(text, "^# Signatures\n\nSigned.\n\n# 1 Results")
+        main <- sub("(?s).*<main", "", read_text(html), perl = TRUE)
+        expect_false(grepl("pubflow-doc-header", main, fixed = TRUE))
+        expect_lt(
+            regexpr("Signed.", main, fixed = TRUE),
+            regexpr("<nav", main, fixed = TRUE)
+        )
+        failed <- pub_doc("x", front_matter = demo_failures()$table)
+        expect_error(
+            pub_render(failed, "md", file = md),
+            "step 'fit' failed",
+            class = "pubflow_render_error"
+        )
+    })
+
     it("runs the post-processors in order before writing the file", {
         calls <- character()
         log <- function(name) {

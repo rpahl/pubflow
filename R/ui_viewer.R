@@ -156,7 +156,8 @@ pub_viewer_server <- function(id, doc, cache = pub_cache()) {
         cache,
         math = "mathjax",
         figure = .figure_default,
-        prefix = prefix
+        prefix = prefix,
+        front = x$front_matter
     )
     toc <- .html_toc(parts$outline, depth = 3L)
     list(

@@ -60,6 +60,21 @@
 #' counts as not given. You can add keys of your own: pubflow keeps them but doesn't
 #' check or use them.
 #'
+#' ## Front matter
+#'
+#' `front_matter` holds what comes before the body, e.g. a title page, a signature
+#' table and a table of contents ([pub_toc()]). It takes the same outputs as the
+#' children (also lists of them) and replaces the title block (in HTML the header), in
+#' the viewer, in [pub_html()] and in every format of [pub_render()]:
+#'
+#' * Its sections are unnumbered (the numbers of the body start at 1), while its tables
+#'   and figures count in the caption numbers.
+#' * The table of contents of a report spec comes after it; end it with
+#'   [pub_pagebreak()] to start the contents on a new page.
+#' * `list()` drops the title block without putting anything in its place.
+#' * The `front_matter` function of a [pub_report_spec()] replaces it (and can build
+#'   on it: `doc$front_matter`), e.g. for a title block of one format only.
+#'
 #' ## Failed steps
 #'
 #' A failed step does not have to stop the document: write the inputs of a layout step
@@ -85,6 +100,8 @@
 #' @param title `character(1)` title of the document or section.
 #' @param subtitle `character(1)` subtitle of the document or `NULL`.
 #' @param meta Named list of document metadata (see "Metadata" in Details).
+#' @param front_matter Outputs placed before the body instead of the title block (see
+#'   "Front matter" in Details), or `NULL` (default): the title block.
 #' @param numbered `TRUE`: the section is numbered (children of unnumbered sections are
 #'   unnumbered).
 #' @param landscape `TRUE`: the section is placed on landscape pages (DOCX, PDF).
@@ -132,14 +149,21 @@
 #'     meta = list(author = "Jane Doe", app = "demo", version = "1.0")
 #' )
 #' @export
-pub_doc <- function(..., title = NULL, subtitle = NULL, meta = list()) {
+pub_doc <- function(
+    ...,
+    title = NULL,
+    subtitle = NULL,
+    meta = list(),
+    front_matter = NULL
+) {
     if (!is.list(meta) || !rlang::is_named2(meta)) {
         rlang::abort("`meta` must be a named list.")
     }
     meta[["title"]] <- title %||% meta[["title"]]
     meta[["subtitle"]] <- subtitle %||% meta[["subtitle"]]
     meta <- .check_doc_meta(meta)
-    .new_doc(.as_children(list(...)), meta)
+    front <- if (!is.null(front_matter)) .as_children(list(front_matter))
+    .new_doc(.as_children(list(...)), meta, front)
 }
 
 #' @rdname pub_doc
@@ -175,11 +199,12 @@ pub_section <- function(
 #' Document node
 #' @param children unnamed `list` of sections and items (see `.as_children()`).
 #' @param meta named `list` of checked document metadata.
+#' @param front_matter unnamed `list` of sections and items before the body, or `NULL`.
 #' @return a `pub_doc`.
 #' @noRd
-.new_doc <- function(children, meta) {
+.new_doc <- function(children, meta, front_matter = NULL) {
     structure(
-        list(meta = meta, children = children),
+        list(meta = meta, children = children, front_matter = front_matter),
         class = c("pub_doc", "pub_node")
     )
 }
@@ -621,7 +646,7 @@ pub_section <- function(
 #' @export
 pub_error_items <- function(x) {
     if (inherits(x, c("pub_doc", "pub_section"))) {
-        return(pub_error_items(x$children))
+        return(pub_error_items(c(x$front_matter, x$children)))
     }
     if (inherits(x, "pub_item")) {
         return(if (x$type == "error") list(x$object) else list())
@@ -654,7 +679,16 @@ print.pub_doc <- function(x, ...) {
     if (!is.null(title)) {
         header <- paste(header, encodeString(title, quote = "\""))
     }
-    cat(c(header, .format_nodes(x$children, level = 1L)), sep = "\n")
+    body <- .format_nodes(x$children, level = 1L)
+    if (!is.null(x$front_matter)) {
+        body <- c(
+            "Front matter:",
+            .format_nodes(x$front_matter, level = 1L),
+            "Body:",
+            body
+        )
+    }
+    cat(c(header, body), sep = "\n")
     invisible(x)
 }
 

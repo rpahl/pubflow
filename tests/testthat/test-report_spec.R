@@ -581,6 +581,27 @@ describe(".front_nodes()", {
         expect_identical(.front_nodes(.render_settings(empty, "md"), doc), list())
     })
 
+    it("takes the document's front matter unless the spec has a function", {
+        fronted <- pub_doc(front_matter = list("Cover", pub_pagebreak()))
+        combine <- pub_report_spec("md", front_matter = function(doc, format) {
+            list(doc$front_matter, pub_text(format))
+        })
+        replace <- pub_report_spec("md", front_matter = \(doc, format) "Own")
+
+        expect_identical(
+            .front_nodes(default_settings("md"), fronted),
+            fronted$front_matter
+        )
+        nodes <- .front_nodes(.render_settings(combine, "md"), fronted)
+        expect_identical(
+            vapply(nodes, \(x) x$type, ""),
+            c("text", "pagebreak", "text")
+        )
+        nodes <- .front_nodes(.render_settings(replace, "md"), fronted)
+        expect_identical(nodes[[1L]]$object, pub_text("Own"))
+        expect_length(nodes, 1L)
+    })
+
     it("wraps errors of the front matter in a render error", {
         spec <- pub_report_spec("md", front_matter = function(doc, format) {
             stop("no signature table")

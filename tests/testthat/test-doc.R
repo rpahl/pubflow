@@ -22,7 +22,8 @@ describe("pub_doc()", {
         )
 
         expect_s3_class(doc, c("pub_doc", "pub_node"), exact = TRUE)
-        expect_identical(names(doc), c("meta", "children"))
+        expect_identical(names(doc), c("meta", "children", "front_matter"))
+        expect_null(doc$front_matter)
         expect_identical(
             doc$meta,
             list(
@@ -63,6 +64,26 @@ describe("pub_doc()", {
             pub_doc(meta = list(a = 1, 2)),
             "`meta` must be a named list"
         )
+    })
+
+    it("holds a front matter placed like the children", {
+        failures <- demo_failures()
+        doc <- pub_doc(
+            pub_section("A", "text"),
+            front_matter = list(
+                "Cover",
+                list(Signatures = data.frame(x = 1)),
+                failures$fit,
+                pub_toc()
+            )
+        )
+
+        types <- vapply(doc$front_matter, \(x) x$type %||% "section", "")
+        expect_identical(types, c("text", "section", "error", "toc"))
+        expect_identical(doc$front_matter[[2L]]$title, "Signatures")
+        expect_identical(pub_doc(front_matter = list())$front_matter, list())
+        expect_identical(pub_doc(front_matter = "x")$front_matter[[1L]]$type, "text")
+        expect_error(pub_doc(front_matter = pub_doc()), "A document can't be part")
     })
 
     it("rejects named children and documents as children", {
@@ -531,6 +552,8 @@ describe("pub_error_items()", {
         )
 
         expect_identical(steps(pub_error_items(doc)), c("fit", "content"))
+        fronted <- pub_doc(failures$table, front_matter = list(item))
+        expect_identical(steps(pub_error_items(fronted)), c("content", "table"))
         expect_identical(steps(pub_error_items(doc$children[[2L]])), "fit")
         expect_identical(pub_error_items(doc$children[[3L]]$children[[1L]]), list(item))
     })
@@ -609,6 +632,11 @@ describe("print()", {
         expect_snapshot(print(doc$children[[2L]]))
         expect_snapshot(print(doc$children[[2L]]$children[[1L]]))
         expect_snapshot(print(pub_doc()))
+        expect_snapshot(print(pub_doc(
+            pub_section("Results", "text"),
+            title = "Report",
+            front_matter = list("Cover", pub_pagebreak())
+        )))
     })
 
     it("returns its argument invisibly", {

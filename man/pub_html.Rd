@@ -38,7 +38,8 @@ UIs directly. \code{\link[=pub_render]{pub_render()}} writes a standalone HTML f
 
 The result has:
 \itemize{
-\item a header with the title, subtitle and metadata;
+\item a header with the title, subtitle and metadata, or the front matter of the
+document instead (see \code{\link[=pub_doc]{pub_doc()}});
 \item an optional table of contents;
 \item one \verb{<section>} per section, with numbered headings.
 }
