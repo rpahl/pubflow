@@ -7,7 +7,7 @@
 \usage{
 pub_viewer_ui(id, toc = TRUE, height = NULL)
 
-pub_viewer_server(id, doc, cache = pub_cache())
+pub_viewer_server(id, doc, cache = pub_cache(), pending = NULL)
 }
 \arguments{
 \item{id}{Module id.}
@@ -22,6 +22,9 @@ height (e.g. \code{"600px"} or \code{"80vh"}): the viewer has that height and sc
 condition (shows an error box).}
 
 \item{cache}{A \code{\link[=pub_cache]{pub_cache()}}.}
+
+\item{pending}{\code{NULL} or a reactive returning the label of a pending document, or
+\code{NULL} (see "Pending results").}
 }
 \value{
 \code{pub_viewer_ui()}: a tag list. \code{pub_viewer_server()}: \code{NULL}, invisibly.
@@ -47,6 +50,20 @@ viewer shows it as one error box.
 
 The document is rendered again as a whole when \code{doc} changes. Figures and tables come
 from the render \code{cache} (\code{\link[=pub_cache]{pub_cache()}}), which can be shared with report rendering.
+}
+
+\subsection{Pending results}{
+
+While the document is being made again (\code{doc} or the viewer's outputs recalculate,
+e.g. while \code{doc} runs the pipeline), the viewer dims the previous document and shows
+"Updating ..." in a bar at its top (after half a second, so fast updates don't flash
+it). The bar is a live region, so screen readers
+announce it. While the marker is shown, the viewer has the class \code{pubflow-pending}
+(e.g. for end-to-end tests to wait on).
+
+Shiny can't see runs outside of \code{doc}, e.g. in a \link[shiny:ExtendedTask]{shiny::ExtendedTask}, or params
+that changed but are applied only by a button. For these, pass a \code{pending} reactive
+returning the label to show (e.g. \code{"Parameters changed: click 'Update' to update the results."}), or \code{NULL} for no marker.
 }
 }
 \examples{

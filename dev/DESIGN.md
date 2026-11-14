@@ -3,7 +3,7 @@
 The agreed design of pubflow and the reasons behind it. `ARCHITECTURE.md` maps the
 code; `PLAN.md` lists the open work; the help pages and vignettes document the API.
 This file keeps what none of them show: **why** things are the way they are. Cite a
-decision by its number (D1-D56) in code comments, commits and PRs, and add a new one
+decision by its number (D1-D57) in code comments, commits and PRs, and add a new one
 here (not a renumbering) when a change settles a design question.
 
 ## 1. Purpose and scope
@@ -111,6 +111,7 @@ results in the PR (`reference/benchmarks.md` has the measurements behind the dec
 | D41 | Items carry **no provenance** besides the figure stamp: traceability is per document (trace stamp, file names, `pub_session_info()`), and a stamp on texts and tables would change cache keys on every re-run. |
 | D42 | **Steps are not added during a run**: such a step can't be named as `~step`, and reading its output through `.self` bypasses dependency tracking. Variable numbers of outputs are covered by named lists, split steps and pipeline functions. |
 | D55 | **One section per view is a ready-made layout**: `pub_layout_sections(sections)` takes a named list of views (one per section, titled by its name) and returns the function of a layout step for `pip_add()`, so `exec` and `after` stay available. Views, not tags: selection stays in `pip_view()` (D39), tags keep one meaning, and the structure stays explicit (D5). One layout step, not one step per section: a failed input is still an error box in its section. No switch params: a section is left out if all its outputs are `NULL`, so a step switched off by a param returns `NULL` (an upstream failure still shows in it; an app that must hide it writes its own layout on `pub_layout_inputs()`). Other layouts keep using `pub_layout_inputs()`. |
+| D57 | **The viewer marks a pending document**: while Shiny marks the document output `recalculating` (also during a run that blocks the session, as Shiny sends that state first) for more than 0.5 s, the viewer shows "Updating ..."; for states Shiny can't see (async runs, params not applied yet) `pub_viewer_server(pending =)` takes a reactive returning a label or `NULL` (no `TRUE`/`FALSE`: one type, the app names the state). The document is dimmed to opacity 0.65 (body text keeps the AA contrast of 4.5:1; lighter text does not), the table of contents is not, and the label shows in a bar sticky at the top of the document; the viewer gets the class `pubflow-pending` for end-to-end tests. A custom message sets the label, so the document is not rendered again; the browser keeps it per viewer id. The bar is an always-present `role="status"` live region; no `aria-busy`, which would hide the still readable old document from screen readers. |
 
 ### Tables and numbers
 

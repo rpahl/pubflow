@@ -237,14 +237,65 @@ describe("pub_viewer_server()", {
         expect_identical(second$doc, first$doc)
     })
 
+    it("marks a pending document with a label", {
+        pending <- shiny::reactiveVal(NULL)
+        shiny::testServer(
+            pub_viewer_server,
+            args = list(doc = shiny::reactive(NULL), pending = pending),
+            {
+                log <- capture_messages(session)
+                for (value in list("Running", "Parameters changed", NULL)) {
+                    pending(value)
+                    session$flushReact()
+                }
+                sent <- log$of_type("pubflow:viewerPending")
+                expect_identical(
+                    lapply(sent, \(m) m$message$label),
+                    list("Running", "Parameters changed", NULL)
+                )
+                expect_identical(sent[[1L]]$message$id, session$ns("viewer"))
+            }
+        )
+    })
+
+    it("sends no pending marker without `pending`", {
+        shiny::testServer(
+            pub_viewer_server,
+            args = list(doc = shiny::reactive(NULL)),
+            {
+                log <- capture_messages(session)
+                session$flushReact()
+                expect_length(log$of_type("pubflow:viewerPending"), 0L)
+            }
+        )
+    })
+
     it("validates its arguments", {
         expect_error(
             pub_viewer_server("v", doc = pub_doc()),
             "`doc` must be a reactive"
         )
         expect_error(
+            pub_viewer_server("v", shiny::reactive(NULL), pending = "Updating"),
+            "`pending` must be `NULL` or a reactive"
+        )
+        expect_error(
             pub_viewer_server("v", shiny::reactive(NULL), cache = 1),
             "pub_cache"
         )
+    })
+})
+
+describe(".viewer_pending_label()", {
+    it("gives the label, or NULL for no marker", {
+        expect_null(.viewer_pending_label(NULL))
+        expect_null(.viewer_pending_label(""))
+        expect_identical(.viewer_pending_label("Changed"), "Changed")
+    })
+
+    it("rejects other values", {
+        for (x in list(TRUE, NA, 1, c("a", "b"), NA_character_)) {
+            expect_error(.viewer_pending_label(x), "`pending` must return")
+        }
     })
 })

@@ -5,7 +5,9 @@
  * - highlights the table of contents entry of the section being read
  *   (scrollspy), whether the page or the viewer scrolls;
  * - typesets math with MathJax after each update of the document (MathJax
- *   typesets the page itself when it is loaded for the first time).
+ *   typesets the page itself when it is loaded for the first time);
+ * - marks a pending document: "Updating ..." while the document output
+ *   recalculates, else the label of message pubflow:viewerPending.
  * A MutationObserver per viewer notices the updates.
  * Independent of Bootstrap.
  */
@@ -16,6 +18,15 @@
     // Offset from the top of the scrolling area at which a section counts
     // as being read (px)
     var READ_OFFSET = 80;
+
+    // Label while the document output recalculates, shown after a delay
+    // (ms), so that fast updates don't flash it
+    var UPDATING_LABEL = 'Updating ...';
+    var UPDATING_DELAY = 500;
+
+    // Pending labels by viewer id (message pubflow:viewerPending), kept so
+    // that a viewer inserted after the message still gets its marker
+    var pendingLabels = {};
 
     function viewerOf(el)
     {
@@ -143,11 +154,50 @@
 
     function refresh(viewer)
     {
+        applyPending(viewer);
         typesetMath(
             viewer,
             viewer.querySelector('.pubflow-viewer-content .pubflow-doc')
         );
         updateToc(viewer);
+    }
+
+    /**
+     * Show "Updating ..." while the viewer's document output recalculates
+     * (Shiny gives it the class "recalculating" as soon as it is
+     * invalidated, also when the run then blocks the session), after
+     * UPDATING_DELAY ms.
+     */
+    function setUpdating(viewer, updating)
+    {
+        window.clearTimeout(viewer.pubflowUpdatingTimer);
+        if (!updating) {
+            if (viewer.pubflowUpdating) {
+                viewer.pubflowUpdating = false;
+                applyPending(viewer);
+            }
+            return;
+        }
+        viewer.pubflowUpdatingTimer = window.setTimeout(function() {
+            viewer.pubflowUpdating = true;
+            applyPending(viewer);
+        }, UPDATING_DELAY);
+    }
+
+    function watchRecalculating(viewer)
+    {
+        var output = viewer.querySelector('.pubflow-viewer-doc');
+        if (!output) {
+            return;
+        }
+        var recalculating = false;
+        new MutationObserver(function() {
+            var now = output.classList.contains('recalculating');
+            if (now !== recalculating) {
+                recalculating = now;
+                setUpdating(viewer, now);
+            }
+        }).observe(output, { attributes: true, attributeFilter: ['class'] });
     }
 
     /**
@@ -167,6 +217,7 @@
             window.clearTimeout(timer);
             timer = window.setTimeout(function() { refresh(viewer); }, 50);
         }).observe(viewer, { childList: true, subtree: true });
+        watchRecalculating(viewer);
         refresh(viewer);
     }
 
@@ -199,6 +250,35 @@
     document.addEventListener('scroll', onScroll,
                               { capture: true, passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
+
+    /**
+     * Mark a viewer's document as pending (class pubflow-pending, which
+     * dims it; pubflow-viewer.css) with its label in the status bar, or
+     * remove the marker (no label).
+     */
+    function applyPending(viewer)
+    {
+        var label = viewer.pubflowUpdating ? UPDATING_LABEL :
+            pendingLabels[viewer.id] || '';
+        viewer.classList.toggle('pubflow-pending', label !== '');
+        var status = viewer.querySelector('.pubflow-viewer-status');
+        if (status && status.textContent !== label) {
+            status.textContent = label;
+        }
+    }
+
+    function setPending(msg)
+    {
+        pendingLabels[msg.id] = msg.label || '';
+        var viewer = document.getElementById(msg.id);
+        if (viewer) {
+            applyPending(viewer);
+        }
+    }
+
+    if (window.Shiny && typeof Shiny.addCustomMessageHandler === 'function') {
+        Shiny.addCustomMessageHandler('pubflow:viewerPending', setPending);
+    }
 
     // Viewers of the page, and viewers inserted later (e.g. by renderUI())
     // when their outputs get values
