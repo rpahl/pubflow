@@ -48,13 +48,13 @@ p <- pipeflow::pip_new("air") |>
     pipeflow::pip_add("fit", \(data = ~data) stop("too few values")) |>
     pipeflow::pip_add("table", \(fit = ~fit) coef(fit))
 suppressWarnings(pipeflow::pip_run(p, on_error = "continue"))
-#> info [2026-11-14 15:22:35.555 UTC]: Starting run of pipeflow 'air'
-#> info [2026-11-14 15:22:35.555 UTC]: Step 1/3 data
-#> info [2026-11-14 15:22:35.556 UTC]: Step 2/3 fit
-#> error [2026-11-14 15:22:35.557 UTC]: too few values
-#> info [2026-11-14 15:22:35.558 UTC]: Step 3/3 table - skipping step, input 'fit' failed
-#> info [2026-11-14 15:22:35.558 UTC]: Finished in 0.003 s (1 done, 1 skipped, 1 failed)
-#> warn [2026-11-14 15:22:35.559 UTC]: Run of pipeline 'air' continued after 1 failed step:
+#> info [2026-11-14 15:52:38.492 UTC]: Starting run of pipeflow 'air'
+#> info [2026-11-14 15:52:38.492 UTC]: Step 1/3 data
+#> info [2026-11-14 15:52:38.493 UTC]: Step 2/3 fit
+#> error [2026-11-14 15:52:38.493 UTC]: too few values
+#> info [2026-11-14 15:52:38.494 UTC]: Step 3/3 table - skipping step, input 'fit' failed
+#> info [2026-11-14 15:52:38.494 UTC]: Finished in 0.002 s (1 done, 1 skipped, 1 failed)
+#> warn [2026-11-14 15:52:38.495 UTC]: Run of pipeline 'air' continued after 1 failed step:
 #>   'fit': too few values
 #> Steps not run because an input failed: 'table'
 
