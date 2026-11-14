@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9051</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9052</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,13 @@
       <small>Source: <a href="https://github.com/rpahl/pubflow/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.0.9052" id="pubflow-0009052">pubflow 0.0.0.9052<a class="anchor" aria-label="anchor" href="#pubflow-0009052"></a></h2>
+<ul><li>New <code><a href="../reference/pub_md_escape.html">pub_md_escape()</a></code> escapes data (e.g. names from a data set) for <code><a href="../reference/pub_text.html">pub_text()</a></code> and Markdown table cells, so it shows as it is (D54).</li>
+<li>
+<code><a href="../reference/pub_strikeout.html">pub_strikeout()</a></code> escapes the cell text for all of pubflow’s Markdown (<code>$...$</code> in a struck-out cell no longer becomes math in <code><a href="../reference/pub_markdown.html">pub_markdown()</a></code>) and strikes each line of a cell through (a blank line in a cell no longer breaks the strikeout).</li>
+<li>A backslash-escaped backtick in a text no longer starts code: math and cross-references after it are shown.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9051" id="pubflow-0009051">pubflow 0.0.0.9051<a class="anchor" aria-label="anchor" href="#pubflow-0009051"></a></h2>
 <ul><li>New <code><a href="../reference/pub_error_items.html">pub_error_items()</a></code> finds the error items (failed steps) in a document or in step outputs, e.g. to list the problems of a report before rendering it (D53).</li>

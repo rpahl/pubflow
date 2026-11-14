@@ -48,7 +48,8 @@ between `~~`. Therefore:
 
 - Empty cells stay unchanged.
 
-- Markdown characters in the text are escaped.
+- Markdown characters in the text are escaped, and each line is struck
+  through.
 
 - In cells that are Markdown already, each line is struck through as a
   whole after its block markers: `~~A~~ and B` becomes `~~A and B~~` and

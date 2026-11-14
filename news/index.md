@@ -1,5 +1,21 @@
 # Changelog
 
+## pubflow 0.0.0.9052
+
+- New
+  [`pub_md_escape()`](https://rpahl.github.io/pubflow/reference/pub_md_escape.md)
+  escapes data (e.g. names from a data set) for
+  [`pub_text()`](https://rpahl.github.io/pubflow/reference/pub_text.md)
+  and Markdown table cells, so it shows as it is (D54).
+- [`pub_strikeout()`](https://rpahl.github.io/pubflow/reference/pub_strikeout.md)
+  escapes the cell text for all of pubflow’s Markdown (`$...$` in a
+  struck-out cell no longer becomes math in
+  [`pub_markdown()`](https://rpahl.github.io/pubflow/reference/pub_markdown.md))
+  and strikes each line of a cell through (a blank line in a cell no
+  longer breaks the strikeout).
+- A backslash-escaped backtick in a text no longer starts code: math and
+  cross-references after it are shown.
+
 ## pubflow 0.0.0.9051
 
 - New

@@ -73,6 +73,8 @@ in the report spec. In Word they are cross-reference fields.
 
 ## See also
 
+[`pub_md_escape()`](https://rpahl.github.io/pubflow/reference/pub_md_escape.md)
+for data in the text,
 [`pub_meta()`](https://rpahl.github.io/pubflow/reference/pub_meta.md),
 [`pub_type()`](https://rpahl.github.io/pubflow/reference/pub_type.md)
 

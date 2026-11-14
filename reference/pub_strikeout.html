@@ -11,7 +11,7 @@ huxtable's rbind(), cbind() and [."><meta property="og:image" content="https://r
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9051</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9052</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,7 +89,7 @@ all.</p></dd>
 <code>~~</code>. Therefore:</p><ul><li><p>The text is fixed when the cells are struck through (a later change of their
 number format does not apply), so strike through last.</p></li>
 <li><p>Empty cells stay unchanged.</p></li>
-<li><p>Markdown characters in the text are escaped.</p></li>
+<li><p>Markdown characters in the text are escaped, and each line is struck through.</p></li>
 <li><p>In cells that are Markdown already, each line is struck through as a whole after
 its block markers: <code>~~A~~ and B</code> becomes <code>~~A and B~~</code> and <code>"# A\n\n- b"</code> becomes
 <code>"# ~~A~~\n\n- ~~b~~"</code>.</p></li>
