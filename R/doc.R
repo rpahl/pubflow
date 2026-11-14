@@ -634,6 +634,7 @@ pub_error_items <- function(x) {
         out$type,
         error = list(.as_error(out$x)),
         list = .flatten_nodes(lapply(out$x, pub_error_items)),
+        section = pub_error_items(out$x),
         list()
     )
 }

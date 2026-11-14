@@ -543,6 +543,13 @@ describe("pub_error_items()", {
         )
 
         expect_identical(pub_error_items(out), list(item))
+        local_as_pub_output_method("fit_section", \(x, ...) {
+            pub_section("Fit", unclass(x))
+        })
+        expect_identical(
+            pub_error_items(structure(list(item), class = "fit_section")),
+            list(item)
+        )
         expect_error(pub_error_items(structure(1, class = "unknown")), "as_pub_output")
     })
 
