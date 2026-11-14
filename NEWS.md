@@ -1,3 +1,12 @@
+# pubflow 0.0.0.9057
+
+* While the document is made again (e.g. while `doc()` runs the pipeline), the viewer
+  dims the shown document and puts "Updating ..." in a bar at its top, so users don't
+  mistake the results of the previous run for the new ones. For runs outside of
+  `doc()` (e.g. in an `ExtendedTask`) or params not applied yet, the new argument
+  `pending` of `pub_viewer_server()` takes a reactive returning the label to show
+  (e.g. `"Parameters changed"`) or `NULL` (#19, D57).
+
 # pubflow 0.0.0.9056
 
 * `pub_doc()` has a new argument `front_matter` (e.g. a title page, a signature table

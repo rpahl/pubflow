@@ -3,7 +3,7 @@
 Audience: developers (human or agent) who want to understand how pubflow's
 parts fit together before working on it.
 Companion documents: `DESIGN.md` is the agreed design with the reasons
-(decision log D1-D56); `PLAN.md` the open work; `reference/` the research
+(decision log D1-D57); `PLAN.md` the open work; `reference/` the research
 behind both. This document is the map: what the parts are, how data flows
 between them and where to look in the code. It cites decisions (D) instead
 of repeating them; "§n below" refers to this document.
@@ -160,7 +160,7 @@ Other parts of the repository:
 
 | Path | Content |
 |---|---|
-| `inst/www/` | `pubflow.js`/`.css` (param UI: inline messages, warn glow, tooltips), `pubflow-viewer.js`/`.css` (TOC sidebar, scrollspy, MathJax after updates), `pubflow-doc.css` (document typography, used by viewer and HTML files) |
+| `inst/www/` | `pubflow.js`/`.css` (param UI: inline messages, warn glow, tooltips), `pubflow-viewer.js`/`.css` (TOC sidebar, scrollspy, MathJax after updates, pending marker), `pubflow-doc.css` (document typography, used by viewer and HTML files) |
 | `inst/templates/` | `reference.docx` (styles and header/footer bookmarks; built by `data-raw/reference_docx.R`), `pubflow-header.tex` (LaTeX packages, error frame, footer), `pubflow.typ` (Typst template) |
 | `inst/examples/report-app/` | report app: param UI in the sidebar, viewer with a short and a long report of one pipeline selected by tags (`pub_layout_inputs()`), download as DOCX/PDF/HTML with `pub_render()` (Bootstrap 3, `?bs=5` for Bootstrap 5) |
 | `inst/examples/modules-app/` | modules app: the param modules' return values as raw R output, refresh, locked steps, a standalone module (Bootstrap 3, `?bs=5` for Bootstrap 5) |
@@ -571,7 +571,12 @@ into `output$doc` and the outline into `output$toc` (one reactive, ids
 prefixed with the module namespace). `NULL` shows "No results", a
 condition (the layout step failed) one error box. The client side
 (`pubflow-viewer.js`) only does scrollspy and MathJax typesetting after
-updates. There are no per-item modules or observers: a changed document is
+updates, and sets the marker of a pending document (class `pubflow-pending`
+and a label in a `role="status"` bar): "Updating ..." while Shiny marks the
+document output `recalculating`, else the label of message
+`pubflow:viewerPending`, sent by an observer on the optional `pending`
+reactive. There are no
+per-item modules or observers: a changed document is
 rendered again as a whole, with figures and tables from the cache.
 
 ### 6.7 The Markdown dialect and the formats (`render_markdown.R`, `render.R`)

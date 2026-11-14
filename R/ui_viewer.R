@@ -30,6 +30,20 @@
 #' The document is rendered again as a whole when `doc` changes. Figures and tables come
 #' from the render `cache` ([pub_cache()]), which can be shared with report rendering.
 #'
+#' ## Pending results
+#'
+#' While the document is being made again (`doc` or the viewer's outputs recalculate,
+#' e.g. while `doc` runs the pipeline), the viewer dims the previous document and shows
+#' "Updating ..." in a bar at its top (after half a second, so fast updates don't flash
+#' it). The bar is a live region, so screen readers
+#' announce it. While the marker is shown, the viewer has the class `pubflow-pending`
+#' (e.g. for end-to-end tests to wait on).
+#'
+#' Shiny can't see runs outside of `doc`, e.g. in a [shiny::ExtendedTask], or params
+#' that changed but are applied only by a button. For these, pass a `pending` reactive
+#' returning the label to show (e.g. `"Parameters changed: click 'Update' to update the
+#' results."`), or `NULL` for no marker.
+#'
 #' @param id Module id.
 #' @param toc `TRUE`: show the table of contents (sections up to level 3) next to the
 #'   document.
@@ -38,6 +52,8 @@
 #' @param doc A reactive returning a document, `NULL` (shows "No results") or a
 #'   condition (shows an error box).
 #' @param cache A [pub_cache()].
+#' @param pending `NULL` or a reactive returning the label of a pending document, or
+#'   `NULL` (see "Pending results").
 #' @return `pub_viewer_ui()`: a tag list. `pub_viewer_server()`: `NULL`, invisibly.
 #' @seealso [pub_html()], [pub_cache()], [pub_doc()]
 #' @examples
@@ -107,7 +123,14 @@ pub_viewer_ui <- function(id, toc = TRUE, height = NULL) {
                 role = if (fixed) "region",
                 `aria-label` = if (fixed) "Document",
                 tabindex = if (fixed) "0",
-                shiny::uiOutput(ns("doc"))
+                # label of a pending document (pubflow-viewer.js); a live region
+                # must exist before its text changes to be announced
+                htmltools::div(
+                    class = "pubflow-viewer-status",
+                    role = "status",
+                    `aria-live` = "polite"
+                ),
+                shiny::uiOutput(ns("doc"), class = "pubflow-viewer-doc")
             )
         )
     )
@@ -115,9 +138,12 @@ pub_viewer_ui <- function(id, toc = TRUE, height = NULL) {
 
 #' @rdname pub_viewer_ui
 #' @export
-pub_viewer_server <- function(id, doc, cache = pub_cache()) {
+pub_viewer_server <- function(id, doc, cache = pub_cache(), pending = NULL) {
     if (!shiny::is.reactive(doc)) {
         rlang::abort("`doc` must be a reactive (e.g. `shiny::reactive()`).")
+    }
+    if (!is.null(pending) && !shiny::is.reactive(pending)) {
+        rlang::abort("`pending` must be `NULL` or a reactive.")
     }
     .check_cache(cache)
     shiny::moduleServer(id, function(input, output, session) {
@@ -126,8 +152,31 @@ pub_viewer_server <- function(id, doc, cache = pub_cache()) {
         })
         output$doc <- shiny::renderUI(rendered()$doc)
         output$toc <- shiny::renderUI(rendered()$toc)
+        if (!is.null(pending)) {
+            shiny::observe({
+                .send_custom_message(
+                    "pubflow:viewerPending",
+                    list(
+                        id = session$ns("viewer"),
+                        label = .viewer_pending_label(pending())
+                    ),
+                    session = session
+                )
+            })
+        }
         invisible(NULL)
     })
+}
+
+#' Label of the pending marker
+#' @param x the value of the viewer's `pending` reactive.
+#' @return the label, or `NULL` for no marker.
+#' @noRd
+.viewer_pending_label <- function(x) {
+    if (!is.null(x) && !rlang::is_string(x)) {
+        rlang::abort("`pending` must return `NULL` or a string.")
+    }
+    if (identical(x, "")) NULL else x
 }
 
 
