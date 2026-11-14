@@ -289,7 +289,7 @@ the document, e.g. the author:
 \
 `file`` ``<-`` `[`pub_render`](https://rpahl.github.io/pubflow/reference/pub_render.md)`(``doc``, ``"docx"``, meta ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``author ``=`` ``"Jane Doe"``)``)`\
 [`basename`](https://rdrr.io/r/base/basename.html)`(``file``)`\
-`# [1] "20261114T103925Z_ozone_in_new_york.docx"`
+`# [1] "20261114T111246Z_ozone_in_new_york.docx"`
 
 By default, the file goes to R’s temporary directory, and its name is
 made of the render time and the title. Word and PDF need pandoc (\>=
