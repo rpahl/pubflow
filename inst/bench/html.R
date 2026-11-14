@@ -22,11 +22,15 @@ time_ms <- function(expr, n = 10L) {
     expr <- substitute(expr)
     env <- parent.frame()
     eval(expr, env)
-    times <- vapply(seq_len(n), function(i) {
-        start <- proc.time()[["elapsed"]]
-        eval(expr, env)
-        proc.time()[["elapsed"]] - start
-    }, numeric(1))
+    times <- vapply(
+        seq_len(n),
+        function(i) {
+            start <- proc.time()[["elapsed"]]
+            eval(expr, env)
+            proc.time()[["elapsed"]] - start
+        },
+        numeric(1)
+    )
     stats::median(times) * 1000
 }
 
@@ -43,9 +47,12 @@ warm <- time_ms(pub_html(doc, cache = cache))
 # Without a cache: tables (formatter + huxtable::to_html()), texts
 is_type <- function(type) function(x) x$type == type
 items <- function(nodes) {
-    unlist(lapply(nodes, function(x) {
-        if (inherits(x, "pub_section")) items(x$children) else list(x)
-    }), recursive = FALSE)
+    unlist(
+        lapply(nodes, function(x) {
+            if (inherits(x, "pub_section")) items(x$children) else list(x)
+        }),
+        recursive = FALSE
+    )
 }
 all <- items(doc$children)
 tables <- Filter(is_type("table"), all)
@@ -63,6 +70,11 @@ cat(sprintf(
         "no cache, tables: %7.1f ms\n",
         "no cache, texts:  %7.1f ms\n"
     ),
-    length(Filter(is_type("figure"), all)), length(tables), length(texts),
-    cold, warm, tablesMs, textsMs
+    length(Filter(is_type("figure"), all)),
+    length(tables),
+    length(texts),
+    cold,
+    warm,
+    tablesMs,
+    textsMs
 ))

@@ -13,39 +13,66 @@ bench_params <- function() {
     params <- list()
     for (i in 1:6) {
         params[[sprintf("num%d", i)]] <- numeric_param(
-            i / 10, label = sprintf("Numeric parameter %d", i),
-            min = 0, max = 1, area = areas[[i %% 3 + 1]],
+            i / 10,
+            label = sprintf("Numeric parameter %d", i),
+            min = 0,
+            max = 1,
+            area = areas[[i %% 3 + 1]],
             description = "A number between 0 and 1"
         )
     }
     for (i in 1:4) {
         params[[sprintf("txt%d", i)]] <- param(
-            sprintf("Text %d", i), label = sprintf("Text parameter %d", i),
+            sprintf("Text %d", i),
+            label = sprintf("Text parameter %d", i),
             area = "report"
         )
     }
     for (i in 1:4) {
         params[[sprintf("sel%d", i)]] <- choice_param(
-            "log", choices = c("none", "log", "sqrt", "exp"),
-            label = sprintf("Choice parameter %d", i), area = "analysis",
+            "log",
+            choices = c("none", "log", "sqrt", "exp"),
+            label = sprintf("Choice parameter %d", i),
+            area = "analysis",
             advanced = i > 3
         )
     }
-    params$radio1 <- choice_param("on", c("on", "off"), label = "Radio 1",
-                                  area = "report", ui_widget = "radio")
-    params$radio2 <- choice_param("no", c("yes", "no"), label = "Radio 2",
-                                  area = "report", ui_widget = "radio")
+    params$radio1 <- choice_param(
+        "on",
+        c("on", "off"),
+        label = "Radio 1",
+        area = "report",
+        ui_widget = "radio"
+    )
+    params$radio2 <- choice_param(
+        "no",
+        c("yes", "no"),
+        label = "Radio 2",
+        area = "report",
+        ui_widget = "radio"
+    )
     params$switch1 <- param(TRUE, label = "Switch 1", area = "analysis")
-    params$switch2 <- param(FALSE, label = "Switch 2", area = "analysis",
-                            advanced = TRUE)
-    params$slider <- numeric_param(5, label = "Slider", min = 1, max = 10,
-                                   ui_widget = "slider", area = "analysis")
+    params$switch2 <- param(
+        FALSE,
+        label = "Switch 2",
+        area = "analysis",
+        advanced = TRUE
+    )
+    params$slider <- numeric_param(
+        5,
+        label = "Slider",
+        min = 1,
+        max = 10,
+        ui_widget = "slider",
+        area = "analysis"
+    )
     params$limits <- param_group(
         list(
             lower = numeral_param("95", label = "LSL"),
             upper = numeral_param("105", label = "USL")
         ),
-        label = "Specification limits", area = "criteria"
+        label = "Specification limits",
+        area = "criteria"
     )
     param_config(params)
 }
@@ -55,11 +82,15 @@ time_ms <- function(expr, n = 50L) {
     expr <- substitute(expr)
     env <- parent.frame()
     eval(expr, env)
-    times <- vapply(seq_len(n), function(i) {
-        start <- proc.time()[["elapsed"]]
-        eval(expr, env)
-        proc.time()[["elapsed"]] - start
-    }, numeric(1))
+    times <- vapply(
+        seq_len(n),
+        function(i) {
+            start <- proc.time()[["elapsed"]]
+            eval(expr, env)
+            proc.time()[["elapsed"]] - start
+        },
+        numeric(1)
+    )
     stats::median(times) * 1000
 }
 
@@ -112,5 +143,9 @@ cat(sprintf(
         "  testServer() overhead:            %6.1f\n",
         "  initial render (module - overhead): %4.1f (target < 100)\n"
     ),
-    build, html, module, overhead, module - overhead
+    build,
+    html,
+    module,
+    overhead,
+    module - overhead
 ))
