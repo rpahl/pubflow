@@ -337,8 +337,8 @@ unwrapping of `Param@value` (its successor is `pip_param_value()`, §4).
   steps with a failed input that is not a `~try()` reference are skipped
   (they keep their output; "done" -> "outdated", "new" stays "new"); a
   `~try()` argument gets a failure object of class `c("pipeflow_failure",
-  "error", "condition")` with `message` ("step 'oot' failed: <message>",
-  or "step 'x' was not run: step 'oot' failed: <message>"), `step`,
+  "error", "condition")` with `message` ("step 'fit' failed: <message>",
+  or "step 'x' was not run: step 'fit' failed: <message>"), `step`,
   `failed_step` and `parent` (the failed step's condition; for partitions
   the key error). Failures are light since 0.5.0.9029 (step call with
   symbols, §3): measured 2026-11-12 with an 8 MB input, a failure from
@@ -433,7 +433,7 @@ unwrapping of `Param@value` (its successor is `pip_param_value()`, §4).
     correct, reuse gets worse: make one function per pipeline).
     `pip_run(outer, force = TRUE)` does not force the inner runs.
   - Failures: with `on_error = "stop"` the outer error nests the inner one
-    ("step 'by_batch': key 'D': step 'fit': ..."; `?as.function.pipeflow`
+    ("step 'by_month': key '5': step 'fit': ..."; `?as.function.pipeflow`
     "Errors of inner steps", vignette v05c shows how to get the outer
     step, key and inner step); with `"continue"` the inner run continues,
     and the call fails only if a step named in `out` failed or was not
@@ -531,11 +531,10 @@ or that many R users need).
 **Landed in pipeflow 0.5.0.9029-0.5.0.9032** (pubflow requires it from
 0.0.0.9047; no pubflow code change needed, the tests pass unchanged):
 step calls with symbols, so failures no longer carry the step's inputs
-(§3, §6; this settles "light failures" of the SM lessons,
-`dev/PUBFLOW_LESSONS_LEARNED.md` item 7), the option `pipeflow.lgr`, the
-`[` warning for column-named selectors (§2), `pip_add()` of a pipeline or
-view (§2), the `pipeflow_outdated_before` warning (§3) and `pip_lock()`
-outdating the dependents of a step that is not done (§2). Docs:
+(§3, §6), the option `pipeflow.lgr`, the `[` warning for column-named
+selectors (§2), `pip_add()` of a pipeline or view (§2), the
+`pipeflow_outdated_before` warning (§3) and `pip_lock()` outdating the
+dependents of a step that is not done (§2). Docs:
 `?pip_add` "Outputs that keep an environment" (same advice as D20) and
 `?pip_view` (a view covers only its steps, running it runs their upstream
 steps too).

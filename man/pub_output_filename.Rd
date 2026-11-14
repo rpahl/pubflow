@@ -30,7 +30,7 @@ accented ones, are dropped, as their transliteration depends on the platform.
 }
 }
 \examples{
-meta <- list(title = "Analysis report: batch A",
+meta <- list(title = "Ozone report: May",
              time = as.POSIXct("2026-10-05 14:30:00", tz = "UTC"))
 pub_output_filename(meta, "docx")
 }

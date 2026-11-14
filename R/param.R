@@ -117,8 +117,8 @@
 #' param_validity(alpha, value = 1.5)
 #'
 #' # A number as text keeps its trailing zero
-#' lsl <- numeral_param("0.90", label = "LSL")
-#' param_value(lsl)
+#' limit <- numeral_param("80.0", label = "Ozone limit (ppb)")
+#' param_value(limit)
 #'
 #' # One of several choices
 #' trans <- choice_param("log", choices = c("none", "log", "sqrt"),
@@ -134,7 +134,7 @@
 #' show <- yes_no_param("no", label = "Show points?")
 #' as.character(show)
 #'
-#' spec_param <- function(..., side = c("lower", "upper")) {
+#' bound_param <- function(..., side = c("lower", "upper")) {
 #'     numeral_param(..., side = match.arg(side))
 #' }
 #'
@@ -168,8 +168,8 @@
 #' # Params shown and checked together
 #' limits <- param_group(
 #'     list(
-#'         lower = spec_param("1.0", label = "Lower", side = "lower"),
-#'         upper = spec_param("2.0", label = "Upper", side = "upper")
+#'         lower = bound_param("1.0", label = "Lower", side = "lower"),
+#'         upper = bound_param("2.0", label = "Upper", side = "upper")
 #'     ),
 #'     label = "Limits"
 #' ) |>

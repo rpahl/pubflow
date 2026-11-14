@@ -391,14 +391,14 @@ Patterns for groups of data:
 ```mermaid
 flowchart LR
     subgraph groups["one pipeline per group (same constructor)"]
-        g1["pipeline 'Water'<br/>… → content"]
-        g2["pipeline 'Assay'<br/>… → content"]
+        g1["pipeline 'May'<br/>… → content"]
+        g2["pipeline 'June'<br/>… → content"]
     end
     g1 -- "pub_out(p, 'content')" --> parts["named list of parts"]
     g2 -- "pub_out(p, 'content')" --> parts
-    parts -- "pip_set_params(report,<br/>list(testParts = parts))" --> rp
+    parts -- "pip_set_params(report,<br/>list(parts = parts))" --> rp
     subgraph rp["report pipeline"]
-        t["tests step<br/>(input)"] --> x["cross-group steps<br/>(e.g. minimum shelf life)"]
+        t["parts step<br/>(input)"] --> x["cross-group steps<br/>(e.g. overall maximum)"]
         t --> d["layout step 'doc'"]
         x --> d
     end
@@ -676,7 +676,7 @@ requirement.
 
 - `helper-pipelines.R`: demo pipelines for every pattern, all built with
   pubflow (`demo_pipeline()`, combined, split, nested, one pipeline per
-  test) and their report variants with layout steps
+  group) and their report variants with layout steps
   (`demo_report_pipeline()`, `demo_split_report_pipeline()`,
   `demo_nested_report_pipeline()`, `demo_test_pipelines()`). Their
   documents (`demo_report_doc()` and friends) feed the render tests.

@@ -71,7 +71,8 @@
 #' pub_format_num(12.25, "%.1f %%")
 #'
 #' # Numbers in text
-#' pub_format_num(mean(c(98.25, 99.1)), "Mean assay: %.2f %%")
+#' high <- mean(airquality$Ozone > 60, na.rm = TRUE)
+#' pub_format_num(100 * high, "Days above 60 ppb: %.1f %%")
 #' @export
 pub_round <- function(x, digits = 0) {
     .check_numbers(x)

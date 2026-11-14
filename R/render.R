@@ -137,7 +137,7 @@
 #'   [pub_output_filename()]
 #' @examples
 #' doc <- pub_doc(
-#'     pub_section("Results", pub_text("All batches meet the limits.")),
+#'     pub_section("Results", pub_text("Ozone is highest in July and August.")),
 #'     title = "Demo report"
 #' )
 #' noon <- as.POSIXct("2026-10-05 12:00:00", tz = "UTC")
@@ -301,7 +301,7 @@ pub_render <- function(
 #' @return `character(1)` file name.
 #' @seealso [pub_render()]
 #' @examples
-#' meta <- list(title = "Analysis report: batch A",
+#' meta <- list(title = "Ozone report: May",
 #'              time = as.POSIXct("2026-10-05 14:30:00", tz = "UTC"))
 #' pub_output_filename(meta, "docx")
 #' @export

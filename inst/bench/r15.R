@@ -1,23 +1,23 @@
-# Workload "R15" (DESIGN.md §4): a report of 15 sections, one per test
-# (one pipeline per test), each with 4 texts, 3 tables
+# Workload "R15" (DESIGN.md §4): a report of 15 sections, one per group
+# (one pipeline per group), each with 4 texts, 3 tables
 # (10 x 6, coloured cells) and 3 figures (ggplot, 50 points + smooth), plus
 # an annex of 30 extra tables (20 x 8). Needs ggplot2.
 #
 # Sourcing this file only defines the generators; the benchmarks source it
-# (inst/bench/doc.R, M6). r15_pipelines() returns the named list of test
+# (inst/bench/doc.R, M6). r15_pipelines() returns the named list of group
 # pipelines (each with a layout step "content"), r15_annex_pipeline() the
 # pipeline with the annex tables, r15_run() computes their outputs and
 # r15_assemble() makes the document from them, as an app does with one
-# pipeline per test; r15_doc() does all of this and returns the document.
+# pipeline per group; r15_doc() does all of this and returns the document.
 
-r15_n_tests <- 15L
+r15_n_groups <- 15L
 
 # Table of random numbers; values above 1 have a coloured background
 r15_table <- function(nrow, ncol, seed, caption) {
     set.seed(seed)
     values <- matrix(stats::rnorm(nrow * ncol), nrow, ncol)
     data <- data.frame(
-        batch = sprintf("B%02d", seq_len(nrow)),
+        site = sprintf("S%02d", seq_len(nrow)),
         as.data.frame(values[, -1L, drop = FALSE])
     )
     names(data)[-1L] <- sprintf("t%d", seq_len(ncol - 1L))
@@ -26,7 +26,7 @@ r15_table <- function(nrow, ncol, seed, caption) {
         data,
         caption = caption,
         digits = rlang::set_names(rep(2L, length(cols)), cols),
-        header = rlang::set_names(rep("Time point", length(cols)), cols)
+        header = rlang::set_names(rep("Day", length(cols)), cols)
     )
     rows <- sum(huxtable::header_rows(ht)) + seq_len(nrow)
     high <- as.matrix(data[cols]) > 1
@@ -51,43 +51,43 @@ r15_figure <- function(seed, caption) {
     pub_figure(p, caption = caption, width = 6, height = 4)
 }
 
-r15_texts <- function(test) {
+r15_texts <- function(group) {
     list(
         pub_text(sprintf(
             paste(
                 "This section summarises the data of **%s**. The",
-                "results of all batches were analysed with a linear model",
+                "results of all sites were analysed with a linear model",
                 "of the response over time ($y = a + b \\cdot t$)."
             ),
-            test
+            group
         )),
         pub_text(c(
             "Findings:",
             "",
-            "- no batch is out of trend;",
-            "- the slopes are similar across batches;",
-            "- the shelf life is supported by the data."
+            "- no site deviates from the trend;",
+            "- the slopes are similar across sites;",
+            "- the model fits the data well."
         )),
         pub_text(sprintf(
             "See [<insert reference for %s>]{.placeholder}.",
-            test
+            group
         )),
         pub_text(
             paste(
-                "The tables below show the data per time point; values above",
-                "one are highlighted. The figures show the trend per batch."
+                "The tables below show the data per day; values above",
+                "one are highlighted. The figures show the trend per site."
             ),
             title = "Data and figures"
         )
     )
 }
 
-# One pipeline per test: steps returning lists of texts, tables, figures,
-# and a layout step listing them (the content of the test's section)
-r15_test_pipeline <- function(i) {
-    test <- sprintf("Test %02d", i)
-    pipeflow::pip_new(test) |>
-        pipeflow::pip_add("texts", \(name = test) r15_texts(name)) |>
+# One pipeline per group: steps returning lists of texts, tables, figures,
+# and a layout step listing them (the content of the group's section)
+r15_group_pipeline <- function(i) {
+    group <- sprintf("Group %02d", i)
+    pipeflow::pip_new(group) |>
+        pipeflow::pip_add("texts", \(name = group) r15_texts(name)) |>
         pipeflow::pip_add("tables", \(seed = i) {
             lapply(1:3, \(k) {
                 r15_table(10L, 6L, 100L * seed + k, sprintf("Table %d", k))
@@ -106,9 +106,9 @@ r15_test_pipeline <- function(i) {
         )
 }
 
-r15_pipelines <- function(n = r15_n_tests) {
-    pipelines <- lapply(seq_len(n), r15_test_pipeline)
-    names(pipelines) <- sprintf("Test %02d", seq_len(n))
+r15_pipelines <- function(n = r15_n_groups) {
+    pipelines <- lapply(seq_len(n), r15_group_pipeline)
+    names(pipelines) <- sprintf("Group %02d", seq_len(n))
     pipelines
 }
 
@@ -129,7 +129,7 @@ r15_run <- function(pipelines) {
     invisible(pipelines)
 }
 
-# The document from the computed outputs: one section per test, the annex
+# The document from the computed outputs: one section per group, the annex
 r15_assemble <- function(pipelines, annex) {
     pub_doc(
         lapply(pipelines, \(p) p[["content", "out"]]),
