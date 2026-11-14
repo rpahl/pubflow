@@ -628,10 +628,19 @@ pub_layout_inputs <- function(x) {
 
 #' `~try(step)` references of steps
 #' @param steps `character` step names.
+#'   `.self` and `...` can't be argument names of a step function (pipeflow reserves
+#'   `.self` and drops `...` from the inputs).
 #' @return Named list (by step) of one-sided formulas `~try(<step>)` whose environment
 #'   is the empty environment, so they don't hold the caller's environment.
 #' @noRd
 .try_inputs <- function(steps) {
+    reserved <- intersect(steps, c(".self", "..."))
+    if (length(reserved) > 0L) {
+        rlang::abort(sprintf(
+            "A step named %s can't be an input of a layout step; rename it.",
+            .quote_names(reserved)
+        ))
+    }
     inputs <- lapply(steps, \(s) {
         f <- eval(call("~", call("try", as.name(s))), baseenv())
         environment(f) <- emptyenv()
@@ -718,6 +727,10 @@ pub_layout_sections <- function(sections) {
             "`sections` must hold pipeflow views; %s is not one.",
             .quote_names(names(sections)[!isView])
         ))
+    }
+    pipenvs <- lapply(sections, \(view) view[["pipenv"]])
+    if (!all(vapply(pipenvs, identical, logical(1), pipenvs[[1L]]))) {
+        rlang::abort("The views in `sections` must be views of the same pipeline.")
     }
     steps <- lapply(sections, \(view) unname(view[["step"]]))
     empty <- names(steps)[lengths(steps) == 0L]

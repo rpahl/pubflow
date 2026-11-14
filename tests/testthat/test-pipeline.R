@@ -1273,6 +1273,17 @@ describe("pub_layout_inputs()", {
             "`x` has no steps"
         )
     })
+
+    it("rejects steps named .self or ...", {
+        # pipeflow reserves the argument .self and drops ... from the inputs
+        p <- pipeflow::pip_new("p") |>
+            pipeflow::pip_add(".self", \() "a") |>
+            pipeflow::pip_add("...", \() "b")
+        expect_error(
+            pub_layout_inputs(p),
+            "A step named '.self', '...' can't be an input of a layout step"
+        )
+    })
 })
 
 
@@ -1433,6 +1444,11 @@ describe("pub_layout_sections()", {
         expect_error(
             f(list(Data = data, None = pipeflow::pip_view(p, tags = "none"))),
             "The view of 'None' has no steps"
+        )
+        other <- test_pipeline()
+        expect_error(
+            f(list(Data = data, Model = pipeflow::pip_view(other, depends = "fit"))),
+            "must be views of the same pipeline"
         )
     })
 })
