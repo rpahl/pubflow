@@ -263,6 +263,29 @@ describe("pub_render()", {
         expect_match(read_text(html), "pubflow-error-title", fixed = TRUE)
     })
 
+    it("refuses missing parts, or shows them if the spec says so", {
+        doc <- small_doc(pub_missing("Run the trend first."))
+        file <- withr::local_tempfile(fileext = ".md")
+
+        expect_error(
+            pub_render(doc, "md", file = file),
+            "missing: Run the trend first.",
+            class = "pubflow_render_error"
+        )
+        expect_false(file.exists(file))
+        expect_warning(
+            pub_render(
+                doc,
+                "md",
+                file = file,
+                spec = pub_report_spec("md", error_items = "show")
+            ),
+            "missing: Run the trend first.",
+            class = "pubflow_render_warning"
+        )
+        expect_match(read_text(file), "*Run the trend first.*", fixed = TRUE)
+    })
+
     it("guards error items of the front matter too", {
         front <- function(doc, format) list(demo_failures()$table)
         file <- withr::local_tempfile(fileext = ".md")
@@ -562,6 +585,18 @@ describe(".guard_error_items()", {
 
         expect_length(gregexpr("failed", conditionMessage(err))[[1L]], 3L)
         expect_identical(err$format, "pdf")
+    })
+
+    it("lists missing parts with the error items", {
+        nodes <- pub_doc(pub_missing("Run it."), failures$fit)$children
+
+        err <- expect_error(
+            .guard_error_items(nodes, "refuse", "pdf"),
+            class = "pubflow_render_error"
+        )
+
+        expect_match(conditionMessage(err), "missing: Run it.", fixed = TRUE)
+        expect_match(conditionMessage(err), "step 'fit' failed", fixed = TRUE)
     })
 
     it("accepts nodes without error items", {

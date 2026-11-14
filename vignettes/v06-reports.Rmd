@@ -201,7 +201,7 @@ The fields in short (`?pub_report_spec` has the details):
 | `figure` | Image format and resolution of figures |
 | `placeholder_color` | Colour of placeholders in HTML and PDF |
 | `lock` | Lock tables, figures, header and footer of DOCX files |
-| `error_items` | Refuse or show failed steps |
+| `error_items` | Refuse or show failed steps and missing parts |
 | `post_process` | Functions that change the finished file |
 | `pandoc_args` | Extra pandoc arguments |
 
@@ -328,10 +328,23 @@ The file has an error box where the model of the failed step would be, and the
 warning names the failed step. Use this for drafts only.
 
 To check a document before rendering it, e.g. to tell the user of an app why a
-report can't be downloaded yet, `pub_error_items()` lists its error items:
+report can't be downloaded yet, `pub_error_items()` lists its error items (and
+missing parts, see below):
 
 ```{r error-list}
 vapply(pub_error_items(draft), \(x) x$message, character(1))
+```
+
+A part that doesn't exist yet, e.g. the results of an analysis the user has not
+run, is not an error. Place `pub_missing("Run the analysis first.")` there: the
+viewer shows the message as a neutral placeholder, and `pub_render()` refuses
+the document like one with error items. `pub_error_items()` finds both, so it
+lists everything that blocks a download (`type = "error"` or `"missing"` picks
+one kind):
+
+```{r missing-list}
+parts <- list(Model = pub_missing("Run the model first."), Data = draft)
+vapply(pub_error_items(parts), \(x) x$message, character(1))
 ```
 
 ## Word files

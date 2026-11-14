@@ -145,6 +145,9 @@ default \code{on_error = "stop"}.
 For drafts, you can instead run the pipeline with \code{on_error = "continue"} and set
 \code{pub_report_spec(error_items = "show")}. The document is then rendered, with the
 error items shown as error boxes and a warning.
+
+Missing parts (\code{\link[=pub_missing]{pub_missing()}}) are treated the same way: refused by default, shown
+as an italic placeholder paragraph with \code{error_items = "show"}.
 }
 
 \subsection{Good to know}{

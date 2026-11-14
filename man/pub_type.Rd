@@ -29,6 +29,7 @@ class of your own.\tabular{ll}{
    \code{"widget"} \tab an htmlwidget \cr
    \code{"raw"}, \code{"pagebreak"}, \code{"toc"} \tab see \code{\link[=pub_raw]{pub_raw()}}, \code{\link[=pub_pagebreak]{pub_pagebreak()}}, \code{\link[=pub_toc]{pub_toc()}} \cr
    \code{"error"} \tab a failed step or an error item of \code{\link[=pub_out]{pub_out()}} (an error box) \cr
+   \code{"missing"} \tab a missing part (\code{\link[=pub_missing]{pub_missing()}}, a placeholder) \cr
    \code{"null"} \tab \code{NULL}, skipped \cr
 }
 

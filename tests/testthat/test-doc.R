@@ -583,6 +583,34 @@ describe("pub_error_items()", {
         )
     })
 
+    it("finds missing parts too, in document order, or one kind with `type`", {
+        missing <- pub_missing("Run the trend first.")
+        parts <- list(A = list(missing, failures$fit), B = item)
+        doc <- pub_doc(parts)
+
+        both <- pub_error_items(doc)
+
+        expect_identical(pub_error_items(parts), both)
+        expect_identical(steps(pub_error_items(doc, "error")), c("fit", "content"))
+        expect_identical(pub_error_items(parts, "missing"), list(missing))
+        expect_identical(pub_error_items(doc, "missing"), list(missing))
+        expect_identical(
+            vapply(both, \(x) class(x)[[1L]], ""),
+            c("pub_missing", "pub_error", "pub_error")
+        )
+        expect_identical(both, pub_error_items(parts, c("missing", "error")))
+        expect_identical(both, pub_error_items(parts, c("error", "missing")))
+        expect_error(pub_error_items(doc, "warning"), "must be one of")
+        expect_error(pub_error_items(doc, character()), "at least one")
+    })
+
+    it("looks into the front matter of a document first", {
+        missing <- pub_missing("Sign first.")
+        doc <- pub_doc(item, front_matter = list(missing))
+
+        expect_identical(pub_error_items(doc), list(missing, item))
+    })
+
     it("returns an empty list without error items", {
         expect_identical(pub_error_items(NULL), list())
         expect_identical(pub_error_items(list()), list())
@@ -683,6 +711,13 @@ describe(".format_item()", {
 
         expect_identical(nchar(label), nchar("error \"\"") + 60L)
         expect_match(label, "^error \"step 'f' failed: m+\\.\\.\\.\"$")
+    })
+
+    it("labels missing parts by their message", {
+        expect_identical(
+            .format_item(item(pub_missing("Run it."), "missing")),
+            "missing \"Run it.\""
+        )
     })
 })
 

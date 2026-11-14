@@ -402,6 +402,7 @@ pub_markdown <- function(
         raw = .md_raw(x$object, ctx),
         toc = .md_toc(x$object, ctx),
         error = .md_error(x$object, ctx),
+        missing = .md_missing(x$object),
         NULL
     )
     if (length(content) > 0L) {
@@ -567,6 +568,15 @@ pub_markdown <- function(
         ),
         paste0("> ", gsub("\n", "\n> ", text, fixed = TRUE))
     )
+}
+
+
+#' Missing part: its message as an italic paragraph
+#' @param x a `pub_missing`.
+#' @return `character(1)` block.
+#' @noRd
+.md_missing <- function(x) {
+    paste0("*", .escape_literal(x$message), "*")
 }
 
 
