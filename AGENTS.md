@@ -82,7 +82,8 @@ R=/opt/R/4.5.3/bin/R
 $R -q -e "devtools::document()"
 $R -q -e "devtools::test()"
 $R -q -e "devtools::test_active_file('tests/testthat/test-param.R')"
-air format R tests inst/examples
+air format .
+air format --check .
 $R -q -e "pkgload::load_all(quiet = TRUE); lintr::lint_package()"
 $R -q -e "rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'warning', check_dir = 'check')"
 $R -q -e "devtools::test_coverage_active_file(normalizePath('tests/testthat/test-cache.R'))"
@@ -97,9 +98,11 @@ $R -q -e "covr::report(covr::package_coverage(), 'check/coverage.html', browse =
   the binary ships with the Air VS Code extension
   (`~/.vscode-server/extensions/posit.air-vscode-*/bundled/bin/air`). air keeps existing
   line breaks inside calls, so it may not undo a manual wrap; join such lines yourself.
-  Mark hand-aligned code (e.g. tables of values) with `# fmt: skip`. CI does not check
-  the formatting. Keep formatting-only commits separate and list them in
-  `.git-blame-ignore-revs`.
+  Mark hand-aligned code (e.g. tables of values) with `# fmt: skip`. CI
+  (`.github/workflows/lint.yaml`) runs `air format --check .` before lintr and fails on
+  unformatted files; it checks the indentation instead of lintr's slow
+  `indentation_linter` (off in `.lintr`). Keep formatting-only commits separate and list
+  them in `.git-blame-ignore-revs`.
 - Lint with the package loaded: lintr's `object_usage_linter` resolves functions defined
   in other files via the package namespace, otherwise it reports them as "no visible
   global function definition".
@@ -118,8 +121,9 @@ $R -q -e "covr::report(covr::package_coverage(), 'check/coverage.html', browse =
 - Clean up and review the branch's changes against `main`. First simplify
   them (Claude Code: `/simplify`), then review them for bugs (Claude Code:
   `/code-review high`), and fix or explicitly dismiss each finding.
-- Run the full check in this order: format, lint, tests, R CMD check. Target for every
-  PR: tests green, lint clean, R CMD check 0 errors / 0 warnings / 0 notes.
+- Run the full check in this order: format (`air format --check .`), lint, tests,
+  R CMD check. Target for every PR: tests green, lint clean, R CMD check 0 errors /
+  0 warnings / 0 notes.
 - If the same failure is still there after 3 fix attempts, stop and summarize the
   attempts instead of weakening tests or masking errors.
 - Note user-facing changes in `NEWS.md`.
