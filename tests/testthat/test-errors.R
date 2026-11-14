@@ -134,21 +134,21 @@ describe(".invalid_param_error()", {
 
     it("is listed per step and param by pip_set_params()", {
         p <- pipeflow::pip_new("p") |>
-            pipeflow::pip_add("fit", \(alpha = 0.05, lsl = "1", usl = "2") {
+            pipeflow::pip_add("fit", \(alpha = 0.05, low = "1", high = "2") {
                 alpha
             })
         pipeflow::pip_set_params(
             p,
             param_config(
                 alpha = numeric_param(0.05, label = "Significance level", max = 1),
-                lsl = param("1", validity = \(x) {
-                    if (identical(x, "3")) "must be < usl" else ""
+                low = param("1", validity = \(x) {
+                    if (identical(x, "3")) "must be < high" else ""
                 })
             )
         )
 
         expect_snapshot(
-            pipeflow::pip_set_params(p, list(alpha = 2, lsl = "3")),
+            pipeflow::pip_set_params(p, list(alpha = 2, low = "3")),
             error = TRUE
         )
     })
@@ -205,7 +205,7 @@ describe("errors of pipeline steps (pipeflow)", {
 describe(".not_done_error()", {
     it("names the pipeline, the step, its state and the failed steps", {
         cnd <- .not_done_error(
-            "Water",
+            "Rain",
             "content",
             "outdated",
             failed = c("data", "fit"),
@@ -214,7 +214,7 @@ describe(".not_done_error()", {
 
         expect_s3_class(cnd, "pubflow_not_done")
         expect_s3_class(cnd, "pubflow_error")
-        expect_identical(cnd$pipeline, "Water")
+        expect_identical(cnd$pipeline, "Rain")
         expect_identical(cnd$step, "content")
         expect_identical(cnd$state, "outdated")
         expect_identical(cnd$failed, c("data", "fit"))
@@ -222,7 +222,7 @@ describe(".not_done_error()", {
         expect_identical(
             lines[[1L]],
             paste(
-                "The output of step 'content' of pipeline 'Water' is not up to",
+                "The output of step 'content' of pipeline 'Rain' is not up to",
                 "date (state \"outdated\")."
             )
         )
@@ -231,7 +231,7 @@ describe(".not_done_error()", {
     })
 
     it("asks to run the pipeline if no step failed", {
-        cnd <- .not_done_error("Water", "content", "new")
+        cnd <- .not_done_error("Rain", "content", "new")
 
         expect_match(cnd$message, "Run the pipeline first.", fixed = TRUE)
         expect_identical(cnd$failed, character())
@@ -239,7 +239,7 @@ describe(".not_done_error()", {
 
     it("lists a single failed step with its message", {
         cnd <- .not_done_error(
-            "Water",
+            "Rain",
             "content",
             "failed",
             failed = "content",
@@ -256,15 +256,15 @@ describe(".not_done_error()", {
     })
 
     it("requires one message per failed step", {
-        expect_error(.not_done_error("Water", "content", "failed", failed = "a"))
+        expect_error(.not_done_error("Rain", "content", "failed", failed = "a"))
         expect_error(
-            .not_done_error("Water", "content", "new", messages = "boom")
+            .not_done_error("Rain", "content", "new", messages = "boom")
         )
     })
 
     it("is signalled with its classes", {
         expect_error(
-            rlang::cnd_signal(.not_done_error("Water", "content", "new")),
+            rlang::cnd_signal(.not_done_error("Rain", "content", "new")),
             "not up to date",
             class = "pubflow_not_done"
         )

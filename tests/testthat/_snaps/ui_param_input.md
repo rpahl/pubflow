@@ -165,21 +165,21 @@
             <table class="pubflow-params-rows">
               <tr class="pubflow-param-row">
                 <td class="pubflow-param-label-cell">
-                  <label class="pubflow-param-label" id="params-limits-param-label" title="Specification limits">Specification limits</label>
+                  <label class="pubflow-param-label" id="params-limits-param-label" title="Range limits">Range limits</label>
                 </td>
                 <td class="pubflow-param-input-cell">
                   <div role="group" aria-labelledby="params-limits-param-label">
                     <div class="pubflow-param-group" style="width:15ch;">
                       <div class="pubflow-param-item">
-                        <label class="pubflow-visually-hidden" for="params-limits_lower">LSL</label>
-                        <div class="form-group shiny-input-container pubflow-tooltip" data-bs-container="body" data-bs-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-container="body" data-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-pubflow-tooltip-autohide-ms="7000" data-toggle="tooltip" data-trigger="hover" style="width:100%;" title="LSL">
+                        <label class="pubflow-visually-hidden" for="params-limits_lower">Min</label>
+                        <div class="form-group shiny-input-container pubflow-tooltip" data-bs-container="body" data-bs-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-container="body" data-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-pubflow-tooltip-autohide-ms="7000" data-toggle="tooltip" data-trigger="hover" style="width:100%;" title="Min">
                           <label class="control-label shiny-label-null" for="params-limits_lower" id="params-limits_lower-label"></label>
                           <input id="params-limits_lower" type="text" class="shiny-input-text form-control" value="95" data-update-on="blur"/>
                         </div>
                       </div>
                       <div class="pubflow-param-item">
-                        <label class="pubflow-visually-hidden" for="params-limits_upper">USL</label>
-                        <div class="form-group shiny-input-container pubflow-tooltip" data-bs-container="body" data-bs-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-container="body" data-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-pubflow-tooltip-autohide-ms="7000" data-toggle="tooltip" data-trigger="hover" style="width:100%;" title="USL">
+                        <label class="pubflow-visually-hidden" for="params-limits_upper">Max</label>
+                        <div class="form-group shiny-input-container pubflow-tooltip" data-bs-container="body" data-bs-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-container="body" data-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-pubflow-tooltip-autohide-ms="7000" data-toggle="tooltip" data-trigger="hover" style="width:100%;" title="Max">
                           <label class="control-label shiny-label-null" for="params-limits_upper" id="params-limits_upper-label"></label>
                           <input id="params-limits_upper" type="text" class="shiny-input-text form-control" value="105" data-update-on="blur"/>
                         </div>
@@ -379,21 +379,21 @@
             <table class="pubflow-params-rows">
               <tr class="pubflow-param-row">
                 <td class="pubflow-param-label-cell">
-                  <label class="pubflow-param-label" id="params-limits-param-label" title="Specification limits">Specification limits</label>
+                  <label class="pubflow-param-label" id="params-limits-param-label" title="Range limits">Range limits</label>
                 </td>
                 <td class="pubflow-param-input-cell">
                   <div role="group" aria-labelledby="params-limits-param-label">
                     <div class="pubflow-param-group" style="width:15ch;">
                       <div class="pubflow-param-item">
-                        <label class="pubflow-visually-hidden" for="params-limits_lower">LSL</label>
-                        <div class="form-group shiny-input-container pubflow-tooltip" data-bs-container="body" data-bs-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-container="body" data-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-pubflow-tooltip-autohide-ms="7000" data-toggle="tooltip" data-trigger="hover" style="width:100%;" title="LSL">
+                        <label class="pubflow-visually-hidden" for="params-limits_lower">Min</label>
+                        <div class="form-group shiny-input-container pubflow-tooltip" data-bs-container="body" data-bs-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-container="body" data-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-pubflow-tooltip-autohide-ms="7000" data-toggle="tooltip" data-trigger="hover" style="width:100%;" title="Min">
                           <label class="control-label shiny-label-null" for="params-limits_lower" id="params-limits_lower-label"></label>
                           <input id="params-limits_lower" type="text" class="shiny-input-text form-control" value="95" data-update-on="blur"/>
                         </div>
                       </div>
                       <div class="pubflow-param-item">
-                        <label class="pubflow-visually-hidden" for="params-limits_upper">USL</label>
-                        <div class="form-group shiny-input-container pubflow-tooltip" data-bs-container="body" data-bs-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-container="body" data-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-pubflow-tooltip-autohide-ms="7000" data-toggle="tooltip" data-trigger="hover" style="width:100%;" title="USL">
+                        <label class="pubflow-visually-hidden" for="params-limits_upper">Max</label>
+                        <div class="form-group shiny-input-container pubflow-tooltip" data-bs-container="body" data-bs-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-bs-toggle="tooltip" data-bs-trigger="hover" data-container="body" data-delay="{&quot;show&quot;:1500,&quot;hide&quot;:100}" data-pubflow-tooltip-autohide-ms="7000" data-toggle="tooltip" data-trigger="hover" style="width:100%;" title="Max">
                           <label class="control-label shiny-label-null" for="params-limits_upper" id="params-limits_upper-label"></label>
                           <input id="params-limits_upper" type="text" class="shiny-input-text form-control" value="105" data-update-on="blur"/>
                         </div>

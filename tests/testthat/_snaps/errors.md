@@ -12,10 +12,10 @@
 # .invalid_param_error() / is listed per step and param by pip_set_params()
 
     Code
-      pipeflow::pip_set_params(p, list(alpha = 2, lsl = "3"))
+      pipeflow::pip_set_params(p, list(alpha = 2, low = "3"))
     Condition
       Error:
       ! Cannot set 2 parameters: nothing was set.
         step 'fit', parameter 'alpha': value must be less than or equal to max (1)
-        step 'fit', parameter 'lsl': must be < usl
+        step 'fit', parameter 'low': must be < high
 

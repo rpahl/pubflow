@@ -475,20 +475,20 @@ describe("placing failure objects (error items)", {
                 step = "content",
                 failed_step = "fit",
                 message = "no trend",
-                pipeline = "Water"
+                pipeline = "Rain"
             ),
             class = "pub_error"
         )
 
-        doc <- pub_doc(list(Assay = "Fine.", Water = item))
+        doc <- pub_doc(list(Yield = "Fine.", Rain = item))
 
-        water <- doc$children[[2L]]
-        expect_identical(water$title, "Water")
-        expect_identical(water$children[[1L]]$type, "error")
-        expect_identical(water$children[[1L]]$object, item)
+        rain <- doc$children[[2L]]
+        expect_identical(rain$title, "Rain")
+        expect_identical(rain$children[[1L]]$type, "error")
+        expect_identical(rain$children[[1L]]$object, item)
         expect_output(
             print(doc),
-            "step 'fit' of pipeline 'Water' failed: no trend",
+            "step 'fit' of pipeline 'Rain' failed: no trend",
             fixed = TRUE
         )
     })
@@ -729,21 +729,21 @@ describe("documents made by layout steps (fixtures)", {
         expect_false(reaches_pipeline(doc))
     })
 
-    it("places the outputs of several partitioned steps per batch (split)", {
+    it("places the outputs of several partitioned steps per site (split)", {
         p <- demo_split_report_pipeline()
         run_quietly(p)
 
         doc <- p[["doc", "out"]]
 
         expect_snapshot(print(doc))
-        batches <- doc$children[[2L]]$children
+        sites <- doc$children[[2L]]$children
         expect_identical(
-            titles(batches),
-            c("Batch A (4 values)", "Batch B (4 values)", "Batch C (4 values)")
+            titles(sites),
+            c("Site A (4 values)", "Site B (4 values)", "Site C (4 values)")
         )
-        for (i in seq_along(batches)) {
+        for (i in seq_along(sites)) {
             key <- c("A", "B", "C")[[i]]
-            parts <- items(batches[[i]])
+            parts <- items(sites[[i]])
             expect_identical(parts[[1L]]$object, p[["partition_table", "out"]][[key]])
             expect_identical(parts[[3L]]$object, p[["coef_text", "out"]][[key]])
         }
@@ -761,7 +761,7 @@ describe("documents made by layout steps (fixtures)", {
         doc <- p[["doc", "out"]]
 
         expect_snapshot(print(doc))
-        expect_identical(titles(doc$children[2:4]), c("Batch A", "Batch B", "Batch C"))
+        expect_identical(titles(doc$children[2:4]), c("Site A", "Site B", "Site C"))
         res <- p[["inner_run", "out"]]
         for (i in 2:4) {
             key <- c("A", "B", "C")[[i - 1L]]
@@ -772,50 +772,50 @@ describe("documents made by layout steps (fixtures)", {
         expect_false(reaches_pipeline(doc))
     })
 
-    it("assembles one section per pipeline of a list (one per test)", {
-        doc <- demo_tests_doc()
+    it("assembles one section per pipeline of a list (one per series)", {
+        doc <- demo_series_doc()
 
         expect_snapshot(print(doc))
-        expect_identical(titles(doc$children), c("Assay", "Water"))
+        expect_identical(titles(doc$children), c("Yield", "Rain"))
         expect_false(reaches_pipeline(doc))
     })
 
-    it("builds a report across the test pipelines", {
-        doc <- demo_tests_report_doc()
+    it("builds a report across the series pipelines", {
+        doc <- demo_series_report_doc()
 
         expect_snapshot(print(doc))
         expect_identical(titles(doc$children), c("Results", "Summary"))
-        expect_identical(titles(doc$children[[1L]]$children), c("Assay", "Water"))
+        expect_identical(titles(doc$children[[1L]]$children), c("Yield", "Rain"))
         slopes <- doc$children[[2L]]$children[[1L]]$object
         expect_identical(
             pub_cell_text(slopes)[-1L, 1L],
-            rep(c("Assay", "Water"), each = 3L)
+            rep(c("Yield", "Rain"), each = 3L)
         )
         expect_false(reaches_pipeline(doc))
     })
 
     it("keeps the report done if the parts are set again unchanged", {
-        pips <- demo_test_pipelines()
+        pips <- demo_series_pipelines()
         for (p in pips) {
             run_quietly(p)
         }
-        report <- demo_tests_report_pipeline()
-        pipeflow::pip_set_params(report, demo_test_parts(pips))
+        report <- demo_series_report_pipeline()
+        pipeflow::pip_set_params(report, demo_series_parts(pips))
         run_quietly(report)
 
-        pipeflow::pip_set_params(report, demo_test_parts(pips))
+        pipeflow::pip_set_params(report, demo_series_parts(pips))
         expect_true(all(report[["state"]] == "done"))
 
-        pipeflow::pip_set_params(pips$Water, list(decimals = "3"))
-        run_quietly(pips$Water)
-        pipeflow::pip_set_params(report, demo_test_parts(pips))
-        expect_identical(report[["tests", "state"]], "outdated")
+        pipeflow::pip_set_params(pips$Rain, list(decimals = "3"))
+        run_quietly(pips$Rain)
+        pipeflow::pip_set_params(report, demo_series_parts(pips))
+        expect_identical(report[["parts", "state"]], "outdated")
         expect_identical(report[["fits", "state"]], "done")
     })
 
-    it("shows a failed test as an error box in the report on request", {
-        pips <- demo_test_pipelines()
-        pipeflow::pip_replace(pips$Water, "fit", \(data = ~data) {
+    it("shows a failed series as an error box in the report on request", {
+        pips <- demo_series_pipelines()
+        pipeflow::pip_replace(pips$Rain, "fit", \(data = ~data) {
             stop("no trend")
         })
         for (p in pips) {
@@ -826,7 +826,7 @@ describe("documents made by layout steps (fixtures)", {
         }
 
         expect_error(
-            demo_test_parts(pips),
+            demo_series_parts(pips),
             "Step 'fit' failed: no trend",
             class = "pubflow_not_done"
         )
@@ -835,11 +835,11 @@ describe("documents made by layout steps (fixtures)", {
 
         error <- doc$children[[2L]]$children[[1L]]
         expect_identical(error$type, "error")
-        expect_identical(error$object$pipeline, "test Water")
+        expect_identical(error$object$pipeline, "series Rain")
         expect_identical(error$object$failed_step, "fit")
         expect_error(
             pub_render(doc, "md", file = withr::local_tempfile()),
-            "step 'fit' of pipeline 'test Water' failed: no trend",
+            "step 'fit' of pipeline 'series Rain' failed: no trend",
             fixed = TRUE
         )
     })
@@ -860,10 +860,10 @@ describe("documents made by layout steps (fixtures)", {
     })
 
     it("places a failed partition as an error box in its own section", {
-        # pipeflow fails a mapped step per key (0.5.0.9015): the batches that succeeded
+        # pipeflow fails a mapped step per key (0.5.0.9015): the sites that succeeded
         # keep their tables, the failed one gets the box
         p <- demo_split_report_pipeline()
-        pipeflow::pip_set_params(p, list(failBatch = "B"))
+        pipeflow::pip_set_params(p, list(failSite = "B"))
 
         expect_warning(
             run_quietly(p, on_error = "continue"),
@@ -874,12 +874,12 @@ describe("documents made by layout steps (fixtures)", {
         expect_identical(p[["doc", "state"]], "done")
         doc <- p[["doc", "out"]]
         expect_s3_class(doc, "pub_doc")
-        batches <- doc$children[[2L]]$children
-        types <- vapply(batches, \(b) b$children[[1L]]$type, character(1))
+        sites <- doc$children[[2L]]$children
+        types <- vapply(sites, \(s) s$children[[1L]]$type, character(1))
         expect_identical(types, c("table", "error", "table"))
         expect_identical(
-            batches[[2L]]$children[[1L]]$object$message,
-            "key 'B': no table for batch B"
+            sites[[2L]]$children[[1L]]$object$message,
+            "key 'B': no table for site B"
         )
     })
 
@@ -958,8 +958,8 @@ describe("documents made by layout steps (fixtures)", {
             demo_report_doc(),
             demo_split_doc(),
             demo_nested_doc(),
-            demo_tests_doc(),
-            demo_tests_report_doc(),
+            demo_series_doc(),
+            demo_series_report_doc(),
             demo_failed_report_doc()
         )
 

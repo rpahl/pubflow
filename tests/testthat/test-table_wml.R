@@ -39,11 +39,11 @@ describe(".huxtable_to_wml()", {
         tables <- list(
             report_data_table(),
             report_summary_table(),
-            report_trend_by_batch()[[1L]],
+            report_trend_by_site()[[1L]],
             report_pvalue_table(),
             report_wrapped_table(),
             report_footnote_table(),
-            slopes_summary_table(serotype = c("1", "1", "3")),
+            slopes_summary_table(panel = c("1", "1", "3")),
             slopes_criteria_table(),
             edge_case_table()
         )
@@ -69,8 +69,8 @@ describe(".huxtable_to_wml()", {
         summary <- wml_doc(report_summary_table())
         expect_identical(wml_val(summary, "//w:vMerge[@w:val]"), rep("restart", 3L))
         expect_length(wml_find(summary, "//w:vMerge[not(@w:val)]"), 3L)
-        batch <- wml_cell_text(summary)[, 1L]
-        expect_identical(batch[-1L], c("A", "", "B", "", "C", ""))
+        site <- wml_cell_text(summary)[, 1L]
+        expect_identical(site[-1L], c("A", "", "B", "", "C", ""))
     })
 
     it("repeats the header rows on every page", {
@@ -98,7 +98,7 @@ describe(".huxtable_to_wml()", {
         bold <- xml2::xml_text(bold)
         expect_identical(
             bold[nzchar(bold)],
-            c("Time [months]", "Batch number", "0", "3", "6")
+            c("Time [months]", "Site ID", "0", "3", "6")
         )
         expect_identical(
             xml2::xml_text(wml_find(doc, "//w:r[w:rPr/w:i]/w:t")),
@@ -132,7 +132,7 @@ describe(".huxtable_to_wml()", {
     it("writes footnote rows spanning all columns", {
         doc <- wml_doc(report_footnote_table())
         text <- wml_row_text(doc)
-        expect_identical(text[[length(text)]], "¹ Batch numbers: A, B, C")
+        expect_identical(text[[length(text)]], "¹ Site IDs: A, B, C")
         last <- wml_find(doc, "//w:tr[last()]/w:tc")
         expect_length(last, 1L)
         expect_identical(wml_val(last[[1L]], ".//w:gridSpan"), "2")
@@ -182,7 +182,7 @@ describe(".huxtable_to_wml()", {
         struck <- wml_doc(slopes_criteria_table())
         expect_identical(
             xml2::xml_text(wml_find(struck, "//w:r[w:rPr/w:strike]/w:t")),
-            c("R²", "0.95", "Parallelism", "0.05")
+            c("R²", "0.95", "Linearity", "0.05")
         )
     })
 
@@ -285,7 +285,7 @@ describe(".huxtable_to_wml()", {
 
     it("writes the XML of a small table", {
         ht <- pub_table(
-            data.frame(batch = c("A", "B"), value = c(1.5, NA)),
+            data.frame(site = c("A", "B"), value = c(1.5, NA)),
             digits = c(value = 1L),
             na = "-",
             header = c(value = "Results")

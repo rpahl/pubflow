@@ -108,20 +108,20 @@ describe("steps of pipelines with params", {
 
     it("keeps param attributes out of the results", {
         p <- pipeflow::pip_new("p") |>
-            pipeflow::pip_add("s", \(batches = "b1", ylab = "y") {
-                cbind(data.frame(Batch = batches), data.frame(Test = ylab))
+            pipeflow::pip_add("s", \(sites = "s1", ylab = "y") {
+                cbind(data.frame(Site = sites), data.frame(Label = ylab))
             })
         pipeflow::pip_set_params(
             p,
             list(
-                batches = c("b1", "b2", "b3"),
+                sites = c("s1", "s2", "s3"),
                 ylab = param("Response", label = "y-axis label")
             )
         )
 
         run_quietly(p)
 
-        expect_identical(p[["s", "out"]]$Test, rep("Response", 3L))
+        expect_identical(p[["s", "out"]]$Label, rep("Response", 3L))
     })
 
     it("passes failures to the ~try() references of a layout step", {
@@ -386,7 +386,7 @@ describe("setting params (pubflow's setter)", {
             class = "pipeflow_set_params_error"
         )
 
-        expect_identical(err$parents[[1]]$label, "Specification limits")
+        expect_identical(err$parents[[1]]$label, "Range limits")
         expect_identical(
             unique(err$errors$message),
             paste(
@@ -814,7 +814,7 @@ describe("pub_get_params()", {
 describe("pub_out()", {
     # 'content' depends on 'fit'; 'other' fails without being upstream
     test_pipeline <- function() {
-        pipeflow::pip_new("Water") |>
+        pipeflow::pip_new("Rain") |>
             pipeflow::pip_add("data", \(n = 3) seq_len(n)) |>
             pipeflow::pip_add("fit", \(x = ~data, fail = FALSE) {
                 if (fail) {
@@ -860,17 +860,17 @@ describe("pub_out()", {
         expect_match(conditionMessage(err), "no trend", fixed = TRUE)
         item <- pub_out(v, "content", on_error = "item")
         expect_identical(item$failed_step, "fit")
-        expect_identical(item$pipeline, "Water")
+        expect_identical(item$pipeline, "Rain")
     })
 
     it("returns partitioned outputs as they are", {
         p <- demo_split_report_pipeline()
         run_quietly(p)
 
-        sections <- pub_out(p, "batch_section")
+        sections <- pub_out(p, "site_section")
 
         expect_s3_class(sections, "pipeflow_partitioned")
-        expect_identical(sections, p[["batch_section", "out"]])
+        expect_identical(sections, p[["site_section", "out"]])
     })
 
     it("signals an error for a step that never ran", {
@@ -879,14 +879,14 @@ describe("pub_out()", {
         err <- expect_error(pub_out(p, "content"), class = "pubflow_not_done")
 
         expect_s3_class(err, "pubflow_error")
-        expect_identical(err$pipeline, "Water")
+        expect_identical(err$pipeline, "Rain")
         expect_identical(err$step, "content")
         expect_identical(err$state, "new")
         expect_identical(err$failed, character())
         expect_match(
             conditionMessage(err),
             paste(
-                "The output of step 'content' of pipeline 'Water' is not",
+                "The output of step 'content' of pipeline 'Rain' is not",
                 "up to date (state \"new\")."
             ),
             fixed = TRUE
@@ -946,7 +946,7 @@ describe("pub_out()", {
                     step = "content",
                     failed_step = "fit",
                     message = "no trend",
-                    pipeline = "Water"
+                    pipeline = "Rain"
                 ),
                 class = "pub_error"
             )
@@ -1233,12 +1233,12 @@ describe("pub_layout_inputs()", {
     it("places partitioned and other outputs once with exec = 'reduce'", {
         p <- pipeflow::pip_new("split") |>
             pipeflow::pip_add("data", \() {
-                data.frame(batch = c("A", "A", "B", "B"), y = 1:4)
+                data.frame(site = c("A", "A", "B", "B"), y = 1:4)
             }) |>
             pipeflow::pip_add(
                 "split_data",
                 \(data = ~data) {
-                    split(data, data$batch)
+                    split(data, data$site)
                 },
                 exec = "split"
             ) |>
@@ -1473,7 +1473,7 @@ describe("split/reduce pipelines", {
             \(
                 data = ~split_data,
                 xTrans = factor("none", demo_trans_choices),
-                byVar = "batch"
+                byVar = "site"
             ) {
                 calls$n <- calls$n + 1L
                 list(n = nrow(data), xTrans = xTrans, byVar = byVar)
@@ -1494,7 +1494,7 @@ describe("split/reduce pipelines", {
                 list(
                     n = 4L,
                     xTrans = factor("none", demo_trans_choices),
-                    byVar = "batch"
+                    byVar = "site"
                 )
             )
         }
@@ -1508,7 +1508,7 @@ describe("split/reduce pipelines", {
 
         expect_s3_class(p[["coefs", "out"]], "pipeflow_partitioned")
         combined <- p[["combine", "out"]]
-        expect_identical(combined$batch, c("A", "B", "C"))
+        expect_identical(combined$site, c("A", "B", "C"))
         expect_identical(combined$x, c(-0.3, -0.2, -0.3))
     })
 })
@@ -1586,7 +1586,7 @@ describe("nested pipelines (as.function())", {
         expect_identical(param_value(pub_get_params(p)$alpha), 0.05)
     })
 
-    it("runs one inner pipeline per batch with the outer params", {
+    it("runs one inner pipeline per site with the outer params", {
         p <- demo_nested_pipeline()
         pipeflow::pip_set_params(p, list(xTrans = "sqrt", alpha = 0.1))
 
@@ -1606,7 +1606,7 @@ describe("nested pipelines (as.function())", {
             expect_identical(param_attr(xTrans, "label"), "x transformation")
             expect_identical(
                 inner[["data", "out"]],
-                split(demo_data(), demo_data()$batch)[[key]]
+                split(demo_data(), demo_data()$site)[[key]]
             )
         }
     })
@@ -1618,7 +1618,7 @@ describe("nested pipelines (as.function())", {
         tab <- p[["coef_table", "out"]]
 
         fits <- demo_fit(demo_data(), "none", 0.05)
-        expect_identical(tab$batch, c("A", "B", "C"))
+        expect_identical(tab$site, c("A", "B", "C"))
         expect_equal(tab$slope, pub_round(fits$slope, 2))
         expect_equal(tab$lower, pub_round(fits$lower, 2))
     })

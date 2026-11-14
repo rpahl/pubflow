@@ -10,7 +10,7 @@ describe("pub_render()", {
     noon <- as.POSIXct("2026-10-05 12:00:00", tz = "UTC")
     small_doc <- function(...) {
         pub_doc(
-            pub_section("Results", "All batches meet the limits.", ...),
+            pub_section("Results", "All sites meet the limits.", ...),
             title = "Demo report",
             meta = list(time = noon)
         )
@@ -70,7 +70,7 @@ describe("pub_render()", {
         pub_render(small_doc(), "md", file = file)
 
         expect_false(grepl("old", read_text(file), fixed = TRUE))
-        expect_match(read_text(file), "All batches meet the limits.", fixed = TRUE)
+        expect_match(read_text(file), "All sites meet the limits.", fixed = TRUE)
     })
 
     it("signals an error (and no warning) if the file can't be written", {
@@ -446,11 +446,11 @@ describe("pub_output_filename()", {
     noon <- as.POSIXct("2026-10-05 14:30:05", tz = "UTC")
 
     it("combines the UTC time and the title in snake case", {
-        meta <- list(title = "Quality report: Batch A (v2)", time = noon)
+        meta <- list(title = "Quality report: Site A (v2)", time = noon)
 
         expect_identical(
             pub_output_filename(meta, "docx"),
-            "20261005T143005Z_quality_report_batch_a_v2.docx"
+            "20261005T143005Z_quality_report_site_a_v2.docx"
         )
         expect_identical(
             pub_output_filename(pub_doc(title = "T", meta = list(time = noon)), "pdf"),

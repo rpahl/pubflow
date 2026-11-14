@@ -403,7 +403,7 @@ describe("demo_report_pipeline() (fixture for documents)", {
             cell_text(data)[1:3, 1:3],
             rbind(
                 c("", "Time [months]", "Time [months]"),
-                c("Batch\u00b9", "0", "3"),
+                c("Site\u00b9", "0", "3"),
                 c("A", "100.00", "99.10")
             )
         )
@@ -420,7 +420,7 @@ describe("demo_report_pipeline() (fixture for documents)", {
             cell_text(criteria)[4, ],
             c("~~Slope below zero~~", "~~0~~", "~~-~~")
         )
-        expect_identical(pub_meta(out("trend_plot"), "caption"), "Assay over time")
+        expect_identical(pub_meta(out("trend_plot"), "caption"), "Yield over time")
         expect_identical(pub_meta(out("conclusion"), "title"), "Conclusion")
         expect_named(out("results"), c("Fit", "Conclusion"))
         expect_identical(

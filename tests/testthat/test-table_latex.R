@@ -77,7 +77,7 @@ describe(".table_latex()", {
 
     it("aligns wrapping cells at the top", {
         ht <- pub_table(data.frame(
-            id = "B01",
+            id = "R01",
             text = paste(rep("Long text that wraps.", 30), collapse = " ")
         ))
 
@@ -355,7 +355,7 @@ describe(".latex_widths()", {
             size = huxtable::font_size(res)
         )
     }
-    long <- "Sample stored at the wrong temperature for two days."
+    long <- "Sensor reported out-of-range values for two days."
 
     it("keeps the natural width of a table that fits", {
         res <- widths(pub_table(data.frame(a = "x", b = 1.5)))
@@ -366,7 +366,7 @@ describe(".latex_widths()", {
 
     it("wraps a wide table, giving each column at least its longest word", {
         ht <- pub_table(data.frame(
-            id = "B01",
+            id = "R01",
             a = paste(rep(long, 4), collapse = " "),
             b = long
         ))
@@ -514,8 +514,8 @@ describe(".cell_extents()", {
 
 describe(".string_widths()", {
     it("measures text in em, bold wider than plain", {
-        plain <- .string_widths(c("M", "MM", "Batch"), c(1L, 1L, 1L))
-        bold <- .string_widths("Batch", 2L)
+        plain <- .string_widths(c("M", "MM", "Site"), c(1L, 1L, 1L))
+        bold <- .string_widths("Site", 2L)
 
         expect_equal(plain[[2L]], 2 * plain[[1L]])
         expect_gt(bold, plain[[3L]])

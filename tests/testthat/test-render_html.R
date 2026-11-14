@@ -132,7 +132,7 @@ describe("pub_html()", {
                 step = "content",
                 failed_step = "fit",
                 message = "no <trend>",
-                pipeline = "Water & Co"
+                pipeline = "Rain & Co"
             ),
             class = "pub_error"
         )
@@ -142,7 +142,7 @@ describe("pub_html()", {
         expect_match(
             html,
             paste0(
-                "pubflow-error-title\">Step 'fit' of pipeline 'Water &amp; Co' ",
+                "pubflow-error-title\">Step 'fit' of pipeline 'Rain &amp; Co' ",
                 "failed</div>"
             ),
             fixed = TRUE
@@ -662,7 +662,7 @@ describe("pub_html() of the fixture documents", {
             demo_report_doc(),
             demo_split_doc(),
             demo_nested_doc(),
-            demo_tests_doc(),
+            demo_series_doc(),
             demo_failed_report_doc()
         )
 

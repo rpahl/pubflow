@@ -10,7 +10,7 @@
 # - demo_split_pipeline(): split/reduce exec modes;
 # - demo_nested_pipeline(): nested pipeline (sub-pipeline factory demo_inner_pipeline()
 #   with its own config; the outer step is the inner pipeline as a function
-#   (as.function()), mapped over the batches, so the inner params are params of the
+#   (as.function()), mapped over the sites, so the inner params are params of the
 #   outer pipeline; a combination step);
 # - demo_report_pipeline(): demo_pipeline() plus steps producing styled tables
 #   (coloured, merged, spanner, footnote, struck-through rows), a figure, Markdown text
@@ -18,19 +18,19 @@
 #   a layout step that takes failures: with `failCheck = "yes"` step 'check' fails, so
 #   'check_text' (placed in section "Criteria") is not run;
 # - demo_split_report_pipeline(), demo_inner_report_pipeline(),
-#   demo_nested_report_pipeline(), demo_test_pipelines(): the split and nested pipelines
-#   with displayable outputs per partition or inner pipeline and layout steps, and one
-#   pipeline per test; the table step of the split report fails for the batch
-#   `failBatch`;
-# - demo_tests_report_pipeline(): a report pipeline over the test pipelines (fed with
-#   demo_test_parts());
+#   demo_nested_report_pipeline(), demo_series_pipelines(): the split and nested
+#   pipelines with displayable outputs per partition or inner pipeline and layout steps,
+#   and one pipeline per series; the table step of the split report fails for the site
+#   `failSite`;
+# - demo_series_report_pipeline(): a report pipeline over the series pipelines (fed with
+#   demo_series_parts());
 # - the documents of these pipelines (run): demo_report_doc(), demo_split_doc(),
-#   demo_nested_doc(), demo_tests_doc(), demo_tests_report_doc(); with failures (run
+#   demo_nested_doc(), demo_series_doc(), demo_series_report_doc(); with failures (run
 #   with `on_error = "continue"`): demo_failed_report_doc().
 
 demo_data <- function() {
     data.frame(
-        batch = rep(c("A", "B", "C"), each = 4L),
+        site = rep(c("A", "B", "C"), each = 4L),
         time = rep(c(0, 3, 6, 12), times = 3L),
         y = c(
             100.0,
@@ -60,14 +60,14 @@ demo_trans <- function(x, trans) {
     )
 }
 
-# Slope of y over transformed time per batch, with confidence limits
+# Slope of y over transformed time per site, with confidence limits
 demo_fit <- function(data, xTrans, alpha) {
-    fits <- lapply(split(data, data$batch), \(d) {
+    fits <- lapply(split(data, data$site), \(d) {
         d$x <- demo_trans(d$time, xTrans)
         fit <- stats::lm(y ~ x, data = d)
         ci <- stats::confint(fit, level = 1 - alpha)
         data.frame(
-            batch = d$batch[[1L]],
+            site = d$site[[1L]],
             intercept = stats::coef(fit)[["(Intercept)"]],
             slope = stats::coef(fit)[["x"]],
             lower = ci["x", 1L],
@@ -86,10 +86,10 @@ ensure_lower_lt_upper <- function(x) {
 demo_limits_param <- function() {
     param_group(
         list(
-            lower = numeral_param("95", label = "LSL"),
-            upper = numeral_param("105", label = "USL")
+            lower = numeral_param("95", label = "Min"),
+            upper = numeral_param("105", label = "Max")
         ),
-        label = "Specification limits",
+        label = "Range limits",
         source = "user",
         area = "criteria"
     ) |>
@@ -135,7 +135,7 @@ demo_config <- function() {
         ),
         limits = demo_limits_param(),
         ylab = param(
-            "Assay",
+            "Yield",
             label = "y-axis label",
             source = "user",
             area = "plot"
@@ -226,7 +226,7 @@ demo_pipeline <- function(name = "demo") {
             ) {
                 predicted <- fit$intercept + fit$slope * demo_trans(12, xTrans)
                 data.frame(
-                    batch = fit$batch,
+                    site = fit$site,
                     predicted = predicted,
                     pass = predicted >= as.numeric(limits$lower) &
                         predicted <= as.numeric(limits$upper)
@@ -239,7 +239,7 @@ demo_pipeline <- function(name = "demo") {
             \(
                 data = ~data,
                 xlab = "Time",
-                ylab = "Assay",
+                ylab = "Yield",
                 yUnit = "",
                 showPoints = factor("yes", c("yes", "no")),
                 smooth = factor("off", c("on", "off"))
@@ -257,7 +257,7 @@ demo_pipeline <- function(name = "demo") {
         pipeflow::pip_add(
             "summary",
             \(fit = ~fit, title = "") {
-                sprintf("%s: %d batches analysed.", title, nrow(fit))
+                sprintf("%s: %d sites analysed.", title, nrow(fit))
             },
             tags = "report"
         ) |>
@@ -362,7 +362,7 @@ demo_combined_pipeline <- function(apply_config = TRUE) {
 
 demo_split_config <- function() {
     param_config(
-        byVar = param("batch", label = "Group column", source = "data"),
+        byVar = param("site", label = "Group column", source = "data"),
         xTrans = choice_param(
             "none",
             choices = demo_trans_choices,
@@ -377,7 +377,7 @@ demo_split_pipeline <- function() {
         pipeflow::pip_add("data", \(data = demo_data()) data) |>
         pipeflow::pip_add(
             "split_data",
-            \(data = ~data, byVar = "batch") {
+            \(data = ~data, byVar = "site") {
                 split(data, data[[byVar]])
             },
             exec = "split"
@@ -398,7 +398,7 @@ demo_split_pipeline <- function() {
         pipeflow::pip_add(
             "combine",
             \(coefs = ~coefs) {
-                data.frame(batch = names(coefs), do.call(rbind, unname(coefs)))
+                data.frame(site = names(coefs), do.call(rbind, unname(coefs)))
             },
             exec = "reduce"
         )
@@ -431,7 +431,7 @@ demo_inner_config <- function() {
     )
 }
 
-# Sub-pipeline factory: analysis of one batch
+# Sub-pipeline factory: analysis of one site
 demo_inner_pipeline <- function(data = NULL, name = "inner") {
     pip <- pipeflow::pip_new(name) |>
         pipeflow::pip_add("data", \(data = NULL) data) |>
@@ -466,13 +466,13 @@ demo_inner_pipeline <- function(data = NULL, name = "inner") {
 
 demo_nested_config <- function() {
     param_config(
-        byVar = param("batch", label = "Group column", source = "data"),
+        byVar = param("site", label = "Group column", source = "data"),
         demo_inner_config()
     )
 }
 
 # The inner pipeline as a function of the outer step 'inner_run', mapped over the
-# batches: one inner pipeline per batch, whose outputs `out` it returns
+# sites: one inner pipeline per site, whose outputs `out` it returns
 demo_nested_pipeline <- function(
     inner = demo_inner_pipeline(),
     out = c("settings", "coefs")
@@ -481,7 +481,7 @@ demo_nested_pipeline <- function(
         pipeflow::pip_add("data", \(data = demo_data()) data) |>
         pipeflow::pip_add(
             "split_data",
-            \(data = ~data, byVar = "batch") {
+            \(data = ~data, byVar = "site") {
                 split(data, data[[byVar]])
             },
             exec = "split"
@@ -495,7 +495,7 @@ demo_nested_pipeline <- function(
             "coef_table",
             \(res = ~inner_run) {
                 coefs <- lapply(res, `[[`, "coefs")
-                data.frame(batch = names(coefs), do.call(rbind, unname(coefs)))
+                data.frame(site = names(coefs), do.call(rbind, unname(coefs)))
             },
             exec = "reduce"
         )
@@ -504,35 +504,35 @@ demo_nested_pipeline <- function(
 
 # Report pipeline --------------------------------------------
 
-# Wide data table: one row per batch, time points under a spanner, values below 98 in
-# red (out-of-trend style), footnote on the batch column
+# Wide data table: one row per site, time points under a spanner, values below 98 in
+# red (outlier style), footnote on the site column
 demo_data_table <- function(data, decimals) {
     wide <- stats::reshape(
-        data[c("batch", "time", "y")],
-        idvar = "batch",
+        data[c("site", "time", "y")],
+        idvar = "site",
         timevar = "time",
         direction = "wide"
     )
     times <- as.character(sort(unique(data$time)))
-    names(wide) <- c("batch", times)
+    names(wide) <- c("site", times)
     rownames(wide) <- NULL
     low <- as.matrix(wide[times]) < 98
     ht <- pub_table(
         wide,
         caption = "Data table",
-        labels = c(batch = "Batch"),
+        labels = c(site = "Site"),
         digits = rlang::set_names(rep(decimals, length(times)), times),
         header = rlang::set_names(rep("Time [months]", length(times)), times),
-        footnotes = c(batch = "Batches of the demo study.")
+        footnotes = c(site = "Sites of the demo data.")
     )
     rows <- pub_table_rows(ht)$body
     huxtable::set_text_color(ht, rows, times, ifelse(low, "red", "black"))
 }
 
-# Fit summary: two rows per batch, merged batch column, bold slopes
+# Fit summary: two rows per site, merged site column, bold slopes
 demo_fit_table <- function(fit, decimals) {
     long <- data.frame(
-        batch = rep(fit$batch, each = 2L),
+        site = rep(fit$site, each = 2L),
         term = rep(c("Intercept", "Slope"), times = nrow(fit)),
         estimate = c(rbind(fit$intercept, fit$slope)),
         lower = c(rbind(NA, fit$lower)),
@@ -542,7 +542,7 @@ demo_fit_table <- function(fit, decimals) {
         long,
         caption = "Fit summary",
         labels = c(
-            batch = "Batch",
+            site = "Site",
             term = "Parameter",
             estimate = "Estimate",
             lower = "Lower",
@@ -550,7 +550,7 @@ demo_fit_table <- function(fit, decimals) {
         ),
         digits = c(estimate = decimals, lower = decimals, upper = decimals),
         header = c(lower = "Confidence interval", upper = "Confidence interval"),
-        merge = "batch",
+        merge = "site",
         na = "-"
     )
     slopes <- pub_table_rows(ht)$body[long$term == "Slope"]
@@ -560,7 +560,7 @@ demo_fit_table <- function(fit, decimals) {
 # Criteria table: deactivated criteria grey and struck through
 demo_criteria_table <- function(check, limits) {
     criteria <- data.frame(
-        criterion = c("Prediction >= LSL", "Prediction <= USL", "Slope below zero"),
+        criterion = c("Prediction >= Min", "Prediction <= Max", "Slope below zero"),
         limit = c(limits$lower, limits$upper, "0"),
         passed = c(
             sum(check$predicted >= as.numeric(limits$lower)),
@@ -575,7 +575,7 @@ demo_criteria_table <- function(check, limits) {
         labels = c(
             criterion = "Criterion",
             limit = "Limit",
-            passed = "Batches passing"
+            passed = "Sites passing"
         ),
         na = "-"
     )
@@ -589,11 +589,11 @@ demo_criteria_table <- function(check, limits) {
 demo_trend_plot <- function(data, xlab, ylab) {
     p <- if (requireNamespace("ggplot2", quietly = TRUE)) {
         # nolint start: object_usage_linter. (columns of `data`)
-        ggplot2::ggplot(data, ggplot2::aes(time, y, colour = batch)) +
+        ggplot2::ggplot(data, ggplot2::aes(time, y, colour = site)) +
             # nolint end
             ggplot2::geom_point() +
             ggplot2::geom_line() +
-            ggplot2::labs(x = xlab, y = ylab, colour = "Batch")
+            ggplot2::labs(x = xlab, y = ylab, colour = "Site")
     } else {
         grDevices::pdf(NULL)
         on.exit(grDevices::dev.off())
@@ -607,7 +607,7 @@ demo_trend_plot <- function(data, xlab, ylab) {
 demo_conclusion <- function(fit, title) {
     pub_text(
         c(
-            sprintf("**%s**: %d batches analysed.", title, nrow(fit)),
+            sprintf("**%s**: %d sites analysed.", title, nrow(fit)),
             "",
             pub_format_num(min(fit$slope), "- steepest slope: *%.3f*"),
             pub_format_num(max(fit$slope), "- flattest slope: *%.3f*"),
@@ -655,7 +655,7 @@ demo_report_pipeline <- function(name = "report") {
         ) |>
         pipeflow::pip_add(
             "trend_plot",
-            \(data = ~data, xlab = "Time", ylab = "Assay") {
+            \(data = ~data, xlab = "Time", ylab = "Yield") {
                 demo_trend_plot(data, xlab, ylab)
             },
             tags = c("report", "figure")
@@ -672,9 +672,9 @@ demo_report_pipeline <- function(name = "report") {
             \(check = ~check) {
                 pub_text(
                     if (isTRUE(check)) {
-                        "All batches meet the limits."
+                        "All sites meet the limits."
                     } else {
-                        "Some batches fail the limits."
+                        "Some sites fail the limits."
                     }
                 )
             },
@@ -700,23 +700,23 @@ demo_report_pipeline <- function(name = "report") {
 # Report variants of the split and nested pipelines -------------------------------
 
 # Split pipeline plus steps with outputs per partition (a table, a figure and a text for
-# each batch), a table of the reduced result and the layout steps: one section per
-# batch, then the document
+# each site), a table of the reduced result and the layout steps: one section per
+# site, then the document
 demo_split_report_pipeline <- function() {
     pip <- demo_split_pipeline() |>
-        pipeflow::pip_add("partition_table", \(data = ~split_data, failBatch = "") {
-            if (data$batch[[1L]] == failBatch) {
-                stop(sprintf("no table for batch %s", failBatch))
+        pipeflow::pip_add("partition_table", \(data = ~split_data, failSite = "") {
+            if (data$site[[1L]] == failSite) {
+                stop(sprintf("no table for site %s", failSite))
             }
             pub_table(
                 data[c("time", "y")],
-                caption = sprintf("Data of batch %s", data$batch[[1L]]),
-                labels = c(time = "Time", y = "Assay"),
+                caption = sprintf("Data of site %s", data$site[[1L]]),
+                labels = c(time = "Time", y = "Yield"),
                 digits = c(time = 0L, y = 1L)
             )
         }) |>
         pipeflow::pip_add("trend_plot", \(data = ~split_data) {
-            demo_trend_plot(data, "Time", "Assay")
+            demo_trend_plot(data, "Time", "Yield")
         }) |>
         pipeflow::pip_add("coef_text", \(coefs = ~coefs) {
             pub_text(sprintf("Slope: %s per month.", coefs[["x"]]))
@@ -724,11 +724,11 @@ demo_split_report_pipeline <- function() {
         pipeflow::pip_add("summary_table", \(combined = ~combine) {
             pub_table(
                 combined,
-                caption = "Coefficients per batch",
-                labels = c(batch = "Batch", X.Intercept. = "Intercept", x = "Slope")
+                caption = "Coefficients per site",
+                labels = c(site = "Site", X.Intercept. = "Intercept", x = "Slope")
             )
         }) |>
-        pipeflow::pip_add("batch_section", demo_batch_layout) |>
+        pipeflow::pip_add("site_section", demo_site_layout) |>
         pipeflow::pip_add("doc", demo_split_layout, exec = "reduce")
     pipeflow::pip_set_params(pip, demo_split_config(), unknown = "error")
 }
@@ -746,7 +746,7 @@ demo_inner_report_pipeline <- function(data = NULL, name = "inner") {
             )
         }) |>
         pipeflow::pip_add("trend_plot", \(data = ~data) {
-            demo_trend_plot(data, "Time", "Assay")
+            demo_trend_plot(data, "Time", "Yield")
         }) |>
         pipeflow::pip_add("note", \(fit = ~fit) {
             slopes <- toString(pub_format_num(fit$slope, 3))
@@ -762,7 +762,7 @@ demo_inner_report_pipeline <- function(data = NULL, name = "inner") {
 }
 
 # Nested pipeline over the inner report pipeline, plus a step returning a named list (by
-# batch) of lists of outputs, a summary table and the layout step
+# site) of lists of outputs, a summary table and the layout step
 demo_nested_report_pipeline <- function() {
     demo_nested_pipeline(
         inner = demo_inner_report_pipeline(),
@@ -776,18 +776,18 @@ demo_nested_report_pipeline <- function() {
             exec = "reduce"
         ) |>
         pipeflow::pip_add("summary_table", \(coefs = ~coef_table) {
-            pub_table(coefs, caption = "Slopes per batch")
+            pub_table(coefs, caption = "Slopes per site")
         }) |>
         pipeflow::pip_add("doc", demo_nested_layout, exec = "reduce")
 }
 
-# One pipeline per test: named list of pipelines
-demo_test_pipelines <- function() {
-    water <- demo_data()
-    water$y <- water$y / 40
+# One pipeline per series: named list of pipelines
+demo_series_pipelines <- function() {
+    rain <- demo_data()
+    rain$y <- rain$y / 40
     list(
-        Assay = demo_inner_report_pipeline(demo_data(), name = "test Assay"),
-        Water = demo_inner_report_pipeline(water, name = "test Water")
+        Yield = demo_inner_report_pipeline(demo_data(), name = "series Yield"),
+        Rain = demo_inner_report_pipeline(rain, name = "series Rain")
     )
 }
 
@@ -812,7 +812,7 @@ demo_report_layout <- function(
     pub_doc(
         pub_section(
             "Introduction",
-            pub_text("Quality of three batches ([demo]{.placeholder})."),
+            pub_text("Quality of three sites ([demo]{.placeholder})."),
             numbered = FALSE
         ),
         pub_section(
@@ -830,49 +830,49 @@ demo_report_layout <- function(
     )
 }
 
-# Runs once per batch (downstream of the split step): one section with the outputs of
+# Runs once per site (downstream of the split step): one section with the outputs of
 # several partitioned steps
-demo_batch_layout <- function(
+demo_site_layout <- function(
     table = ~ try(partition_table),
     plot = ~ try(trend_plot),
     text = ~ try(coef_text),
     data = ~ try(split_data)
 ) {
-    title <- sprintf("Batch %s (%d values)", data$batch[[1L]], nrow(data))
+    title <- sprintf("Site %s (%d values)", data$site[[1L]], nrow(data))
     pub_section(title, table, plot, text)
 }
 
-# Reduce step: the batch sections (unnamed, so that they are not wrapped in sections per
+# Reduce step: the site sections (unnamed, so that they are not wrapped in sections per
 # key), the reduced table once, and a partitioned output placed as is (one section per
 # key)
 demo_split_layout <- function(
-    batches = ~ try(batch_section),
+    sites = ~ try(site_section),
     summary = ~ try(summary_table),
     slopes = ~ try(coef_text)
 ) {
     pub_doc(
         pub_section("Overview", summary),
-        pub_section("Batches", unname(batches)),
+        pub_section("Sites", unname(sites)),
         pub_section("All slopes", slopes),
         title = "Split demo"
     )
 }
 
 # One section per inner pipeline (from its layout step "content"), and the entries of a
-# list output selected and ordered per batch
+# list output selected and ordered per site
 demo_nested_layout <- function(
     res = ~inner_run,
     results = ~inner_results,
     summary = ~summary_table
 ) {
-    batches <- lapply(names(res), \(name) {
-        pub_section(sprintf("Batch %s", name), res[[name]]$content, page_break = TRUE)
+    sites <- lapply(names(res), \(name) {
+        pub_section(sprintf("Site %s", name), res[[name]]$content, page_break = TRUE)
     })
     pub_doc(
         pub_section("Summary", summary),
-        batches,
+        sites,
         pub_section(
-            "Results per batch",
+            "Results per site",
             lapply(results, \(r) unname(r[c("note", "table")]))
         ),
         title = "Nested demo"
@@ -931,68 +931,68 @@ demo_failures <- function() {
     p[["doc", "out"]]
 }
 
-# One pipeline per test, assembled by the app: one section per test
-demo_tests_doc <- function(pipelines = demo_test_pipelines()) {
+# One pipeline per series, assembled by the app: one section per series
+demo_series_doc <- function(pipelines = demo_series_pipelines()) {
     for (p in pipelines) {
         run_quietly(p)
     }
-    pub_doc(lapply(pipelines, pub_out, step = "content"), title = "Tests")
+    pub_doc(lapply(pipelines, pub_out, step = "content"), title = "Series")
 }
 
-# Report pipeline over one pipeline per test: the parts of the test pipelines come in as
-# param values (demo_test_parts()), and a step computes across the tests
-demo_tests_report_pipeline <- function() {
-    pipeflow::pip_new("tests report") |>
-        pipeflow::pip_add("tests", \(testParts = list()) testParts) |>
-        pipeflow::pip_add("fits", \(testFits = list()) testFits) |>
+# Report pipeline over one pipeline per series: the parts of the series pipelines come
+# in as param values (demo_series_parts()), and a step computes across the series
+demo_series_report_pipeline <- function() {
+    pipeflow::pip_new("series report") |>
+        pipeflow::pip_add("parts", \(seriesParts = list()) seriesParts) |>
+        pipeflow::pip_add("fits", \(seriesFits = list()) seriesFits) |>
         pipeflow::pip_add("slope_table", \(fits = ~fits) {
             slopes <- Map(
-                \(test, fit) data.frame(test = test, fit[c("batch", "slope")]),
+                \(series, fit) data.frame(series = series, fit[c("site", "slope")]),
                 names(fits),
                 fits
             )
             pub_table(
                 do.call(rbind, unname(slopes)),
-                caption = "Slopes per test",
-                labels = c(test = "Test", batch = "Batch", slope = "Slope"),
+                caption = "Slopes per series",
+                labels = c(series = "Series", site = "Site", slope = "Slope"),
                 digits = c(slope = 3L),
-                merge = "test"
+                merge = "series"
             )
         }) |>
-        pipeflow::pip_add("doc", demo_tests_report_layout)
+        pipeflow::pip_add("doc", demo_series_report_layout)
 }
 
-demo_tests_report_layout <- function(
-    tests = ~ try(tests),
+demo_series_report_layout <- function(
+    parts = ~ try(parts),
     slopes = ~ try(slope_table)
 ) {
     pub_doc(
-        pub_section("Results", tests),
+        pub_section("Results", parts),
         pub_section("Summary", slopes),
-        title = "Tests report"
+        title = "Series report"
     )
 }
 
-# Param values of the report pipeline: the parts of the test pipelines
-demo_test_parts <- function(pipelines, on_error = "stop") {
+# Param values of the report pipeline: the parts of the series pipelines
+demo_series_parts <- function(pipelines, on_error = "stop") {
     list(
-        testParts = lapply(
+        seriesParts = lapply(
             pipelines,
             pub_out,
             step = "content",
             on_error = on_error
         ),
-        testFits = lapply(pipelines, pub_out, step = "fit")
+        seriesFits = lapply(pipelines, pub_out, step = "fit")
     )
 }
 
-# Document of the report pipeline over the test pipelines
-demo_tests_report_doc <- function(pipelines = demo_test_pipelines()) {
+# Document of the report pipeline over the series pipelines
+demo_series_report_doc <- function(pipelines = demo_series_pipelines()) {
     for (p in pipelines) {
         run_quietly(p)
     }
-    report <- demo_tests_report_pipeline()
-    pipeflow::pip_set_params(report, demo_test_parts(pipelines))
+    report <- demo_series_report_pipeline()
+    pipeflow::pip_set_params(report, demo_series_parts(pipelines))
     run_quietly(report)
     report[["doc", "out"]]
 }

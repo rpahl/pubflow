@@ -42,46 +42,46 @@
     Output
       <pubflow document> "Quality demo"
       # Introduction [unnumbered]
-        text "Quality of three batches ([demo]{.pla..."
+        text "Quality of three sites ([demo]{.place..."
       # Data
         table "Data table"
         table "Predicted values at 12 months"
       # Analysis
         table "Fit summary"
-        figure "Assay over time"
+        figure "Yield over time"
         ## Fit
           table "Fit summary"
-          figure "Assay over time"
+          figure "Yield over time"
         ## Conclusion
           text "Conclusion"
       # Criteria [landscape]
         table "Acceptance criteria"
-        text "All batches meet the limits."
+        text "All sites meet the limits."
       # Summary
-        text "Quality demo: 3 batches analysed."
+        text "Quality demo: 3 sites analysed."
         text "Conclusion"
       # Notes [on empty: keep]
 
-# documents made by layout steps (fixtures) / places the outputs of several partitioned steps per batch (split)
+# documents made by layout steps (fixtures) / places the outputs of several partitioned steps per site (split)
 
     Code
       print(doc)
     Output
       <pubflow document> "Split demo"
       # Overview
-        table "Coefficients per batch"
-      # Batches
-        ## Batch A (4 values)
-          table "Data of batch A"
-          figure "Assay over time"
+        table "Coefficients per site"
+      # Sites
+        ## Site A (4 values)
+          table "Data of site A"
+          figure "Yield over time"
           text "Slope: -0.26 per month."
-        ## Batch B (4 values)
-          table "Data of batch B"
-          figure "Assay over time"
+        ## Site B (4 values)
+          table "Data of site B"
+          figure "Yield over time"
           text "Slope: -0.25 per month."
-        ## Batch C (4 values)
-          table "Data of batch C"
-          figure "Assay over time"
+        ## Site C (4 values)
+          table "Data of site C"
+          figure "Yield over time"
           text "Slope: -0.29 per month."
       # All slopes
         ## A
@@ -98,20 +98,20 @@
     Output
       <pubflow document> "Nested demo"
       # Summary
-        table "Slopes per batch"
-      # Batch A [page break]
+        table "Slopes per site"
+      # Site A [page break]
         table "Fit summary"
-        figure "Assay over time"
+        figure "Yield over time"
         text "Slope: -0.255."
-      # Batch B [page break]
+      # Site B [page break]
         table "Fit summary"
-        figure "Assay over time"
+        figure "Yield over time"
         text "Slope: -0.248."
-      # Batch C [page break]
+      # Site C [page break]
         table "Fit summary"
-        figure "Assay over time"
+        figure "Yield over time"
         text "Slope: -0.289."
-      # Results per batch
+      # Results per site
         ## A
           text "Slope: -0.255."
           table "Fit summary"
@@ -122,38 +122,38 @@
           text "Slope: -0.289."
           table "Fit summary"
 
-# documents made by layout steps (fixtures) / assembles one section per pipeline of a list (one per test)
+# documents made by layout steps (fixtures) / assembles one section per pipeline of a list (one per series)
 
     Code
       print(doc)
     Output
-      <pubflow document> "Tests"
-      # Assay
+      <pubflow document> "Series"
+      # Yield
         table "Fit summary"
-        figure "Assay over time"
+        figure "Yield over time"
         text "Slope: -0.255, -0.248, -0.289."
-      # Water
+      # Rain
         table "Fit summary"
-        figure "Assay over time"
+        figure "Yield over time"
         text "Slope: -0.006, -0.006, -0.007."
 
-# documents made by layout steps (fixtures) / builds a report across the test pipelines
+# documents made by layout steps (fixtures) / builds a report across the series pipelines
 
     Code
       print(doc)
     Output
-      <pubflow document> "Tests report"
+      <pubflow document> "Series report"
       # Results
-        ## Assay
+        ## Yield
           table "Fit summary"
-          figure "Assay over time"
+          figure "Yield over time"
           text "Slope: -0.255, -0.248, -0.289."
-        ## Water
+        ## Rain
           table "Fit summary"
-          figure "Assay over time"
+          figure "Yield over time"
           text "Slope: -0.006, -0.006, -0.007."
       # Summary
-        table "Slopes per test"
+        table "Slopes per series"
 
 # documents made by layout steps (fixtures) / places the failures of a report run with on_error = "continue"
 
@@ -162,23 +162,23 @@
     Output
       <pubflow document> "Quality demo"
       # Introduction [unnumbered]
-        text "Quality of three batches ([demo]{.pla..."
+        text "Quality of three sites ([demo]{.place..."
       # Data
         table "Data table"
         table "Predicted values at 12 months"
       # Analysis
         table "Fit summary"
-        figure "Assay over time"
+        figure "Yield over time"
         ## Fit
           table "Fit summary"
-          figure "Assay over time"
+          figure "Yield over time"
         ## Conclusion
           text "Conclusion"
       # Criteria [landscape]
         table "Acceptance criteria"
         error "step 'check' failed: check failed on request"
       # Summary
-        text "Quality demo: 3 batches analysed."
+        text "Quality demo: 3 sites analysed."
         text "Conclusion"
       # Notes [on empty: keep]
 

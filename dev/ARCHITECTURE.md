@@ -676,9 +676,9 @@ requirement.
 
 - `helper-pipelines.R`: demo pipelines for every pattern, all built with
   pubflow (`demo_pipeline()`, combined, split, nested, one pipeline per
-  group) and their report variants with layout steps
+  series) and their report variants with layout steps
   (`demo_report_pipeline()`, `demo_split_report_pipeline()`,
-  `demo_nested_report_pipeline()`, `demo_test_pipelines()`). Their
+  `demo_nested_report_pipeline()`, `demo_series_pipelines()`). Their
   documents (`demo_report_doc()` and friends) feed the render tests.
 - `helper-tables.R`: tables modelled on typical report tables, and the numeric
   edge-case table of the cross-format test.
