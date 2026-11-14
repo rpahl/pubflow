@@ -1467,7 +1467,7 @@ describe("pub_pipeline_params_server()", {
 
                 expect_message(
                     session$setInputs(limits_upper = "106"),
-                    "'Specification limits' input: upper limit too high"
+                    "'Range limits' input: upper limit too high"
                 )
                 inline <- log$of_type("pubflow:showInputInlineMessage")
                 expect_equal(

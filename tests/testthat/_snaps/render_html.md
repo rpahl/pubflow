@@ -166,7 +166,7 @@
       <section class="pubflow-section pubflow-level-1" id="pubflow-sec-1">
       <h2>Introduction</h2>
       <div class="pubflow-item pubflow-text">
-      <p>Quality of three batches (<span class="pubflow-placeholder">demo</span>).</p>
+      <p>Quality of three sites (<span class="pubflow-placeholder">demo</span>).</p>
       </div>
       </section>
       <section class="pubflow-section pubflow-level-1" id="pubflow-sec-2">
@@ -178,7 +178,7 @@
       <tr>
       <th class="huxtable-cell huxtable-header" style="text-align: center;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0pt 0pt;         font-size: 9pt;"></th><th class="huxtable-cell huxtable-header" colspan="4" style="text-align: center;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">Time [months]</th></tr>
       <tr>
-      <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Batch¹</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">0</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">3</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">6</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">12</th></tr>
+      <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Site¹</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">0</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">3</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">6</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">12</th></tr>
       </thead>
       <tbody>
       <tr>
@@ -188,7 +188,7 @@
       <tr>
       <td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.8pt 0pt;         font-size: 9pt;">C</td><td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.8pt 0pt;         font-size: 9pt;"><span style="color: rgb(0, 0, 0);">99.60</span></td><td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.8pt 0pt;         font-size: 9pt;"><span style="color: rgb(0, 0, 0);">98.90</span></td><td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.8pt 0pt;         font-size: 9pt;"><span style="color: rgb(255, 0, 0);">97.80</span></td><td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.8pt 0pt;         font-size: 9pt;"><span style="color: rgb(255, 0, 0);">96.20</span></td></tr>
       <tr>
-      <td class="huxtable-cell" colspan="5" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0pt 0pt;         font-size: 9pt;">¹ Batches of the demo study.</td></tr>
+      <td class="huxtable-cell" colspan="5" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0pt 0pt;         font-size: 9pt;">¹ Sites of the demo data.</td></tr>
       </tbody>
       </table>
       </div>
@@ -197,7 +197,7 @@
       <caption>Table 2: Predicted values at 12 months</caption>
       <col><col><col><thead>
       <tr>
-      <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">batch</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">predicted</th><th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">pass</th></tr>
+      <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">site</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">predicted</th><th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">pass</th></tr>
       </thead>
       <tbody>
       <tr>
@@ -219,7 +219,7 @@
       <tr>
       <th class="huxtable-cell huxtable-header" style="text-align: center;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0pt 0pt;         font-size: 9pt;"></th><th class="huxtable-cell huxtable-header" style="text-align: center;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0pt 0pt;         font-size: 9pt;"></th><th class="huxtable-cell huxtable-header" style="text-align: center;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0pt 0pt;         font-size: 9pt;"></th><th class="huxtable-cell huxtable-header" colspan="2" style="text-align: center;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">Confidence interval</th></tr>
       <tr>
-      <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Batch</th><th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Parameter</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Estimate</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">Lower</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">Upper</th></tr>
+      <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Site</th><th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Parameter</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Estimate</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">Lower</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">Upper</th></tr>
       </thead>
       <tbody>
       <tr>
@@ -239,8 +239,8 @@
       </div>
       <div class="pubflow-item pubflow-figure">
       <figure>
-      <img src="data:image/png;..." alt="Assay over time" style="width: 90%;">
-      <figcaption>Figure 1: Assay over time</figcaption>
+      <img src="data:image/png;..." alt="Yield over time" style="width: 90%;">
+      <figcaption>Figure 1: Yield over time</figcaption>
       </figure>
       </div>
       <section class="pubflow-section pubflow-level-2" id="pubflow-sec-3-1">
@@ -252,7 +252,7 @@
       <tr>
       <th class="huxtable-cell huxtable-header" style="text-align: center;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0pt 0pt;         font-size: 9pt;"></th><th class="huxtable-cell huxtable-header" style="text-align: center;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0pt 0pt;         font-size: 9pt;"></th><th class="huxtable-cell huxtable-header" style="text-align: center;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0pt 0pt;         font-size: 9pt;"></th><th class="huxtable-cell huxtable-header" colspan="2" style="text-align: center;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">Confidence interval</th></tr>
       <tr>
-      <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Batch</th><th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Parameter</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Estimate</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">Lower</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">Upper</th></tr>
+      <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Site</th><th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Parameter</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Estimate</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">Lower</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">Upper</th></tr>
       </thead>
       <tbody>
       <tr>
@@ -272,8 +272,8 @@
       </div>
       <div class="pubflow-item pubflow-figure">
       <figure>
-      <img src="data:image/png;..." alt="Assay over time" style="width: 90%;">
-      <figcaption>Figure 2: Assay over time</figcaption>
+      <img src="data:image/png;..." alt="Yield over time" style="width: 90%;">
+      <figcaption>Figure 2: Yield over time</figcaption>
       </figure>
       </div>
       </section>
@@ -281,7 +281,7 @@
       <h3><span class="pubflow-section-number">2.2</span> Conclusion</h3>
       <div class="pubflow-item pubflow-text">
       <div class="pubflow-item-title">Conclusion</div>
-      <p><strong>Quality demo</strong>: 3 batches analysed.</p>
+      <p><strong>Quality demo</strong>: 3 sites analysed.</p>
       <ul>
       <li>steepest slope: <em>-0.289</em></li>
       <li>flattest slope: <em>-0.248</em></li>
@@ -297,13 +297,13 @@
       <caption>Table 5: Acceptance criteria</caption>
       <col><col><col><thead>
       <tr>
-      <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">Criterion</th><th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">Limit</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">Batches passing</th></tr>
+      <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">Criterion</th><th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">Limit</th><th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.8pt 0pt 0.4pt 0pt;         font-size: 9pt;">Sites passing</th></tr>
       </thead>
       <tbody>
       <tr>
-      <td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0.4pt 0pt 0pt 0pt;         font-size: 9pt;">Prediction &gt;= LSL</td><td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0.4pt 0pt 0pt 0pt;         font-size: 9pt;">95</td><td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0pt 0pt;         font-size: 9pt;">3</td></tr>
+      <td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0.4pt 0pt 0pt 0pt;         font-size: 9pt;">Prediction &gt;= Min</td><td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0.4pt 0pt 0pt 0pt;         font-size: 9pt;">95</td><td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0pt 0pt;         font-size: 9pt;">3</td></tr>
       <tr>
-      <td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0pt;         font-size: 9pt;">Prediction &lt;= USL</td><td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0pt;         font-size: 9pt;">105</td><td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0pt;         font-size: 9pt;">3</td></tr>
+      <td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0pt;         font-size: 9pt;">Prediction &lt;= Max</td><td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0pt;         font-size: 9pt;">105</td><td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0pt;         font-size: 9pt;">3</td></tr>
       <tr>
       <td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.8pt 0pt;         font-size: 9pt;"><span style="color: rgb(211, 200, 200);"><p><del>Slope below zero</del></p>
       </span></td><td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.8pt 0pt;         font-size: 9pt;"><span style="color: rgb(211, 200, 200);"><p><del>0</del></p>
@@ -313,17 +313,17 @@
       </table>
       </div>
       <div class="pubflow-item pubflow-text">
-      <p>All batches meet the limits.</p>
+      <p>All sites meet the limits.</p>
       </div>
       </section>
       <section class="pubflow-section pubflow-level-1" id="pubflow-sec-5">
       <h2><span class="pubflow-section-number">4</span> Summary</h2>
       <div class="pubflow-item pubflow-text">
-      <p>Quality demo: 3 batches analysed.</p>
+      <p>Quality demo: 3 sites analysed.</p>
       </div>
       <div class="pubflow-item pubflow-text">
       <div class="pubflow-item-title">Conclusion</div>
-      <p><strong>Quality demo</strong>: 3 batches analysed.</p>
+      <p><strong>Quality demo</strong>: 3 sites analysed.</p>
       <ul>
       <li>steepest slope: <em>-0.289</em></li>
       <li>flattest slope: <em>-0.248</em></li>

@@ -20,7 +20,7 @@ border <- function(ht, side) {
 
 describe("pub_table()", {
     df <- data.frame(
-        batch = c("A", "B"),
+        site = c("A", "B"),
         slope = c(0.12345, NA),
         n = 1:2,
         grade = factor(c("x", NA))
@@ -34,7 +34,7 @@ describe("pub_table()", {
         expect_identical(
             cells(ht),
             rbind(
-                c("batch", "slope", "n", "grade"),
+                c("site", "slope", "n", "grade"),
                 c("A", "0.12345", "1", "x"),
                 c("B", NA, "2", NA)
             )
@@ -84,7 +84,7 @@ describe("pub_table()", {
         ht <- pub_table(
             df,
             caption = "Slopes",
-            labels = c(batch = "Batch", slope = "Slope"),
+            labels = c(site = "Site", slope = "Slope"),
             digits = c(slope = 2, n = 1),
             na = "-"
         )
@@ -92,7 +92,7 @@ describe("pub_table()", {
         expect_identical(
             cell_text(ht),
             rbind(
-                c("Batch", "Slope", "n", "grade"),
+                c("Site", "Slope", "n", "grade"),
                 c("A", "0.12", "1.0", "x"),
                 c("B", "-", "2.0", "-")
             )
@@ -130,13 +130,13 @@ describe("pub_table()", {
     it("numbers footnotes in the labels and lists them below the body", {
         ht <- pub_table(
             df,
-            labels = c(batch = "Batch"),
-            footnotes = c(batch = "Lot.", n = "Count.", grade = "Lot.")
+            labels = c(site = "Site"),
+            footnotes = c(site = "Origin.", n = "Count.", grade = "Origin.")
         )
 
         expect_identical(
             cell_text(ht)[c(1, 4, 5), 1],
-            c("Batch\u00b9", "\u00b9 Lot.", "\u00b2 Count.")
+            c("Site\u00b9", "\u00b9 Origin.", "\u00b2 Count.")
         )
         expect_identical(cell_text(ht)[1, 3:4], c("n\u00b2", "grade\u00b9"))
         expect_identical(unname(huxtable::colspan(ht)[4:5, 1]), c(4, 4))
@@ -173,7 +173,7 @@ describe("pub_table()", {
 
     it("stores widths in huxtable's col_width", {
         rel <- pub_table(df, widths = list(slope = 2, n = 0.5))
-        mixed <- pub_table(df, widths = c(batch = "2.5cm", slope = 2, grade = "auto"))
+        mixed <- pub_table(df, widths = c(site = "2.5cm", slope = 2, grade = "auto"))
 
         expect_identical(unname(huxtable::col_width(rel)), c(NA, 2, 0.5, NA))
         expect_identical(
@@ -418,14 +418,14 @@ describe("pub_table()", {
     })
 
     it("finishes a table combined with huxtable's rbind()", {
-        a <- pub_table(data.frame(batch = "A", y = 1.5), digits = c(y = 1))
-        b <- pub_table(data.frame(batch = "B", y = 2.25), digits = c(y = 1))
+        a <- pub_table(data.frame(site = "A", y = 1.5), digits = c(y = 1))
+        b <- pub_table(data.frame(site = "B", y = 2.25), digits = c(y = 1))
         stacked <- rbind(a, b[!huxtable::header_rows(b), ])
         expect_identical(border(stacked, "bottom")[, 1], c(0.4, 0.8, 0.8))
 
-        ht <- pub_table(stacked, footnotes = c(batch = "Lots."))
+        ht <- pub_table(stacked, footnotes = c(site = "Sites."))
 
-        expect_identical(cell_text(ht)[, 1], c("batch\u00b9", "A", "B", "\u00b9 Lots."))
+        expect_identical(cell_text(ht)[, 1], c("site\u00b9", "A", "B", "\u00b9 Sites."))
         expect_identical(cell_text(ht)[2:3, 2], c("1.5", "2.3"))
         expect_identical(border(ht, "bottom")[, 1], c(0.4, 0, 0.8, 0))
         expect_identical(border(ht, "top")[1, 1], 0.8)
@@ -533,7 +533,7 @@ describe("pub_table()", {
 # ----
 
 describe("pub_table_rows()", {
-    df <- data.frame(batch = c("A", "B"), slope = c(0.5, 1.5))
+    df <- data.frame(site = c("A", "B"), slope = c(0.5, 1.5))
     note <- c(slope = "Per month.")
 
     it("gives the rows by role, as the theme's style function gets them", {
@@ -600,13 +600,13 @@ describe("pub_table_rows()", {
 
         again <- pub_table(
             ht,
-            labels = c(batch = "Batch", slope = "Slope"),
+            labels = c(site = "Site", slope = "Slope"),
             digits = c(slope = 2),
             theme = theme
         )
 
         expect_identical(pub_table_rows(again), pub_table_rows(ht))
-        expect_identical(cell_text(again)[1, ], c("Batch", "Slope\u00b9"))
+        expect_identical(cell_text(again)[1, ], c("Site", "Slope\u00b9"))
         expect_identical(cell_text(again)[2:3, 2], c("0.50", "1.50"))
         expect_identical(
             huxtable::number_format(again)[4, ],
@@ -615,7 +615,7 @@ describe("pub_table_rows()", {
         expect_identical(border(again, "bottom")[, 1], c(0.4, 0, 0.8, 0))
         expect_true(all(huxtable::italic(again)[4, ]))
         expect_error(
-            pub_table(ht, footnotes = c(batch = "Lots.")),
+            pub_table(ht, footnotes = c(site = "Sites.")),
             "give all footnotes in one"
         )
     })
@@ -1028,21 +1028,21 @@ describe("report tables", {
         # status font colours, bold, spanner row, footnote, vertical merge, auto-width
         # and centred column
         data <- data.frame(
-            batch = c("A", "A"),
-            test = c("Assay", "pH"),
+            site = c("A", "A"),
+            series = c("Yield", "Rain"),
             value = c(99.123, 7.05),
             status = c("validated", "recorded"),
             note = c("A long comment that wraps.", "-")
         )
         ht <- pub_table(
             data,
-            labels = c(batch = "Batch number"),
+            labels = c(site = "Site ID"),
             digits = c(value = 1),
             header = c(value = "Result", status = "Result"),
-            footnotes = c(batch = "Batch footnote."),
-            merge = "batch",
+            footnotes = c(site = "Site footnote."),
+            merge = "site",
             widths = c(note = "auto"),
-            align = c(test = "center")
+            align = c(series = "center")
         )
         rows <- pub_table_rows(ht)$body[1:2]
         ht <- ht |>
@@ -1050,7 +1050,7 @@ describe("report tables", {
             huxtable::set_bold(rows[[2L]], "status")
 
         text <- cell_text(ht)
-        expect_identical(text[2, 1], "Batch number\u00b9")
+        expect_identical(text[2, 1], "Site ID\u00b9")
         expect_identical(text[1, 3:4], c("Result", "Result"))
         expect_identical(unname(huxtable::colspan(ht)[1, 3]), 2)
         expect_identical(unname(huxtable::rowspan(ht)[3, 1]), 2)
@@ -1062,16 +1062,16 @@ describe("report tables", {
         expect_identical(text[3:4, 3], c("99.1", "7.1"))
         expect_true(all(huxtable::align(ht)[2:4, 2] == "center"))
         expect_identical(unname(huxtable::col_width(ht))[[5]], "auto")
-        expect_identical(text[5, 1], "\u00b9 Batch footnote.")
+        expect_identical(text[5, 1], "\u00b9 Site footnote.")
     })
 
-    it("build the batch summary from the stacked per-batch data", {
+    it("build the site summary from the stacked per-site data", {
         ht <- report_summary_table()
 
         expect_identical(
             cell_text(ht)[, 1:3],
             rbind(
-                c("Batch number", "Parameter", "Estimate"),
+                c("Site ID", "Parameter", "Estimate"),
                 c("A", "Intercept", "100.123"),
                 c("A", "Slope", "-0.251"),
                 c("B", "Intercept", "100.123"),
@@ -1089,33 +1089,33 @@ describe("report tables", {
         expect_match(pub_meta(ht, "caption"), "^Summary of linear regression")
     })
 
-    it("split the trend assessment combined across tests by batch", {
-        tables <- report_trend_by_batch()
+    it("split the trend assessment combined across series by site", {
+        tables <- report_trend_by_site()
 
         expect_named(tables, c("A", "B"))
         expect_identical(
             cell_text(tables$B),
             rbind(
-                c("Batch", "Test", "Estimated trend (months)"),
-                c("B", "Assay", "36"),
-                c("B", "Impurity A", "24")
+                c("Site", "Series", "Estimated trend (months)"),
+                c("B", "Yield", "36"),
+                c("B", "Rain", "24")
             )
         )
         expect_identical(
             pub_meta(tables$A, "caption"),
-            "Current trend assessment of batch A"
+            "Current trend assessment of site A"
         )
         expect_true(all(huxtable::align(tables$A)[, 2] == "center"))
     })
 
-    it("show test-status colours under a time spanner", {
+    it("show status colours under a time spanner", {
         ht <- report_data_table()
 
         expect_identical(
             cell_text(ht)[1:3, ],
             rbind(
                 c("", rep("Time [months]", 3)),
-                c("Batch number", "0", "3", "6"),
+                c("Site ID", "0", "3", "6"),
                 c("A", "100.0", "99.1", "98.4")
             )
         )
@@ -1150,12 +1150,12 @@ describe("report tables", {
         expect_true(all(huxtable::font_size(ht) == 8))
     })
 
-    it("put the batch numbers into a footnote", {
+    it("put the site IDs into a footnote", {
         ht <- report_footnote_table()
 
         expect_identical(
             cell_text(ht)[c(1, 4), 1],
-            c("Parameter\u00b9", "\u00b9 Batch numbers: A, B, C")
+            c("Parameter\u00b9", "\u00b9 Site IDs: A, B, C")
         )
     })
 })
@@ -1176,7 +1176,7 @@ describe("slope summary tables", {
                     "Slope Ratio",
                     "Slope",
                     "R\u00b2",
-                    "Rel. Potency [%]"
+                    "Rel. level [%]"
                 ),
                 c("Ref", "1.235", "0.988", "0.99", "", "", "", "")
             )
@@ -1189,12 +1189,12 @@ describe("slope summary tables", {
         )
     })
 
-    it("add a merged serotype column", {
-        ht <- slopes_summary_table(serotype = "6B")
+    it("add a merged panel column", {
+        ht <- slopes_summary_table(panel = "6B")
 
         expect_identical(
             cell_text(ht)[1:3, 1:2],
-            rbind(c("", ""), c("Serotype", "Sample"), c("6B", "Ref"))
+            rbind(c("", ""), c("Panel", "Sample"), c("6B", "Ref"))
         )
         expect_identical(unname(huxtable::rowspan(ht)[, 1]), c(1, 1, 3, 1, 1))
         expect_identical(
@@ -1211,7 +1211,7 @@ describe("slope summary tables", {
             cell_text(ht)[2:3, ],
             rbind(c("Slope ratio", "0.80", "1.25"), c("~~R\u00b2~~", "~~0.95~~", ""))
         )
-        expect_identical(cell_text(ht)[5, ], c("~~Parallelism~~", "", "~~0.05~~"))
+        expect_identical(cell_text(ht)[5, ], c("~~Linearity~~", "", "~~0.05~~"))
         expect_identical(
             unname(huxtable::text_color(ht)[, 3]),
             c(NA, NA, grey, NA, grey)
@@ -1226,16 +1226,16 @@ describe("slope summary tables", {
 
 # A failure here means huxtable changed
 describe("huxtable 6.0.2 behaviour pubflow relies on", {
-    part <- function(batch, color) {
+    part <- function(site, color) {
         ht <- pub_table(
-            data.frame(batch = batch, y = c(0.125, NA, 1)),
-            caption = paste("Batch", batch),
+            data.frame(site = site, y = c(0.125, NA, 1)),
+            caption = paste("Site", site),
             digits = c(y = 2),
             na = "-",
-            merge = "batch"
+            merge = "site"
         )
         ht <- huxtable::set_text_color(ht, 2:4, "y", color)
-        pub_set_meta(pub_strikeout(ht, 4, "y"), title = batch)
+        pub_set_meta(pub_strikeout(ht, 4, "y"), title = site)
     }
 
     it("rbind(), cbind() and [ keep cell properties", {
@@ -1272,8 +1272,8 @@ describe("huxtable 6.0.2 behaviour pubflow relies on", {
         a <- part("A", "red")
         b <- part("B", "blue")
 
-        expect_identical(huxtable::caption(rbind(a, b)), "Batch A")
-        expect_identical(huxtable::caption(cbind(a, b)), "Batch A")
+        expect_identical(huxtable::caption(rbind(a, b)), "Site A")
+        expect_identical(huxtable::caption(cbind(a, b)), "Site A")
         expect_identical(pub_meta(rbind(a, b), "title"), "A")
         expect_null(pub_meta(cbind(a, b), "title"))
         expect_null(pub_meta(a[1:2, ], "title"))

@@ -397,7 +397,7 @@ describe("pub_markdown()", {
                 step = "fit",
                 failed_step = "fit",
                 message = "no trend",
-                pipeline = "Water"
+                pipeline = "Rain"
             ),
             class = "pub_error"
         )
@@ -405,7 +405,7 @@ describe("pub_markdown()", {
 
         expect_match(
             markdown(doc, "md"),
-            "> **Step 'fit' of pipeline 'Water' failed**\\\n> no trend",
+            "> **Step 'fit' of pipeline 'Rain' failed**\\\n> no trend",
             fixed = TRUE
         )
         expect_no_match(markdown(doc, "md"), "was not run", fixed = TRUE)

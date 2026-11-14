@@ -140,7 +140,7 @@
                     <w:sz w:val="18"/>
                     <w:szCs w:val="18"/>
                   </w:rPr>
-                  <w:t xml:space="preserve">batch</w:t>
+                  <w:t xml:space="preserve">site</w:t>
                 </w:r>
               </w:p>
             </w:tc>

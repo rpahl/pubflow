@@ -124,7 +124,7 @@ describe("pub_param_input()", {
 
         expect_match(
             html,
-            '<label class="control-label" id="limits-param-label">Specification limits'
+            '<label class="control-label" id="limits-param-label">Range limits'
         )
         expect_match(
             html,
@@ -137,7 +137,7 @@ describe("pub_param_input()", {
         expect_match(html, '<input id="limits_upper" type="text"[^>]*"105"')
 
         html <- html_of(pub_param_input(demo_limits_param(), "x", label = NULL))
-        expect_no_match(html, "Specification limits")
+        expect_no_match(html, "Range limits")
         expect_match(html, '<div class="pubflow-param-group">')
     })
 
@@ -145,9 +145,9 @@ describe("pub_param_input()", {
         html <- html_of(pub_param_input(demo_limits_param(), "limits"))
         expect_match(
             html,
-            '<label class="pubflow-visually-hidden" for="limits_lower">LSL</label>'
+            '<label class="pubflow-visually-hidden" for="limits_lower">Min</label>'
         )
-        expect_match(html, 'for="limits_upper">USL</label>')
+        expect_match(html, 'for="limits_upper">Max</label>')
 
         # widgets that can't be the target of a label: a named group; the name of
         # the child stands in for a missing label
@@ -212,7 +212,7 @@ describe("pub_param_input()", {
         # group children get their own tooltips
         limits <- demo_limits_param()
         html <- html_of(pub_param_input(limits, "l", tooltip = TRUE))
-        expect_match(html, 'title="LSL".*title="USL"')
+        expect_match(html, 'title="Min".*title="Max"')
     })
 
     it("wraps a widget that is no single tag for its tooltip", {

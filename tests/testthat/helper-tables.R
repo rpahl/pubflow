@@ -87,7 +87,7 @@ edge_case_text <- function() {
     )
 }
 
-# Report table: data table with test-status font colours and a time spanner ------------
+# Report table: data table with status font colours and a time spanner -----------------
 
 report_status_colors <- c(
     validated = "black",
@@ -97,7 +97,7 @@ report_status_colors <- c(
 
 report_data_table <- function() {
     wide <- data.frame(
-        batch = c("A", "B", "C"),
+        site = c("A", "B", "C"),
         `0` = c(100.0, 100.4, 99.6),
         `3` = c(99.1, 99.8, 98.9),
         `6` = c(98.4, NA, 97.8),
@@ -122,8 +122,8 @@ report_data_table <- function() {
     times <- names(wide)[-1L]
     ht <- pub_table(
         wide,
-        caption = "Data table for Assay",
-        labels = c(batch = "Batch number"),
+        caption = "Data table for Yield",
+        labels = c(site = "Site ID"),
         digits = rlang::set_names(rep(1L, 3L), times),
         header = rlang::set_names(rep("Time [months]", 3L), times),
         na = "-"
@@ -132,13 +132,13 @@ report_data_table <- function() {
     huxtable::set_text_color(ht, rows, times, matrix(colors, nrow = 3L))
 }
 
-# Report table: batch summary = per-batch summaries stacked, coloured merged batch -----
+# Report table: site summary = per-site summaries stacked, coloured merged site --------
 
-report_batch_colors <- c(A = "#1B9E77", B = "#D95F02", C = "#7570B3")
+report_site_colors <- c(A = "#1B9E77", B = "#D95F02", C = "#7570B3")
 
-report_batch_summary <- function(batch, slope) {
+report_site_summary <- function(site, slope) {
     data.frame(
-        Batch = batch,
+        Site = site,
         term = c("Intercept", "Slope"),
         estimate = c(100.12345, slope),
         std.error = c(0.41234, 0.05432),
@@ -149,7 +149,7 @@ report_batch_summary <- function(batch, slope) {
 
 report_summary_table <- function() {
     slopes <- c(A = -0.2512, B = -0.3, C = -0.1257)
-    data <- do.call(rbind, unname(Map(report_batch_summary, names(slopes), slopes)))
+    data <- do.call(rbind, unname(Map(report_site_summary, names(slopes), slopes)))
     ht <- pub_table(
         data,
         caption = paste(
@@ -157,45 +157,45 @@ report_summary_table <- function() {
             "separate intercepts with 95% confidence interval."
         ),
         labels = c(
-            Batch = "Batch number",
+            Site = "Site ID",
             term = "Parameter",
             estimate = "Estimate",
             std.error = "Standard error",
             p.value = "p-value"
         ),
         digits = c(estimate = 3, std.error = 3),
-        merge = "Batch"
+        merge = "Site"
     )
     rows <- pub_table_rows(ht)$body
     huxtable::set_text_color(
         ht,
         rows,
-        "Batch",
-        unname(report_batch_colors[data$Batch])
+        "Site",
+        unname(report_site_colors[data$Site])
     )
 }
 
-# Report table: trend assessment, data combined across tests, split by batch -----------
+# Report table: trend assessment, data combined across series, split by site -----------
 
 report_trend_data <- function() {
     rbind(
-        data.frame(Batch = c("A", "B"), Test = "Assay", finalTrend = 36),
-        data.frame(Batch = c("A", "B"), Test = "Impurity A", finalTrend = 24.4)
+        data.frame(Site = c("A", "B"), Series = "Yield", finalTrend = 36),
+        data.frame(Site = c("A", "B"), Series = "Rain", finalTrend = 24.4)
     )
 }
 
-report_trend_by_batch <- function() {
+report_trend_by_site <- function() {
     data <- report_trend_data()
-    lapply(split(data, data$Batch), \(d) {
+    lapply(split(data, data$Site), \(d) {
         pub_table(
             d,
             caption = sprintf(
-                "Current trend assessment of batch %s",
-                d$Batch[[1L]]
+                "Current trend assessment of site %s",
+                d$Site[[1L]]
             ),
             labels = c(finalTrend = "Estimated trend (months)"),
             digits = c(finalTrend = 0),
-            align = c(Test = "center")
+            align = c(Series = "center")
         )
     })
 }
@@ -204,7 +204,7 @@ report_trend_by_batch <- function() {
 
 report_pvalue_table <- function(pInteraction = 0.31, alpha = 0.25) {
     df <- data.frame(
-        Source = c("Batch", "Slope", "Batch:Slope", "Residuals"),
+        Source = c("Site", "Slope", "Site:Slope", "Residuals"),
         Df = c(2L, 1L, 2L, 6L),
         `F value` = c(1.234, 45.678, 1.3, NA),
         `Pr(>F)` = c("0.3501", "<1e-04", pub_format_num(pInteraction, 4), ""),
@@ -212,7 +212,7 @@ report_pvalue_table <- function(pInteraction = 0.31, alpha = 0.25) {
     )
     color <- if (pInteraction > alpha) "#006400" else "#8B0000"
     ht <- pub_table(df, digits = c(`F value` = 3))
-    row <- pub_table_rows(ht)$body[df$Source == "Batch:Slope"]
+    row <- pub_table_rows(ht)$body[df$Source == "Site:Slope"]
     ht |>
         huxtable::set_text_color(row, "Pr(>F)", color) |>
         huxtable::set_bold(row, "Pr(>F)")
@@ -223,8 +223,8 @@ report_pvalue_table <- function(pInteraction = 0.31, alpha = 0.25) {
 report_wrapped_table <- function() {
     df <- data.frame(
         deviation_number = c("DEV-1", "DEV-2"),
-        description = c("Sample stored at the wrong temperature.", "Late."),
-        root_cause = c("Freezer failure.", "Holiday."),
+        description = c("Sensor reported out-of-range values.", "Late."),
+        root_cause = c("Power failure.", "Holiday."),
         status = c("closed", "open")
     )
     pub_table(
@@ -256,11 +256,11 @@ report_footnote_table <- function() {
         ),
         labels = c(term = "Parameter", estimate = "Estimate"),
         digits = c(estimate = 3),
-        footnotes = c(term = "Batch numbers: A, B, C")
+        footnotes = c(term = "Site IDs: A, B, C")
     )
 }
 
-# Slope summary: separate | common fits, serotype column, criteria ---------------------
+# Slope summary: separate | common fits, panel column, criteria ------------------------
 
 slopes_separate_data <- function() {
     data.frame(
@@ -276,19 +276,19 @@ slopes_common_data <- function() {
     data.frame(
         slope_common = c(NA, 0.991, 0.991),
         r2_common = c(NA, 0.982, 0.979),
-        rel_pot_pct = c(NA, 104.6, 97.5)
+        rel_level_pct = c(NA, 104.6, 97.5)
     )
 }
 
-# Both fits side by side under their spanners; with `serotype` a merged serotype column
+# Both fits side by side under their spanners; with `panel` a merged panel column
 # in front
-slopes_summary_table <- function(serotype = NULL) {
+slopes_summary_table <- function(panel = NULL) {
     data <- cbind(slopes_separate_data(), slopes_common_data())
-    if (!is.null(serotype)) {
-        data <- cbind(Serotype = serotype, data)
+    if (!is.null(panel)) {
+        data <- cbind(Panel = panel, data)
     }
     separate <- c("intercept", "slope", "r2", "slope_ratio")
-    common <- c("slope_common", "r2_common", "rel_pot_pct")
+    common <- c("slope_common", "r2_common", "rel_level_pct")
     pub_table(
         data,
         caption = "Overall summary of separate and common slope fits.",
@@ -300,7 +300,7 @@ slopes_summary_table <- function(serotype = NULL) {
             slope_ratio = "Slope Ratio",
             slope_common = "Slope",
             r2_common = "R\u00b2",
-            rel_pot_pct = "Rel. Potency [%]"
+            rel_level_pct = "Rel. level [%]"
         ),
         digits = c(
             intercept = 3,
@@ -309,13 +309,13 @@ slopes_summary_table <- function(serotype = NULL) {
             slope_ratio = 2,
             slope_common = 3,
             r2_common = 2,
-            rel_pot_pct = 0
+            rel_level_pct = 0
         ),
         header = c(
             rlang::set_names(rep("Separate slope", 4L), separate),
             rlang::set_names(rep("Common slope", 3L), common)
         ),
-        merge = if (!is.null(serotype)) "Serotype"
+        merge = if (!is.null(panel)) "Panel"
     )
 }
 
@@ -323,7 +323,7 @@ slopes_criteria_active <- c(TRUE, FALSE, TRUE, FALSE)
 
 slopes_criteria_table <- function() {
     criteria <- data.frame(
-        Name = c("Slope ratio", "R\u00b2", "Relative potency", "Parallelism"),
+        Name = c("Slope ratio", "R\u00b2", "Relative level", "Linearity"),
         Min = c("0.80", "0.95", "50", ""),
         Max = c("1.25", "", "200", "0.05")
     )
