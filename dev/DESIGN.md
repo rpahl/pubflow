@@ -58,7 +58,7 @@ Error classes all inherit `pubflow_error` (`pubflow_invalid_param`,
 
 ## 4. Performance targets
 
-Workload "R15" (`inst/bench/r15.R`): 15 sections, one pipeline per test, each with 4
+Workload "R15" (`inst/bench/r15.R`): 15 sections, one pipeline per group, each with 4
 texts, 3 tables and 3 figures, plus 30 extra tables. Targets: making the document from
 computed outputs < 200 ms; `pub_html()` with a warm cache < 500 ms (measured 99 ms);
 `pub_render(format = "docx")` with a warm cache < 5 s; native Word table 40x8 < 10 ms;

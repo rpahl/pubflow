@@ -68,10 +68,10 @@ bench_params <- function() {
     )
     params$limits <- param_group(
         list(
-            lower = numeral_param("95", label = "LSL"),
-            upper = numeral_param("105", label = "USL")
+            lower = numeral_param("50", label = "Lower"),
+            upper = numeral_param("100", label = "Upper")
         ),
-        label = "Specification limits",
+        label = "Limits",
         area = "criteria"
     )
     param_config(params)

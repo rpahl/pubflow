@@ -61,7 +61,7 @@ functions to read or change it afterwards.
 
 
 An \code{id} must be unique in a document. It starts with a letter, ends with a letter or
-digit and has only letters, digits, \verb{_} and \code{-} in between, e.g. \code{"slopes-1"}.
+digit and has only letters, digits, \verb{_} and \code{-} in between, e.g. \code{"ozone-1"}.
 
 You can also add keys of your own. pubflow keeps them but does not use them.
 }
@@ -85,9 +85,9 @@ names(pub_meta(x))
 pub_meta(x) <- list(title = "Data")
 pub_meta(x)
 
-# the target of the cross-reference `@tab:slopes` in a text
-tab <- pub_table(data.frame(a = 1:2), caption = "Slopes")
-tab <- pub_set_meta(tab, id = "slopes")
+# the target of the cross-reference `@tab:ozone` in a text
+tab <- pub_table(airquality[1:4, c("Month", "Day", "Ozone")], caption = "Ozone")
+tab <- pub_set_meta(tab, id = "ozone")
 pub_meta(tab, "id")
 }
 \seealso{

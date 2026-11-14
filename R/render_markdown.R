@@ -75,9 +75,9 @@
 #' doc <- pub_doc(
 #'     pub_section(
 #'         "Results",
-#'         pub_text("The slope is **negative** ($b < 0$)."),
-#'         pub_table(data.frame(batch = c("A", "B"), slope = c(-0.26, -0.25)),
-#'                   caption = "Slopes", digits = c(slope = 2L))
+#'         pub_text("Mean ozone peaks in **August** ($x_8 = 60$ ppb)."),
+#'         pub_table(aggregate(Ozone ~ Month, data = airquality, FUN = mean),
+#'                   caption = "Mean ozone", digits = c(Ozone = 1L))
 #'     ),
 #'     title = "Demo"
 #' )

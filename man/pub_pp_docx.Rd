@@ -80,7 +80,7 @@ path <- tempfile(fileext = ".docx")
 file.copy(system.file("templates", "reference.docx", package = "pubflow"),
           path)
 fill <- pub_pp_docx_header_footer(header = c(left = "Draft",
-                                             right = "Batch A"))
+                                             right = "May"))
 fill(path, doc, pub_report_spec("docx"))
 
 # In a spec: another header in DOCX reports, the lock after the spec's

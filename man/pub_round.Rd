@@ -74,7 +74,8 @@ pub_format_num(c(0.125, 999.5), "\%.2g")
 pub_format_num(12.25, "\%.1f \%\%")
 
 # Numbers in text
-pub_format_num(mean(c(98.25, 99.1)), "Mean assay: \%.2f \%\%")
+high <- mean(airquality$Ozone > 60, na.rm = TRUE)
+pub_format_num(100 * high, "Days above 60 ppb: \%.1f \%\%")
 }
 \seealso{
 \code{\link[=pub_cell_text]{pub_cell_text()}}, \code{\link[=pub_table]{pub_table()}}

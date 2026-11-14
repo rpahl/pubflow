@@ -399,7 +399,7 @@ pub_get_params <- function(
 #'   an error item for each failed key.
 #' @seealso [pub_doc()]
 #' @examples
-#' test_pipeline <- function(name, values) {
+#' mean_pipeline <- function(name, values) {
 #'     pipeflow::pip_new(name) |>
 #'         pipeflow::pip_add("data", \(values = 1) values) |>
 #'         pipeflow::pip_add("mean", \(x = ~data) {
@@ -407,26 +407,27 @@ pub_get_params <- function(
 #'             mean(x)
 #'         }) |>
 #'         pipeflow::pip_add("content", \(m = ~mean) {
-#'             pub_text(paste("Mean:", pub_format_num(m, 2)))
+#'             pub_text(paste("Mean:", pub_format_num(m, 1)))
 #'         }) |>
 #'         pipeflow::pip_set_params(list(values = values))
 #' }
-#' tests <- list(
-#'     Assay = test_pipeline("Assay", c(99.1, 98.7)),
-#'     Water = test_pipeline("Water", c(0.4, NA))
+#' # Ozone has missing values, so its mean fails
+#' measures <- list(
+#'     Temperature = mean_pipeline("Temperature", airquality$Temp),
+#'     Ozone = mean_pipeline("Ozone", airquality$Ozone)
 #' )
-#' for (p in tests) {
+#' for (p in measures) {
 #'     suppressWarnings(
 #'         pipeflow::pip_run(p, lgr = NULL, on_error = "continue")
 #'     )
 #' }
 #'
-#' pub_out(tests$Assay, "content")
-#' try(pub_out(tests$Water, "content"))
+#' pub_out(measures$Temperature, "content")
+#' try(pub_out(measures$Ozone, "content"))
 #'
-#' # One section per test; the failed one shows an error box
-#' parts <- lapply(tests, pub_out, step = "content", on_error = "item")
-#' pub_doc(parts, title = "Tests")
+#' # One section per measure; the failed one shows an error box
+#' parts <- lapply(measures, pub_out, step = "content", on_error = "item")
+#' pub_doc(parts, title = "Means")
 #' @export
 pub_out <- function(x, step, on_error = c("stop", "item")) {
     .assert_pipeline(x)

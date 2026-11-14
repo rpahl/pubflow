@@ -285,8 +285,8 @@ switches off returns `NULL`.
 
 ## Layouts that change with the data
 
-The structure of a document often depends on the data: one section per batch,
-per site, per month. Choose among three ways, from the simplest.
+The structure of a document often depends on the data: one section per month,
+per site, per variable. Choose among three ways, from the simplest.
 
 ### A step that returns a named list
 
@@ -329,10 +329,10 @@ in one step. A step that returns a list is one step: if it fails, all
 sections fail together, and the pipeline can't cache or re-run a single
 section.
 
-### Split steps: one partition per batch
+### Split steps: one partition per month
 
-If each batch needs its own chain of steps (a fit, a table and a figure per
-batch), use pipeflow's split steps: a step with `exec = "split"` returns a
+If each month needs its own chain of steps (a fit, a table and a figure per
+month), use pipeflow's split steps: a step with `exec = "split"` returns a
 list, and every step downstream runs once per element, the *partitions*,
 until a step with `exec = "reduce"` takes them all. A layout step downstream
 of a split step runs once per partition and returns the section of that
@@ -391,42 +391,41 @@ show(ps[["doc", "out"]])
 
 Pipeflow's split steps fail per partition. If the table of one month fails,
 its section shows an error box and the other months are complete. A failed
-batch is also the only one that runs again in the next run, as long as the
+month is also the only one that runs again in the next run, as long as the
 failed step's params, exec mode and inputs are unchanged, no input ran again
 and the run is not forced. Note that a param change outdates a whole step: all
 its partitions run again, not only some.
 
 Choose between the two like this: the named list is easiest if the content of
-a section is made in one step. Split steps pay off when the chain per batch is
+a section is made in one step. Split steps pay off when the chain per month is
 long, when it can fail, or when its results are expensive to recompute after a
 failure. A
 third way, *nested pipelines* (a pipeline that is a step function through
-`as.function()`), is for batches that share one param set but are computed by
+`as.function()`), is for groups that share one param set but are computed by
 a pipeline of their own; see pipeflow's vignette
 [Nested pipelines](https://cran.r-project.org/package=pipeflow/vignettes/v05b-nested-pipeline.html).
 
 ### What does not work: add steps while running
 
 A step that adds steps to the pipeline in the course of a run (a step
-function that calls `pip_add(.self, ...)` for every batch it finds) does not
+function that calls `pip_add(.self, ...)` for every month it finds) does not
 work for documents: the layout step can't name a step that does not exist when
 it is added, because `pip_add()` rejects unknown `~step` references, and
 `pub_layout_inputs()` lists the steps present at that moment. Use a named
-list or a split step instead; both have as many outputs as there are batches.
+list or a split step instead; both have as many outputs as there are months.
 
 ```{r unknown-reference, error = TRUE}
 pip_new("tmp") |>
-    pip_add("report", function(table = ~ try(batch_a_table)) pub_doc(table))
+    pip_add("report", function(table = ~ try(may_table)) pub_doc(table))
 ```
 
 ## Documents across pipelines
 
 Groups that have their own params, their own inputs or their own runs are
 better as *independent pipelines* made by one constructor than as one
-pipeline with partitions. A study can have one pipeline per test (assay,
-water content, ...), each with its own specification limits, its own parameter
-tab and its own run, possibly in a parallel worker. The report puts the parts
-together.
+pipeline with partitions. A report can have one pipeline per month or per
+site, each with its own limits, its own parameter tab and its own run,
+possibly in a parallel worker. The report puts the parts together.
 
 A constructor for a group's pipeline. The layout step `content` makes the
 part of the report for this group. It takes a plain `~table`, so it is skipped
@@ -508,7 +507,7 @@ one, so parts that did not change don't outdate anything:
 report <- pip_new("report") |>
     pip_add("parts", function(parts = list()) parts) |>
     pip_add("doc", function(parts = ~ try(parts)) {
-        pub_doc(pub_section("Ozone by month", parts), title = "Study report")
+        pub_doc(pub_section("Ozone by month", parts), title = "Ozone report")
     })
 ```
 

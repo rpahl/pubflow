@@ -196,7 +196,7 @@ runs <- data.frame(
 )
 tabRuns <- pub_table(
     runs[, c("sample", "result")],
-    caption = "Assay results",
+    caption = "Sample results",
     digits = c(result = 2L)
 )
 rows <- pub_table_rows(tabRuns)$body[runs$excluded]
@@ -211,8 +211,8 @@ Word, PDF and HTML all show the cells struck through. There is no underline.
 ### Combining tables
 
 Combine the *data* and build the table once, rather than gluing finished tables
-together: bind the data of several batches with `rbind()` and give
-`pub_table(merge = "batch")`, or subset the data to get one table per batch.
+together: bind the data of several months with `rbind()` and give
+`pub_table(merge = "Month")`, or subset the data to get one table per month.
 
 If you do combine finished tables with huxtable's `rbind()`, `cbind()` or `[`,
 the cell styles are kept, but the pieces are bound by position, each keeps its
@@ -241,7 +241,8 @@ table:
 
 ```{r format-num}
 pub_format_num(x, 2)
-pub_format_num(mean(c(98.25, 99.1)), "Mean assay: %.2f %%")
+high <- mean(airquality$Ozone > 60, na.rm = TRUE)
+pub_format_num(100 * high, "Days above 60 ppb: %.1f %%")
 ```
 
 A format is a number of decimal places or a `sprintf()` format with exactly one

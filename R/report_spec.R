@@ -182,7 +182,7 @@
 #'
 #' # Use a spec to render (HTML needs nothing but pubflow)
 #' doc <- pub_doc(
-#'     pub_section("Results", pub_text("All batches meet the limits.")),
+#'     pub_section("Results", pub_text("Ozone is highest in July and August.")),
 #'     meta = list(title = "Demo report", author = "Jane Doe")
 #' )
 #' html <- pub_report_spec("html", toc = FALSE, number_sections = FALSE)
