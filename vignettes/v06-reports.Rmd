@@ -307,6 +307,13 @@ withCallingHandlers(
 The file has an error box where the model of the failed step would be, and the
 warning names the failed step. Use this for drafts only.
 
+To check a document before rendering it, e.g. to tell the user of an app why a
+report can't be downloaded yet, `pub_error_items()` lists its error items:
+
+```{r error-list}
+vapply(pub_error_items(draft), \(x) x$message, character(1))
+```
+
 ## Word files
 
 ### Header, footer and locks

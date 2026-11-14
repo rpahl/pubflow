@@ -354,7 +354,7 @@ pub_output_filename <- function(meta, ext) {
 #' @return `NULL`, invisibly, if there are none.
 #' @noRd
 .check_no_error_items <- function(nodes, format, call = rlang::caller_env()) {
-    errors <- .error_items(nodes)
+    errors <- pub_error_items(nodes)
     if (length(errors) == 0L) {
         return(invisible())
     }
@@ -377,7 +377,7 @@ pub_output_filename <- function(meta, ext) {
 #' @return `NULL`, invisibly.
 #' @noRd
 .warn_error_items <- function(nodes) {
-    errors <- .error_items(nodes)
+    errors <- pub_error_items(nodes)
     if (length(errors) > 0L) {
         rlang::warn(
             c("The report shows error items (failed steps):", .error_bullets(errors)),
@@ -388,29 +388,14 @@ pub_output_filename <- function(meta, ext) {
 }
 
 #' Bullets (`x`) with the error texts of error items
-#' @param errors list of error items.
+#' @param errors list of error items (`pub_error`).
 #' @return named character vector.
 #' @noRd
 .error_bullets <- function(errors) {
     rlang::set_names(
-        vapply(errors, \(x) .error_text(x$object), character(1)),
+        vapply(errors, .error_text, character(1)),
         rep("x", length(errors))
     )
-}
-
-#' Error items of a list of nodes, recursively
-#' @param nodes list of nodes (sections are searched).
-#' @return list of error items (`NULL` if there are none).
-#' @noRd
-.error_items <- function(nodes) {
-    found <- lapply(nodes, \(x) {
-        if (inherits(x, "pub_section")) {
-            .error_items(x$children)
-        } else if (x$type == "error") {
-            list(x)
-        }
-    })
-    .unlist1(found)
 }
 
 

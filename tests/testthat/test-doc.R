@@ -495,6 +495,73 @@ describe("placing failure objects (error items)", {
 })
 
 
+# -----------
+# Error items
+# -----------
+
+describe("pub_error_items()", {
+    failures <- demo_failures()
+    item <- structure(
+        list(step = "content", failed_step = "fit", message = "no trend"),
+        class = "pub_error"
+    )
+    steps <- \(errors) vapply(errors, \(x) x$step, "")
+
+    it("finds failures and error items in nested step outputs, in order", {
+        parts <- list(
+            A = data.frame(x = 1),
+            B = list("text", list(failures$fit, NULL)),
+            item,
+            failures$table
+        )
+
+        errors <- pub_error_items(parts)
+
+        expect_identical(steps(errors), c("fit", "content", "table"))
+        expect_true(all(vapply(errors, inherits, NA, "pub_error")))
+        expect_identical(errors[[1L]]$message, "singular fit")
+        expect_identical(errors[[2L]], item)
+    })
+
+    it("finds the error items of documents, sections and items", {
+        doc <- pub_doc(
+            pub_text("ok"),
+            pub_section("A", pub_section("B", failures$fit)),
+            list(C = item)
+        )
+
+        expect_identical(steps(pub_error_items(doc)), c("fit", "content"))
+        expect_identical(steps(pub_error_items(doc$children[[2L]])), "fit")
+        expect_identical(pub_error_items(doc$children[[3L]]$children[[1L]]), list(item))
+    })
+
+    it("converts other objects with as_pub_output(), as a document does", {
+        local_as_pub_output_method("fit_result", \(x, ...) unclass(x))
+        out <- structure(
+            list(tab = data.frame(x = 1), fit = item),
+            class = "fit_result"
+        )
+
+        expect_identical(pub_error_items(out), list(item))
+        expect_error(pub_error_items(structure(1, class = "unknown")), "as_pub_output")
+    })
+
+    it("refuses a pipeline, whose outputs are what a document shows", {
+        expect_error(
+            pub_error_items(list(pipeflow::pip_new("p"))),
+            class = "pubflow_pipeline_output"
+        )
+    })
+
+    it("returns an empty list without error items", {
+        expect_identical(pub_error_items(NULL), list())
+        expect_identical(pub_error_items(list()), list())
+        expect_identical(pub_error_items(pub_doc(pub_text("ok"))), list())
+        expect_identical(pub_error_items(list(a = data.frame(x = 1), "b")), list())
+    })
+})
+
+
 # ======================================================================================
 # Printing
 # ======================================================================================
