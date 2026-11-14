@@ -133,8 +133,8 @@ grDevices::dev.control("enable")
 plot(1:10)
 p <- grDevices::recordPlot()
 grDevices::dev.off()
-#> agg_record_1d7b5535227 
-#>                      2 
+#> agg_record_1c9e306fa13c 
+#>                       2 
 pub_type(p)
 #> [1] "figure"
 
@@ -172,8 +172,8 @@ file <- tempfile(fileext = ".png")
 ragg::agg_png(file)
 plot(1:10)
 grDevices::dev.off()
-#> agg_record_1d7b5535227 
-#>                      2 
+#> agg_record_1c9e306fa13c 
+#>                       2 
 pub_type(file)
 #> [1] "text"
 pub_type(pub_figure(file, caption = "Ten points from a file"))
@@ -184,13 +184,13 @@ files <- file.path(tempdir(), c("points.png", "points.pdf"))
 ragg::agg_png(files[1])
 plot(1:10)
 grDevices::dev.off()
-#> agg_record_1d7b5535227 
-#>                      2 
+#> agg_record_1c9e306fa13c 
+#>                       2 
 grDevices::pdf(files[2])
 plot(1:10)
 grDevices::dev.off()
-#> agg_record_1d7b5535227 
-#>                      2 
+#> agg_record_1c9e306fa13c 
+#>                       2 
 fig <- pub_figure(files, caption = "Ten points as png and pdf")
 html <- pub_html(pub_doc(fig))  # HTML picks the png
 grepl("data:image/png", html)
