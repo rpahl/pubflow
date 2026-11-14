@@ -27,25 +27,40 @@ elapsed_ms <- function(expr) {
 
 doc <- r15_doc()
 typst <- tryCatch(pubflow:::.find_typst(), error = function(e) NULL)
-engines <- c("xelatex",
-             if (!is.null(typst) && !is.null(pubflow:::.tool_version(typst))) {
-                 "typst"
-             })
+engines <- c(
+    "xelatex",
+    if (!is.null(typst) && !is.null(pubflow:::.tool_version(typst))) {
+        "typst"
+    }
+)
 
 for (engine in engines) {
     target <- if (engine == "xelatex") "latex" else "typst"
     file <- tempfile(fileext = ".pdf")
     # Cold: a new cache, every figure is rendered (PNG, 200 dpi)
     cache <- pub_cache()
-    cold <- elapsed_ms(pub_render(doc, "pdf", file = file, cache = cache,
-                                  pdf_engine = engine))
+    cold <- elapsed_ms(pub_render(
+        doc,
+        "pdf",
+        file = file,
+        cache = cache,
+        pdf_engine = engine
+    ))
     # Warm: the figures come from the cache (median of 3 runs)
-    warm <- stats::median(vapply(1:3, \(i) {
-        elapsed_ms(pub_render(doc, "pdf", file = file, cache = cache,
-                              pdf_engine = engine))
-    }, numeric(1)))
-    markdown <- elapsed_ms(pub_markdown(doc, target, tempfile(),
-                                        cache = cache))
+    warm <- stats::median(vapply(
+        1:3,
+        \(i) {
+            elapsed_ms(pub_render(
+                doc,
+                "pdf",
+                file = file,
+                cache = cache,
+                pdf_engine = engine
+            ))
+        },
+        numeric(1)
+    ))
+    markdown <- elapsed_ms(pub_markdown(doc, target, tempfile(), cache = cache))
     cat(sprintf(
         paste0(
             "R15 pub_render(format = \"pdf\", pdf_engine = \"%s\"): ",
@@ -54,7 +69,11 @@ for (engine in engines) {
             "warm (cached):    %7.0f ms\n",
             "  pub_markdown(): %7.0f ms\n"
         ),
-        engine, file.size(file) / 1e6,
-        length(pdftools::pdf_text(file)), cold, warm, markdown
+        engine,
+        file.size(file) / 1e6,
+        length(pdftools::pdf_text(file)),
+        cold,
+        warm,
+        markdown
     ))
 }

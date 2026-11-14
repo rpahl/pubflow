@@ -27,22 +27,42 @@ elapsed_ms <- function(expr) {
 doc <- r15_doc()
 file <- tempfile(fileext = ".docx")
 # render-time metadata of a report with header and footer (trace stamp)
-meta <- list(author = "A. User", app = "demo", version = "1.2.0",
-             header = c(left = "R15 benchmark report"),
-             footer = c(left = "{trace}"))
+meta <- list(
+    author = "A. User",
+    app = "demo",
+    version = "1.2.0",
+    header = c(left = "R15 benchmark report"),
+    footer = c(left = "{trace}")
+)
 # the workload of the recorded timings: everything locked
 spec <- pub_report_spec("docx", lock = TRUE)
 
 # Cold: a new cache, every figure is rendered (PNG, 200 dpi)
 cache <- pub_cache()
-cold <- elapsed_ms(pub_render(doc, "docx", file = file, spec = spec,
-                              cache = cache, meta = meta))
+cold <- elapsed_ms(pub_render(
+    doc,
+    "docx",
+    file = file,
+    spec = spec,
+    cache = cache,
+    meta = meta
+))
 
 # Warm: the figures come from the cache (median of 3 runs)
-warm <- stats::median(vapply(1:3, \(i) {
-    elapsed_ms(pub_render(doc, "docx", file = file, spec = spec,
-                          cache = cache, meta = meta))
-}, numeric(1)))
+warm <- stats::median(vapply(
+    1:3,
+    \(i) {
+        elapsed_ms(pub_render(
+            doc,
+            "docx",
+            file = file,
+            spec = spec,
+            cache = cache,
+            meta = meta
+        ))
+    },
+    numeric(1)
+))
 
 # The parts of a warm run
 assets <- tempfile()
@@ -54,10 +74,17 @@ writeLines(md, input)
 output <- tempfile(fileext = ".docx")
 pandoc <- elapsed_ms(system2(
     pubflow:::.find_pandoc(),
-    c("-f", pubflow:::.pandoc_reader(), "-o", shQuote(output),
-      "--reference-doc",
-      shQuote(system.file("templates", "reference.docx", package = "pubflow")),
-      "--resource-path", shQuote(dirname(assets)), shQuote(input))
+    c(
+        "-f",
+        pubflow:::.pandoc_reader(),
+        "-o",
+        shQuote(output),
+        "--reference-doc",
+        shQuote(system.file("templates", "reference.docx", package = "pubflow")),
+        "--resource-path",
+        shQuote(dirname(assets)),
+        shQuote(input)
+    )
 ))
 sections <- elapsed_ms(pubflow:::.docx_complete_sections(output))
 merged <- pubflow:::.render_doc(doc, meta)
@@ -75,6 +102,12 @@ cat(sprintf(
         "  header/footer:  %7.0f ms\n",
         "  lock:           %7.0f ms\n"
     ),
-    file.size(file) / 1e6, cold, warm, markdown, pandoc, sections,
-    header_footer, lock
+    file.size(file) / 1e6,
+    cold,
+    warm,
+    markdown,
+    pandoc,
+    sections,
+    header_footer,
+    lock
 ))

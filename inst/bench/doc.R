@@ -21,18 +21,26 @@ time_ms <- function(expr, n = 20L) {
     expr <- substitute(expr)
     env <- parent.frame()
     eval(expr, env)
-    times <- vapply(seq_len(n), function(i) {
-        start <- proc.time()[["elapsed"]]
-        eval(expr, env)
-        proc.time()[["elapsed"]] - start
-    }, numeric(1))
+    times <- vapply(
+        seq_len(n),
+        function(i) {
+            start <- proc.time()[["elapsed"]]
+            eval(expr, env)
+            proc.time()[["elapsed"]] - start
+        },
+        numeric(1)
+    )
     stats::median(times) * 1000
 }
 
 count_items <- function(nodes) {
-    sum(vapply(nodes, function(x) {
-        if (inherits(x, "pub_section")) count_items(x$children) else 1L
-    }, integer(1)))
+    sum(vapply(
+        nodes,
+        function(x) {
+            if (inherits(x, "pub_section")) count_items(x$children) else 1L
+        },
+        integer(1)
+    ))
 }
 
 pipelines <- r15_pipelines()
@@ -49,5 +57,8 @@ cat(sprintf(
         "R15: %d sections, %d items (computing the outputs took %.1f s)\n",
         "making the document: %6.1f ms (target < 200 ms)\n"
     ),
-    length(doc$children), count_items(doc$children), setup, assemble
+    length(doc$children),
+    count_items(doc$children),
+    setup,
+    assemble
 ))

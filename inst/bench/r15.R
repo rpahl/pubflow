@@ -23,14 +23,18 @@ r15_table <- function(nrow, ncol, seed, caption) {
     names(data)[-1L] <- sprintf("t%d", seq_len(ncol - 1L))
     cols <- names(data)[-1L]
     ht <- pub_table(
-        data, caption = caption,
+        data,
+        caption = caption,
         digits = rlang::set_names(rep(2L, length(cols)), cols),
         header = rlang::set_names(rep("Time point", length(cols)), cols)
     )
     rows <- sum(huxtable::header_rows(ht)) + seq_len(nrow)
     high <- as.matrix(data[cols]) > 1
     huxtable::set_background_color(
-        ht, rows, cols, ifelse(high, "#f4cccc", "white")
+        ht,
+        rows,
+        cols,
+        ifelse(high, "#f4cccc", "white")
     )
 }
 
@@ -49,24 +53,32 @@ r15_figure <- function(seed, caption) {
 
 r15_texts <- function(test) {
     list(
-        pub_text(sprintf(paste(
-            "This section summarises the data of **%s**. The",
-            "results of all batches were analysed with a linear model",
-            "of the response over time ($y = a + b \\cdot t$)."
-        ), test)),
+        pub_text(sprintf(
+            paste(
+                "This section summarises the data of **%s**. The",
+                "results of all batches were analysed with a linear model",
+                "of the response over time ($y = a + b \\cdot t$)."
+            ),
+            test
+        )),
         pub_text(c(
-            "Findings:", "",
+            "Findings:",
+            "",
             "- no batch is out of trend;",
             "- the slopes are similar across batches;",
             "- the shelf life is supported by the data."
         )),
         pub_text(sprintf(
-            "See [<insert reference for %s>]{.placeholder}.", test
+            "See [<insert reference for %s>]{.placeholder}.",
+            test
         )),
-        pub_text(paste(
-            "The tables below show the data per time point; values above",
-            "one are highlighted. The figures show the trend per batch."
-        ), title = "Data and figures")
+        pub_text(
+            paste(
+                "The tables below show the data per time point; values above",
+                "one are highlighted. The figures show the trend per batch."
+            ),
+            title = "Data and figures"
+        )
     )
 }
 
@@ -86,10 +98,12 @@ r15_test_pipeline <- function(i) {
                 r15_figure(100L * seed + k, sprintf("Figure %d", k))
             })
         }) |>
-        pipeflow::pip_add("content", \(texts = ~texts, tables = ~tables,
-                                       figures = ~figures) {
-            list(texts, tables, figures)
-        })
+        pipeflow::pip_add(
+            "content",
+            \(texts = ~texts, tables = ~tables, figures = ~figures) {
+                list(texts, tables, figures)
+            }
+        )
 }
 
 r15_pipelines <- function(n = r15_n_tests) {
