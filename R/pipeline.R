@@ -623,6 +623,24 @@ pub_layout_inputs <- function(x) {
     if (length(steps) == 0L) {
         rlang::abort("`x` has no steps.")
     }
+    .try_inputs(steps)
+}
+
+#' `~try(step)` references of steps
+#' @param steps `character` step names.
+#'   `.self` and `...` can't be argument names of a step function (pipeflow reserves
+#'   `.self` and drops `...` from the inputs).
+#' @return Named list (by step) of one-sided formulas `~try(<step>)` whose environment
+#'   is the empty environment, so they don't hold the caller's environment.
+#' @noRd
+.try_inputs <- function(steps) {
+    reserved <- intersect(steps, c(".self", "..."))
+    if (length(reserved) > 0L) {
+        rlang::abort(sprintf(
+            "A step named %s can't be an input of a layout step; rename it.",
+            .quote_names(reserved)
+        ))
+    }
     inputs <- lapply(steps, \(s) {
         f <- eval(call("~", call("try", as.name(s))), baseenv())
         environment(f) <- emptyenv()
@@ -630,6 +648,148 @@ pub_layout_inputs <- function(x) {
     })
     names(inputs) <- steps
     inputs
+}
+
+
+# ---------------
+# Layout sections
+# ---------------
+#' Layout step with one section per view
+#'
+#' Makes the function of a layout step (see [pub_doc()]) whose document has one section
+#' per view: the section is titled by the name of the view and shows the outputs of the
+#' steps of the view, in pipeline order. Select the steps of each section with
+#' `pipeflow::pip_view()`, e.g. by a tag naming the section or by the steps that depend
+#' on a model fit. Add the layout step with `pipeflow::pip_add()` (see Examples).
+#'
+#' This is a ready-made layout on top of [pub_layout_inputs()], which gives the inputs
+#' for a layout function you write yourself (e.g. one section per step). The inputs
+#' behave as there: running the layout step runs only the steps it needs, a failed
+#' input is shown as an error box in its section, the steps are read when
+#' `pub_layout_sections()` is called (so add the layout step last), and partitioned
+#' outputs together with other outputs need `exec = "reduce"`.
+#'
+#' A step in several views appears in each of their sections (not a table or figure
+#' with an `id`, which must be unique in a document). A section whose outputs are all
+#' `NULL` is left out (see `on_empty` of [pub_section()]), so a step can leave its
+#' section out by returning `NULL`, e.g. if a param switches it off.
+#'
+#' @param sections Named list of pipeflow views of one pipeline, one per section, named
+#'   by the section titles. The views must not contain other layout steps (a document
+#'   can't be part of a document).
+#' @return A function for `pipeflow::pip_add()`. It takes the outputs of the steps of
+#'   the views (`~try(step)`) and returns a [pub_doc()].
+#' @seealso [pub_layout_inputs()] for other layouts.
+#' @examples
+#' p <- pipeflow::pip_new("ozone") |>
+#'     pipeflow::pip_add("data", \(month = 5) {
+#'         subset(airquality, Month == month, select = c(Day, Ozone, Temp))
+#'     }) |>
+#'     pipeflow::pip_add("table", \(data = ~data) {
+#'         pub_table(head(data), caption = "First days")
+#'     }, tags = "Data") |>
+#'     pipeflow::pip_add("fit", \(data = ~data) {
+#'         stats::lm(Ozone ~ Temp, data = data)
+#'     }) |>
+#'     pipeflow::pip_add("slope", \(fit = ~fit, show_model = param(TRUE)) {
+#'         if (!show_model) {
+#'             return(NULL)
+#'         }
+#'         pub_format_num(stats::coef(fit)[["Temp"]], "Slope: %.2f ppb per degree F")
+#'     })
+#'
+#' layout <- pub_layout_sections(list(
+#'     Data = pipeflow::pip_view(p, tags = "Data"),
+#'     Model = pipeflow::pip_view(p, depends = "fit")
+#' ))
+#' pipeflow::pip_add(p, "doc", layout)
+#' pipeflow::pip_run(p, lgr = NULL)
+#' p[["doc", "out"]]
+#'
+#' # The model section is left out if its only step returns NULL
+#' pipeflow::pip_set_params(p, list(show_model = FALSE))
+#' pipeflow::pip_run(p, lgr = NULL)
+#' p[["doc", "out"]]
+#' @export
+pub_layout_sections <- function(sections) {
+    if (
+        !is.list(sections) ||
+            inherits(sections, "pipeflow") ||
+            length(sections) == 0L ||
+            !rlang::is_named(sections) ||
+            anyDuplicated(names(sections))
+    ) {
+        rlang::abort("`sections` must be a list of views named by unique titles.")
+    }
+    isView <- vapply(sections, inherits, logical(1), "pipeflow")
+    if (!all(isView)) {
+        rlang::abort(sprintf(
+            "`sections` must hold pipeflow views; %s is not one.",
+            .quote_names(names(sections)[!isView])
+        ))
+    }
+    pipenvs <- lapply(sections, \(view) view[["pipenv"]])
+    if (!all(vapply(pipenvs, identical, logical(1), pipenvs[[1L]]))) {
+        rlang::abort("The views in `sections` must be views of the same pipeline.")
+    }
+    steps <- lapply(sections, \(view) unname(view[["step"]]))
+    empty <- names(steps)[lengths(steps) == 0L]
+    if (length(empty) > 0L) {
+        rlang::abort(sprintf("The view of %s has no steps.", .quote_names(empty)))
+    }
+    fun <- .layout_sections_step(steps)
+    formals(fun) <- .try_inputs(unique(unlist(steps, use.names = FALSE)))
+    fun
+}
+
+#' Names quoted for an error message
+#' @param x `character` names.
+#' @return `string`, e.g. `"'a', 'b'"`.
+#' @noRd
+.quote_names <- function(x) {
+    toString(encodeString(x, quote = "'"))
+}
+
+#' Step function of a layout with one section per view
+#'
+#' Built here, not in `pub_layout_sections()`, so that its environment holds only the
+#' step names, not the views and their pipeline (D20); the caller sets the formals. The
+#' formals are named after the steps, so the body reads `steps` from its enclosing
+#' environment and the outputs via `formals()`: a step named like a variable (e.g.
+#' `steps`) can't mask it.
+#' @param steps named list (by section title) of the step names of each section.
+#' @return A function without arguments yet, returning a `pub_doc`.
+#' @noRd
+.layout_sections_step <- function(steps) {
+    function() {
+        .sections_doc(
+            parent.env(environment())[["steps"]],
+            mget(names(formals(sys.function())), envir = environment())
+        )
+    }
+}
+
+#' Document with one section per view
+#' @param steps named list (by section title) of the step names of each section.
+#' @param values named list (by step) of the step outputs.
+#' @return A `pub_doc`.
+#' @noRd
+.sections_doc <- function(steps, values) {
+    pub_doc(lapply(names(steps), \(title) {
+        tryCatch(
+            pub_section(title, unname(values[steps[[title]]])),
+            error = \(e) {
+                rlang::abort(
+                    sprintf(
+                        "Can't place the outputs of section '%s' (steps %s).",
+                        title,
+                        .quote_names(steps[[title]])
+                    ),
+                    parent = e
+                )
+            }
+        )
+    }))
 }
 
 

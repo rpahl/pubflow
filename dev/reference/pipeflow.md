@@ -517,6 +517,16 @@ or that many R users need).
   otherwise. Suggested fix: return `setNames(list(), character(0))`.
   pubflow's `pub_get_params()` returns a named empty list itself until
   then. Low priority.
+- **Step names that can't be arguments** (found 2026-11-14): `pip_add()`
+  accepts steps named `.self` and `...`, but no step can take them as an
+  argument of the same name: `pip_add()` rejects a `.self` argument
+  (reserved), and a `...` argument with a `~step` default is dropped from
+  the inputs, so the dependency is silently missing. `.try_inputs()`
+  (`pub_layout_inputs()`, `pub_layout_sections()`) rejects such steps.
+  Possible fix: reject the two step names in `pip_add()`. Low priority.
+  The views of a pipeline share its environment (`view[["pipenv"]]`),
+  which `pub_layout_sections()` compares to reject views of different
+  pipelines.
 
 **Landed in pipeflow 0.5.0.9029-0.5.0.9032** (pubflow requires it from
 0.0.0.9047; no pubflow code change needed, the tests pass unchanged):

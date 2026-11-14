@@ -1273,6 +1273,184 @@ describe("pub_layout_inputs()", {
             "`x` has no steps"
         )
     })
+
+    it("rejects steps named .self or ...", {
+        # pipeflow reserves the argument .self and drops ... from the inputs
+        p <- pipeflow::pip_new("p") |>
+            pipeflow::pip_add(".self", \() "a") |>
+            pipeflow::pip_add("...", \() "b")
+        expect_error(
+            pub_layout_inputs(p),
+            "A step named '.self', '...' can't be an input of a layout step"
+        )
+    })
+})
+
+
+# ---------------
+# Layout sections
+# ---------------
+
+describe("pub_layout_sections()", {
+    # 'table' is tagged "Data", 'mean' "Data" and "Model"; 'mean' and 'slope'
+    # depend on 'fit'; 'slope' returns NULL if `show_model` is FALSE
+    test_pipeline <- function() {
+        pipeflow::pip_new("sections") |>
+            pipeflow::pip_add("data", \(n = 4) {
+                data.frame(x = seq_len(n), y = seq_len(n)^2)
+            }) |>
+            pipeflow::pip_add("table", \(data = ~data) data, tags = "Data") |>
+            pipeflow::pip_add("fit", \(data = ~data, fail = FALSE) {
+                if (fail) {
+                    stop("no fit")
+                }
+                stats::lm(y ~ x, data = data)
+            }) |>
+            pipeflow::pip_add(
+                "mean",
+                \(fit = ~fit) paste("Mean:", mean(stats::fitted(fit))),
+                tags = c("Data", "Model")
+            ) |>
+            pipeflow::pip_add(
+                "slope",
+                \(fit = ~fit, show_model = TRUE) {
+                    if (!show_model) {
+                        return(NULL)
+                    }
+                    paste("Slope:", stats::coef(fit)[["x"]])
+                }
+            )
+    }
+    views <- \(p) {
+        list(
+            Model = pipeflow::pip_view(p, depends = "fit"),
+            Data = pipeflow::pip_view(p, tags = "Data")
+        )
+    }
+    titles <- \(doc) vapply(doc$children, \(s) s$title, character(1))
+    item_types <- \(section) vapply(section$children, \(i) i$type, character(1))
+
+    it("makes one section per view, in the order of `sections`", {
+        p <- test_pipeline()
+        pipeflow::pip_add(p, "doc", pub_layout_sections(views(p)))
+        run_quietly(p)
+
+        doc <- p[["doc", "out"]]
+        expect_s3_class(doc, "pub_doc")
+        expect_identical(titles(doc), c("Model", "Data"))
+        expect_identical(item_types(doc$children[[1L]]), c("text", "text"))
+        expect_identical(doc$children[[1L]]$children[[1L]]$object, "Mean: 7.5")
+        expect_identical(item_types(doc$children[[2L]]), c("table", "text"))
+    })
+
+    it("takes the steps of the views as ~try() inputs and runs only what it needs", {
+        p <- test_pipeline()
+        layout <- pub_layout_sections(list(Data = pipeflow::pip_view(p, tags = "Data")))
+        expect_identical(
+            lapply(formals(layout), deparse),
+            list(table = "~try(table)", mean = "~try(mean)")
+        )
+        pipeflow::pip_add(p, "doc", layout)
+        run_quietly(pipeflow::pip_view(p, step = "doc"))
+
+        expect_identical(p[["slope", "state"]], "new")
+        expect_identical(titles(p[["doc", "out"]]), "Data")
+    })
+
+    it("doesn't keep the views or the pipeline in the step function", {
+        layout <- pub_layout_sections(views(test_pipeline()))
+        expect_identical(ls(environment(layout)), "steps")
+    })
+
+    it("shows a failed input as an error box in its section", {
+        p <- test_pipeline()
+        pipeflow::pip_add(p, "doc", pub_layout_sections(views(p)))
+        pipeflow::pip_set_params(p, list(fail = TRUE))
+        suppressWarnings(
+            run_quietly(p, on_error = "continue"),
+            classes = "pipeflow_run_failed"
+        )
+
+        data <- p[["doc", "out"]]$children[[2L]]
+        expect_identical(item_types(data), c("table", "error"))
+        expect_identical(data$children[[2L]]$object$failed_step, "fit")
+    })
+
+    it("leaves out a section whose outputs are all NULL", {
+        p <- test_pipeline()
+        sections <- list(
+            Data = pipeflow::pip_view(p, tags = "Data"),
+            Slope = pipeflow::pip_view(p, step = "slope")
+        )
+        pipeflow::pip_add(p, "doc", pub_layout_sections(sections))
+        pipeflow::pip_set_params(p, list(show_model = FALSE))
+        run_quietly(p)
+
+        expect_identical(titles(p[["doc", "out"]]), "Data")
+    })
+
+    it("works with step names that are not syntactic", {
+        p <- pipeflow::pip_new("names") |>
+            pipeflow::pip_add("fit table", \() "Text")
+        pipeflow::pip_add(p, "doc", pub_layout_sections(list(Results = p)))
+        run_quietly(p)
+
+        section <- p[["doc", "out"]]$children[[1L]]
+        expect_identical(section$children[[1L]]$object, "Text")
+    })
+
+    it("works with steps named like the variables of the step function", {
+        p <- pipeflow::pip_new("names") |>
+            pipeflow::pip_add("steps", \() "A") |>
+            pipeflow::pip_add("values", \() "B") |>
+            pipeflow::pip_add("title", \() "C")
+        pipeflow::pip_add(p, "doc", pub_layout_sections(list(S = p)))
+        run_quietly(p)
+
+        section <- p[["doc", "out"]]$children[[1L]]
+        objects <- vapply(section$children, \(i) i$object, character(1))
+        expect_identical(objects, c("A", "B", "C"))
+    })
+
+    it("names the section and its steps if an output can't be placed", {
+        p <- pipeflow::pip_new("bad") |>
+            pipeflow::pip_add("env", \() new.env())
+        pipeflow::pip_add(p, "doc", pub_layout_sections(list(S = p)))
+        err <- tryCatch(
+            pipeflow::pip_run(p, lgr = NULL),
+            error = \(e) e
+        )
+        expect_match(
+            conditionMessage(err),
+            "Can't place the outputs of section 'S' (steps 'env')",
+            fixed = TRUE
+        )
+    })
+
+    it("validates its argument", {
+        p <- test_pipeline()
+        data <- pipeflow::pip_view(p, tags = "Data")
+        f <- pub_layout_sections
+        msg <- "`sections` must be a list of views named by unique titles"
+        expect_error(f(data), msg)
+        expect_error(f(list()), msg)
+        expect_error(f(list(data)), msg)
+        expect_error(f(list(Data = data, data)), msg)
+        expect_error(f(list(Data = data, Data = data)), msg)
+        expect_error(
+            f(list(Data = data, Model = "fit")),
+            "must hold pipeflow views; 'Model' is not one"
+        )
+        expect_error(
+            f(list(Data = data, None = pipeflow::pip_view(p, tags = "none"))),
+            "The view of 'None' has no steps"
+        )
+        other <- test_pipeline()
+        expect_error(
+            f(list(Data = data, Model = pipeflow::pip_view(other, depends = "fit"))),
+            "must be views of the same pipeline"
+        )
+    })
 })
 
 

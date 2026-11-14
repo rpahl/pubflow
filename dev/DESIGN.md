@@ -3,7 +3,7 @@
 The agreed design of pubflow and the reasons behind it. `ARCHITECTURE.md` maps the
 code; `PLAN.md` lists the open work; the help pages and vignettes document the API.
 This file keeps what none of them show: **why** things are the way they are. Cite a
-decision by its number (D1-D54) in code comments, commits and PRs, and add a new one
+decision by its number (D1-D55) in code comments, commits and PRs, and add a new one
 here (not a renumbering) when a change settles a design question.
 
 ## 1. Purpose and scope
@@ -110,6 +110,7 @@ results in the PR (`reference/benchmarks.md` has the measurements behind the dec
 | D39 | **Tags select the steps of a layout step**: `pub_layout_inputs(x)` returns `~try(step)` for every step of a pipeline or view, to be given as `params` of a layout step whose function takes `...`. pipeflow's tags and views decide what a report shows; pubflow adds no selection or run logic. |
 | D41 | Items carry **no provenance** besides the figure stamp: traceability is per document (trace stamp, file names, `pub_session_info()`), and a stamp on texts and tables would change cache keys on every re-run. |
 | D42 | **Steps are not added during a run**: such a step can't be named as `~step`, and reading its output through `.self` bypasses dependency tracking. Variable numbers of outputs are covered by named lists, split steps and pipeline functions. |
+| D55 | **One section per view is a ready-made layout**: `pub_layout_sections(sections)` takes a named list of views (one per section, titled by its name) and returns the function of a layout step for `pip_add()`, so `exec` and `after` stay available. Views, not tags: selection stays in `pip_view()` (D39), tags keep one meaning, and the structure stays explicit (D5). One layout step, not one step per section: a failed input is still an error box in its section. No switch params: a section is left out if all its outputs are `NULL`, so a step switched off by a param returns `NULL` (an upstream failure still shows in it; an app that must hide it writes its own layout on `pub_layout_inputs()`). Other layouts keep using `pub_layout_inputs()`. |
 
 ### Tables and numbers
 

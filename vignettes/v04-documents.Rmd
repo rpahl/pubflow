@@ -258,6 +258,31 @@ depend on `fit`: `pub_layout_inputs(pip_view(tagged, depends = "fit"))`.
 `exec = "reduce"` for the layout step; otherwise the layout step runs once per
 partition.)
 
+### One section per view
+
+`pub_layout_sections()` makes a whole layout step with one section per view:
+the section is titled by the name of the view and shows the outputs of its
+steps in pipeline order. Here a tag selects the data section and the
+dependency on `fit` the model section:
+
+```{r sections}
+sectioned <- pip_reset(pip_clone(pip))
+pip_tag(pip_view(sectioned, step = "data_table"), "data")
+pip_add(
+    sectioned,
+    "by_section",
+    pub_layout_sections(list(
+        Data = pip_view(sectioned, tags = "data"),
+        Model = pip_view(sectioned, depends = "fit")
+    ))
+)
+pip_run(sectioned, lgr = NULL)
+show(sectioned[["by_section", "out"]])
+```
+
+A section whose outputs are all `NULL` is left out, so a step that a param
+switches off returns `NULL`.
+
 ## Layouts that change with the data
 
 The structure of a document often depends on the data: one section per batch,

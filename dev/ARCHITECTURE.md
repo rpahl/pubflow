@@ -3,7 +3,7 @@
 Audience: developers (human or agent) who want to understand how pubflow's
 parts fit together before working on it.
 Companion documents: `DESIGN.md` is the agreed design with the reasons
-(decision log D1-D54); `PLAN.md` the open work; `reference/` the research
+(decision log D1-D55); `PLAN.md` the open work; `reference/` the research
 behind both. This document is the map: what the parts are, how data flows
 between them and where to look in the code. It cites decisions (D) instead
 of repeating them; "§n below" refers to this document.
@@ -109,7 +109,7 @@ flowchart TB
 | `param.R` | param objects, values, validity | `param()`, `*_param()`, `param_group()`, `param_value()`, `` `param_value<-` ``, `param_validity()` |
 | `param_config.R` | ordered configs | `param_config()`, `c()`, `[` |
 | `param_print.R` | printing params | `print.param()` |
-| `pipeline.R` | params in pipelines, reading parts | `pub_get_params()`, `pub_out()`, `pub_layout_inputs()`, `pip_param_value.param()`, `` `pip_param_value<-.param`() `` |
+| `pipeline.R` | params in pipelines, reading parts | `pub_get_params()`, `pub_out()`, `pub_layout_inputs()`, `pub_layout_sections()`, `pip_param_value.param()`, `` `pip_param_value<-.param`() `` |
 | `ui_params_module.R` | param UI server logic | `pub_params_ui()`, `pub_params_server()`, `pub_pipeline_params_server()`; `.params_module()` |
 | `ui_param_input.R` | widgets and the params table | `pub_param_input()`, `.widget()`, `.params_table()`, `.pubflow_dependency()` |
 | `output.R` | metadata, output types, small content nodes | `pub_meta()`, `pub_set_meta()`, `pub_type()`, `as_pub_output()`, `pub_raw()`, `pub_toc()`, `pub_pagebreak()`, `pub_session_info()` |
@@ -220,6 +220,7 @@ params of a pipeline (`x[["params"]]`, one row per step):
 | `` `pip_param_value<-.param`() `` | generic `` `pip_param_value<-`() ``, used by `pip_set_params()` | merges a plain value into the param stored in a row and validates it (`pubflow_invalid_param`; pipeflow collects all into one `pipeflow_set_params_error` and sets nothing); configs are applied with `pip_set_params(x, config, unknown = "error")` (D36) |
 | `pub_out()` | `x[[step, "out"]]`, step state | the output only if the step is "done" (a failed run leaves old outputs behind); else a `pubflow_not_done` error naming the pipeline and failed steps, or an error item (D34) |
 | `pub_layout_inputs()` | views (`pip_view(tags = )`), `~try(step)` references | `~try(step)` for each step of a view, as `params` of a layout step taking `...`: tags select what a report shows (D39) |
+| `pub_layout_sections()` | views (`pip_view()`), `~try(step)` references | the function of a layout step with one section per view (D55) |
 | `pip_param_value.param()` | generic `pip_param_value()` | step functions receive plain values |
 
 Nested pipelines need no function of pubflow: the inner pipeline becomes

@@ -1,3 +1,9 @@
+# pubflow 0.0.0.9055
+
+* New `pub_layout_sections()` makes the function of a layout step whose document has
+  one section per view, e.g. `list(Data = pip_view(p, tags = "Data"), Model =
+  pip_view(p, depends = "fit"))`, with the outputs of the view's steps in it (D55).
+
 # pubflow 0.0.0.9054
 
 * `pub_params_table()` shows a `param_group()` as `"<label>: <value>"` of its members
