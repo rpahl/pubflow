@@ -1,6 +1,6 @@
 Package: pubflow
 Title: Publish 'pipeflow' Pipelines: Parameter UIs, Result Viewers and Reports
-Version: 0.0.0.9051
+Version: 0.0.0.9052
 Authors@R: c(
     person("Roman", "Pahl", , "roman.pahl@gmail.com", role = c("aut", "cre", "cph"))
     )
