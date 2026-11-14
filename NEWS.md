@@ -1,4 +1,4 @@
-# pubflow (development version)
+# pubflow 0.0.0.9058
 
 * New `pub_missing()` stands in for a part of a document that doesn't exist yet, e.g.
   the results of an analysis not run: the viewer shows its message as a neutral
