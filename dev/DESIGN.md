@@ -3,7 +3,7 @@
 The agreed design of pubflow and the reasons behind it. `ARCHITECTURE.md` maps the
 code; `PLAN.md` lists the open work; the help pages and vignettes document the API.
 This file keeps what none of them show: **why** things are the way they are. Cite a
-decision by its number (D1-D58) in code comments, commits and PRs, and add a new one
+decision by its number (e.g. D19) in code comments, commits and PRs, and add a new one
 here (not a renumbering) when a change settles a design question.
 
 ## 1. Purpose and scope
@@ -32,7 +32,7 @@ export of tables; offline math for HTML files (bundled KaTeX/MathJax).
 ## 2. Constraints
 
 - Develop with R 4.5.3; support R >= 4.3 (CI checks the oldest).
-- pipeflow >= 0.5.0.9032, pinned by commit in `Remotes` until it is on CRAN (D9).
+- pipeflow >= 0.5.0.9040, pinned by commit in `Remotes` until it is on CRAN (D9).
 - pandoc >= 3.6; optional xelatex and typst for PDF.
 - Regulated (GxP-style) use: traceable, deterministic output; errors never silently
   in a deliverable; all times in UTC.
@@ -75,7 +75,7 @@ results in the PR (`reference/benchmarks.md` has the measurements behind the dec
 | D2 | No knitr/rmarkdown in the rendering. Outputs go into an in-memory **document tree**, rendered to HTML with htmltools (UI, HTML files) or to **Pandoc Markdown with raw format-specific blocks and one pandoc call** (DOCX, PDF, Markdown). The vignettes use knitr and rmarkdown (Suggests only). |
 | D3 | PDF via LaTeX (xelatex, default) and Typst (optional). |
 | D7 | Scope of v0.1: params, param UI, outputs and tables, document tree, HTML renderer and viewer, DOCX/PDF/Markdown rendering, report specs and post-processors. |
-| D9 | Requires pipeflow >= 0.5.0.9032. A problem better solved in pipeflow is solved there (the maintainer is the same) if the change is not invasive; pubflow then pins the pipeflow commit until it is on CRAN. pipeflow hands plain values to step functions through pubflow's `pip_param_value()` method. |
+| D9 | Requires pipeflow >= 0.5.0.9040. A problem better solved in pipeflow is solved there (the maintainer is the same) if the change is not invasive; pubflow then pins the pipeflow commit until it is on CRAN. pipeflow hands plain values to step functions through pubflow's `pip_param_value()` method. |
 | D12 | The Shiny UI works with Bootstrap 3 and 5. |
 | D13 | Develop with R 4.5.3, support R >= 4.3, verified on CI. |
 
@@ -113,6 +113,7 @@ results in the PR (`reference/benchmarks.md` has the measurements behind the dec
 | D55 | **One section per view is a ready-made layout**: `pub_layout_sections(sections)` takes a named list of views (one per section, titled by its name) and returns the function of a layout step for `pip_add()`, so `exec` and `after` stay available. Views, not tags: selection stays in `pip_view()` (D39), tags keep one meaning, and the structure stays explicit (D5). One layout step, not one step per section: a failed input is still an error box in its section. No switch params: a section is left out if all its outputs are `NULL`, so a step switched off by a param returns `NULL` (an upstream failure still shows in it; an app that must hide it writes its own layout on `pub_layout_inputs()`). Other layouts keep using `pub_layout_inputs()`. |
 | D57 | **The viewer marks a pending document**: while Shiny marks the document output `recalculating` (also during a run that blocks the session, as Shiny sends that state first) for more than 0.5 s, the viewer shows "Updating ..."; for states Shiny can't see (async runs, params not applied yet) `pub_viewer_server(pending =)` takes a reactive returning a label or `NULL` (no `TRUE`/`FALSE`: one type, the app names the state). The document is shown in grey (`filter: grayscale(1)`, which also undoes Shiny's fade of a recalculating output): unlike fading with opacity, this keeps the AA text contrast of 4.5:1 for the still readable old document. The table of contents stays in colour, and the label shows in a bar sticky at the top of the document; the viewer gets the class `pubflow-pending` for end-to-end tests. A custom message sets the label, so the document is not rendered again; the browser keeps it per viewer id, and a viewer inserted later (e.g. by `renderUI()`, whose script may load after the first label was sent) asks for it again with the input `<id>_ready`. The bar is an always-present `role="status"` live region; no `aria-busy`, which would hide the still readable old document from screen readers. |
 | D58 | **Missing parts are `pub_missing(message)` items**: a part that doesn't exist yet (e.g. an analysis not run) is neither content nor an error. The viewer shows the message as a neutral placeholder (`pubflow-missing`, not an error box); `pub_render()` refuses it like an error item, under the same switch (`problems = "show"` renders it as an italic paragraph and warns). `pub_problems(x)` finds error items and missing parts by default (told apart by class), so the short call is the check for what `pub_render()` refuses; `type = "error"` or `"missing"` picks one kind. One walker, not a second finder. Explicit only: layout steps don't create them for inputs that haven't run, since pipeflow runs a "new" step before its dependents and a skipped input already arrives as a failure (an error item). The message is plain text (escaped like error messages). |
+| D60 | **Runs in workers send back a light clone**: an app that runs a pipeline in a worker (e.g. a `shiny::ExtendedTask`) returns `pipeflow::pip_clone(p, out = <layout steps>)`, a copy that keeps only the outputs of the named steps (pipeflow 0.5.0.9040; in the first app several MB per run against a few KB). The session reads it with the functions it uses on any pipeline: `pub_out()` for the documents, `pub_get_params()` for the params of the run (to tell that the current params differ, D57), the failed steps for notifications. No pubflow snapshot helper (`pub_run_snapshot()` was proposed in #20): it would run the pipeline (against D19) or duplicate the pipeline as a second structure, and the app code that is left is a few lines. The clone marks the steps that lost their output "outdated" (failed and locked steps keep theirs), so `pub_out()` refuses them and a run of the clone computes them again: nothing old or `NULL` reaches a document. Revision numbers that drop the results of replaced runs stay in the app (v05). |
 
 ### Tables and numbers
 

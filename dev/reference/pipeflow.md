@@ -1,13 +1,10 @@
 # pipeflow — facts relevant for pubflow
 
-Checked 2026-11-12 against **pipeflow 0.5.0.9032** (GitHub
-`rpahl/pipeflow`, commit 2ee2970; required since pubflow 0.0.0.9047 and
-pinned in `Remotes`, D9) by reading the source and running examples;
-first written for 0.5.0 (CRAN, commit aff664b), updated for 0.5.0.9012
-(af3b0e5, pubflow 0.0.0.9021-9026), 0.5.0.9026 (bf6b314, pubflow
-0.0.0.9027-9034) and 0.5.0.9028 (a3bbe82, pubflow 0.0.0.9035-9046); the
-changes are in pipeflow's NEWS,
-and its `dev/pipeflow.md` maps the run flow and invariants. Source: worktree `~/coding/rlang/pipeflow/main` (bare repo
+Checked 2026-11-15 against **pipeflow 0.5.0.9040** (GitHub
+`rpahl/pipeflow`, commit 31427ca; required since pubflow 0.0.0.9060 and
+pinned in `Remotes`, D9) by reading the source and running examples. Earlier
+pins and what changed: the "Landed in" entries in §9 and pipeflow's NEWS;
+pipeflow's `dev/pipeflow.md` maps the run flow and invariants. Source: worktree `~/coding/rlang/pipeflow/main` (bare repo
 `pipeflow.git` with worktrees; GitHub `rpahl/pipeflow`, which is public). pipeflow's maintainer is the pubflow maintainer: a problem
 that is better solved in pipeflow may be solved there if the change is not
 invasive (D9). Record new pipeflow bugs, quirks and feature requests
@@ -39,8 +36,12 @@ in §9.
 
 ## 2. Exported API (complete)
 
-Construction/cloning: `pip_new(name = "pipe")`, `pip_clone(x, name = NULL)`
-(deep copy, full pipeline only), `x[]` (copy).
+Construction/cloning: `pip_new(name = "pipe")`, `pip_clone(x, name = NULL,
+out = NULL)` (deep copy, full pipeline only), `x[]` (copy). `out`
+(0.5.0.9040) names the steps whose outputs the copy keeps (`character(0)`:
+none): the other steps lose theirs, and those that were "done" become
+"outdated"; failed and locked steps keep their outputs. For results sent back
+from a worker (D60).
 
 Steps:
 - `pip_add(x, step, fun, tags = character(0), params = list(),
@@ -499,6 +500,13 @@ cost (pipeflow stays lean: only features that make pubflow a lot simpler
 or that many R users need).
 
 **Open:**
+- **Clones forget the failed keys** (found 2026-11-15, pipeflow
+  0.5.0.9040): `.pip_clone()` doesn't copy `.steps_with_current_out`, so a
+  run of a clone (`pip_clone()`, `p[]`) calls a failed mapped step for all
+  its keys again instead of only the failed ones (2 calls instead of 1 with
+  keys `a` ok, `b` failed). Matters for apps that send a clone to a worker
+  after a partly failed run. Suggested fix: copy the environment in
+  `.pip_clone()`. Low priority.
 - **Annotated formula values bind** (found 2026-10-20): `pip_set_params()`
   treats any value with `inherits(x, "formula") && length(x) == 2` as a
   binding (`is_one_sided_formula()`, `R/utils.R`), so a pubflow param
@@ -527,6 +535,13 @@ or that many R users need).
   The views of a pipeline share its environment (`view[["pipenv"]]`),
   which `pub_layout_sections()` compares to reject views of different
   pipelines.
+
+**Landed in pipeflow 0.5.0.9033-0.5.0.9040** (pubflow requires it from
+0.0.0.9060): `pip_clone(out = )` (requested here 2026-11-15 for runs in
+workers, issue #20, D60); fixes of runs whose steps change their pipeline
+through `.self` (tracked by node id), `NULL` keys of partitioned outputs
+kept, shared checks and messages of the step editing functions. No other
+pubflow code change needed, the tests pass unchanged.
 
 **Landed in pipeflow 0.5.0.9029-0.5.0.9032** (pubflow requires it from
 0.0.0.9047; no pubflow code change needed, the tests pass unchanged):

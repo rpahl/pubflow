@@ -535,13 +535,17 @@ pip_run(report, lgr = NULL)
 report
 ```
 
-Two things to know when a worker runs the group's pipeline:
+Three things to know when a worker runs the group's pipeline:
 
 * A pipeline survives `saveRDS()`, so a worker returns the *run pipeline* and
   the app keeps all states: the next run of that pipeline re-runs only outdated
   steps. The returned pipeline holds copies of its outputs, in which ggplots
   get new cache keys, so make figures in such steps with
   `pub_figure(render = TRUE)`: the step then returns the picture, not the plot.
+* If the app only needs the part, the worker returns
+  `pip_clone(p, out = "content")`: a copy without the outputs of the other
+  steps, which is much smaller. `pub_out()` reads the part from it as from the
+  pipeline, but the next run starts from scratch.
 * Computations across groups (e.g. a table of all minima) are steps of the
   report pipeline. Give them the groups' data as parts read with `pub_out()`,
   too.
