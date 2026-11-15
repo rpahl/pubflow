@@ -237,6 +237,34 @@ describe("pub_table()", {
         expect_identical(huxtable::rowspan(again), huxtable::rowspan(ht))
     })
 
+    it("merges marked cells by their display text when finished again", {
+        data <- data.frame(g = c(1.234, 1.234, 1.234, 1.231), x = 1:4)
+        notes <- data.frame(row = c(2, 1), col = "g", text = c("Two.", "One."))
+        ht <- pub_table(data, digits = c(g = 2), footnotes = notes)
+
+        merged <- pub_table(ht, merge = "g")
+
+        expect_identical(unname(huxtable::rowspan(merged)[2:5, 1]), c(3, 1, 1, 1))
+        # the marker of the hidden cell moves to the shown cell
+        expect_identical(
+            merged[[1]][2:5],
+            c("1.23\u207d\u00b9\u207e\u207d\u00b2\u207e", "1.23", "1.23", "1.231")
+        )
+        unmarked <- pub_table(pub_table(data[3:4, ], digits = c(g = 2)), merge = "g")
+        expect_true(all(huxtable::rowspan(unmarked) == 1))
+    })
+
+    it("numbers label notes first when the header is not the first row", {
+        ht <- huxtable::hux(a = 1:3, b = 4:6, add_colnames = FALSE)
+        huxtable::header_rows(ht) <- c(FALSE, TRUE, FALSE)
+        notes <- data.frame(row = c(1, NA), col = c("a", "b"), text = c("B.", "L."))
+
+        ht <- pub_table(ht, footnotes = notes)
+
+        expect_identical(ht[[1]][1], "1\u207d\u00b2\u207e")
+        expect_identical(ht[[2]][2], "5\u207d\u00b9\u207e")
+    })
+
     it("keeps marked numeric columns right-aligned when finished again", {
         data <- data.frame(a = "z", k = 5L)
         notes <- data.frame(row = 1, col = "k", text = "K.")

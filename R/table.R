@@ -545,7 +545,8 @@ pub_table <- function(
         notes$col <- shown %/% nrow(ht) + 1L
     }
     notes$row <- row
-    notes <- unique(notes[order(notes$row, notes$col), ])
+    # labels first, also when the header is not the first table row
+    notes <- unique(notes[order(!onLabel, notes$row, notes$col), ])
     notes$number <- match(notes$text, unique(notes$text))
     rownames(notes) <- NULL
     notes
@@ -857,12 +858,70 @@ pub_table_rows <- function(ht) {
 .merge_body <- function(ht, body, merge) {
     for (col in merge) {
         j <- match(col, names(ht))
-        # a footnote marker on the shown cell of a merge doesn't split its run
-        for (run in .runs(.split_marks(ht[[j]][body])$text)) {
+        raw <- ht[[j]][body]
+        marks <- .split_marks(as.character(raw))$marks
+        if (!any(nzchar(marks))) {
+            for (run in .runs(raw)) {
+                ht <- huxtable::merge_cells(ht, body[run], j)
+            }
+            next
+        }
+        shown <- .split_marks(.format_cells(ht, j)[body, 1L])$text
+        for (run in .runs(.merge_keys(raw, shown, nzchar(marks)))) {
             ht <- huxtable::merge_cells(ht, body[run], j)
+            if (!any(nzchar(marks[run[-1L]]))) {
+                next
+            }
+            # the markers of hidden cells go to the cell that shows the merge
+            ht[body[run], j] <- c(
+                paste0(shown[run[[1L]]], .join_marks(marks[run])),
+                shown[run[-1L]]
+            )
         }
     }
     ht
+}
+
+#' Merge keys of a column with footnote markers
+#'
+#' A marked cell holds its display text (see .mark_cells()), so it is compared with
+#' its neighbours by display text; two unmarked cells are compared by value, so that
+#' different numbers that round alike stay apart.
+#' @param raw the cell values.
+#' @param shown the display texts without markers.
+#' @param marked logical: cells with markers.
+#' @return a vector for .runs(): equal neighbours share a value, missing cells are `NA`.
+#' @noRd
+.merge_keys <- function(raw, shown, marked) {
+    n <- length(raw)
+    if (n < 2L) {
+        return(raw)
+    }
+    same <- ifelse(
+        marked[-1L] | marked[-n],
+        shown[-1L] == shown[-n],
+        raw[-1L] == raw[-n]
+    )
+    key <- cumsum(c(TRUE, is.na(same) | !same))
+    key[is.na(raw)] <- NA
+    key
+}
+
+#' Join footnote markers of several cells into one marker string
+#' @param marks character vector of marker strings (`""` without markers).
+#' @return `character(1)`: the distinct markers in increasing order.
+#' @noRd
+.join_marks <- function(marks) {
+    one <- unlist(regmatches(marks, gregexpr("\u207d[^\u207e]+\u207e", marks)))
+    if (length(one) == 0L) {
+        return("")
+    }
+    digits <- chartr(
+        "\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079",
+        "0123456789",
+        gsub("[\u207d\u207e]", "", one)
+    )
+    paste(.footnote_mark(sort(unique(as.integer(digits)))), collapse = "")
 }
 
 #' Borders by the theme's border style
