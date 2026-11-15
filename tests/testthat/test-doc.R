@@ -516,9 +516,9 @@ describe("placing failure objects (error items)", {
 })
 
 
-# -----------
-# Error items
-# -----------
+# --------
+# Problems
+# --------
 
 describe("pub_problems()", {
     failures <- demo_failures()

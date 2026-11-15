@@ -2,7 +2,7 @@
 % Please edit documentation in R/doc.R
 \name{pub_problems}
 \alias{pub_problems}
-\title{Error items and missing parts of a document or of step outputs}
+\title{Problems (error items and missing parts) of a document or of step outputs}
 \usage{
 pub_problems(x, type = c("error", "missing"))
 }

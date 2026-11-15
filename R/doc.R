@@ -609,10 +609,10 @@ pub_section <- function(
 }
 
 
-# -----------
-# Error items
-# -----------
-#' Error items and missing parts of a document or of step outputs
+# --------
+# Problems
+# --------
+#' Problems (error items and missing parts) of a document or of step outputs
 #'
 #' Finds the failed steps and the missing parts ([pub_missing()]) in a document or in
 #' the outputs placed into one, e.g. to check a report before it is rendered
