@@ -70,10 +70,10 @@ The development documents live in `dev/` (excluded from the build).
   The snap `/snap/bin/typst` is still installed but can't start inside the sandbox and
   has a private `/tmp`; make sure `typst` resolves to `~/.local/bin`.
 - Git layout: bare repository `~/coding/rlang/pubflow/pubflow.git` with worktrees;
-  `main` is checked out at `~/coding/rlang/pubflow/main`. Milestone worktree example:
-  `git -C ~/coding/rlang/pubflow/pubflow.git worktree add ../m2-params -b m2-params main`.
+  `main` is checked out at `~/coding/rlang/pubflow/main`. Worktree example:
+  `git -C ~/coding/rlang/pubflow/pubflow.git worktree add ../my-branch -b my-branch main`.
   Remote `origin` = `rpahl/pubflow`. Commit when the user asks (or as agreed for the
-  milestone); never push without asking.
+  branch); never push without asking.
 
 ## Commands (from the package root)
 
