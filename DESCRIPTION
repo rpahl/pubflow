@@ -21,7 +21,7 @@ Imports:
     commonmark,
     htmltools,
     huxtable (>= 6.0.0),
-    pipeflow (>= 0.5.0.9032),
+    pipeflow (>= 0.5.0.9040),
     ragg,
     rlang,
     shiny (>= 1.8.1),
@@ -39,7 +39,7 @@ Suggests:
     testthat (>= 3.0.0),
     withr
 Remotes:
-    rpahl/pipeflow@2ee29704bb6e18b43d0bcc84c917dd63044399b1
+    rpahl/pipeflow@31427ca518bc160f8470f9fb873668b7f0116f70
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Encoding: UTF-8
