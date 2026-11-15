@@ -254,6 +254,12 @@ describe("pub_viewer_server()", {
                     list("Running", "Parameters changed", NULL)
                 )
                 expect_identical(sent[[1L]]$message$id, session$ns("viewer"))
+
+                # a viewer inserted later asks for the label again
+                session$setInputs(viewer_ready = TRUE)
+                sent <- log$of_type("pubflow:viewerPending")
+                expect_length(sent, 4L)
+                expect_null(sent[[4L]]$message$label)
             }
         )
     })

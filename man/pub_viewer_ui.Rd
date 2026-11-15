@@ -55,11 +55,11 @@ from the render \code{cache} (\code{\link[=pub_cache]{pub_cache()}}), which can 
 \subsection{Pending results}{
 
 While the document is being made again (\code{doc} or the viewer's outputs recalculate,
-e.g. while \code{doc} runs the pipeline), the viewer dims the previous document and shows
-"Updating ..." in a bar at its top (after half a second, so fast updates don't flash
-it). The bar is a live region, so screen readers
-announce it. While the marker is shown, the viewer has the class \code{pubflow-pending}
-(e.g. for end-to-end tests to wait on).
+e.g. while \code{doc} runs the pipeline), the viewer shows the previous document in grey
+and "Updating ..." in a bar at its top (after half a second, so fast updates don't
+flash it). The bar is a live region, so screen readers announce it. While the marker
+is shown, the viewer has the class \code{pubflow-pending} (e.g. for end-to-end tests to
+wait on).
 
 Shiny can't see runs outside of \code{doc}, e.g. in a \link[shiny:ExtendedTask]{shiny::ExtendedTask}, or params
 that changed but are applied only by a button. For these, pass a \code{pending} reactive

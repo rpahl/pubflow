@@ -33,11 +33,11 @@
 #' ## Pending results
 #'
 #' While the document is being made again (`doc` or the viewer's outputs recalculate,
-#' e.g. while `doc` runs the pipeline), the viewer dims the previous document and shows
-#' "Updating ..." in a bar at its top (after half a second, so fast updates don't flash
-#' it). The bar is a live region, so screen readers
-#' announce it. While the marker is shown, the viewer has the class `pubflow-pending`
-#' (e.g. for end-to-end tests to wait on).
+#' e.g. while `doc` runs the pipeline), the viewer shows the previous document in grey
+#' and "Updating ..." in a bar at its top (after half a second, so fast updates don't
+#' flash it). The bar is a live region, so screen readers announce it. While the marker
+#' is shown, the viewer has the class `pubflow-pending` (e.g. for end-to-end tests to
+#' wait on).
 #'
 #' Shiny can't see runs outside of `doc`, e.g. in a [shiny::ExtendedTask], or params
 #' that changed but are applied only by a button. For these, pass a `pending` reactive
@@ -154,6 +154,7 @@ pub_viewer_server <- function(id, doc, cache = pub_cache(), pending = NULL) {
         output$toc <- shiny::renderUI(rendered()$toc)
         if (!is.null(pending)) {
             shiny::observe({
+                input$viewer_ready
                 .send_custom_message(
                     "pubflow:viewerPending",
                     list(
