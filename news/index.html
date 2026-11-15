@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9059</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9060</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,11 @@
       <small>Source: <a href="https://github.com/rpahl/pubflow/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.0.9060" id="pubflow-0009060">pubflow 0.0.0.9060<a class="anchor" aria-label="anchor" href="#pubflow-0009060"></a></h2>
+<ul><li>pubflow requires pipeflow 0.5.0.9040, whose <code>pip_clone(out = )</code> copies a pipeline with the outputs of the named steps only (<a href="https://github.com/rpahl/pubflow/issues/20" class="external-link">#20</a>).</li>
+<li>New section “Long runs in a worker” in <code><a href="../articles/v05-shiny.html">vignette("v05-shiny")</a></code>: a Shiny app runs the pipeline in a <code><a href="https://rdrr.io/pkg/shiny/man/ExtendedTask.html" class="external-link">shiny::ExtendedTask</a></code> and the worker sends back only the document (<code>pip_clone(out = )</code>), which <code><a href="../reference/pub_out.html">pub_out()</a></code> reads; with the params of the run, so the viewer can mark results that don’t match the current params.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9059" id="pubflow-0009059">pubflow 0.0.0.9059<a class="anchor" aria-label="anchor" href="#pubflow-0009059"></a></h2>
 <ul><li>

@@ -491,6 +491,102 @@ If the layout step itself fails, its output is the error, and the viewer
 shows it as one box: pass `pip[[report, "out"]]` on as it is, as in the
 app above. An error is never embedded silently in a document.
 
+### Long runs in a worker
+
+A long run blocks the session: the app doesn’t react until the run is
+done. A
+[`shiny::ExtendedTask`](https://rdrr.io/pkg/shiny/man/ExtendedTask.html)
+runs it in another R process instead (a worker, e.g. with
+[mirai](https://mirai.r-lib.org)), and the session stays responsive.
+
+The worker gets a copy of the pipeline and runs it. A run pipeline holds
+the outputs of all its steps (the data, the model, the plot), and
+sending all of them back after every run can take seconds. So the worker
+sends back `pip_clone(pip, out = report)`, a copy that keeps the output
+of the layout step only. The copy still has the states, params and
+failures of the steps, so
+[`pub_out()`](https://rpahl.github.io/pubflow/reference/pub_out.md) and
+[`pub_get_params()`](https://rpahl.github.io/pubflow/reference/pub_get_params.md)
+work on it as on the pipeline itself. The steps that lost their output
+are `outdated`, so
+[`pub_out()`](https://rpahl.github.io/pubflow/reference/pub_out.md)
+refuses them and nothing old ends up in a document.
+
+The worker is a new R process: it knows only what it gets. The step
+functions travel with the pipeline, but the helpers they call
+(`coef_table()`, `scatter_plot()` and `params_table()` above) are
+defined in the app, so pass them to `mirai()` as well; it puts them in
+the worker’s global environment, where the steps find them. Create the
+task in `server()`, so that each session has its own task and never gets
+the results of another session:
+
+\
+`task`` ``<-`` `[`ExtendedTask`](https://rdrr.io/pkg/shiny/man/ExtendedTask.html)`$``new``(``function``(``pip``, ``report``, ``revision``)`` ``{`\
+`    ``mirai``::``mirai``(`\
+`        ``{`\
+`            `[`library`](https://rdrr.io/r/base/library.html)`(`[`pubflow`](https://rpahl.github.io/pubflow/)`)`` ``# the params need pubflow's methods`\
+`            ``pipeflow``::`[`pip_run`](https://rpahl.github.io/pipeflow/reference/pip_run.html)`(`\
+`                ``pipeflow``::`[`pip_view`](https://rpahl.github.io/pipeflow/reference/pip_view.html)`(``pip``, step ``=`` ``report``)``,`\
+`                lgr ``=`` ``NULL``,`\
+`                on_error ``=`` ``"continue"`\
+`            ``)`\
+`            `[`list`](https://rdrr.io/r/base/list.html)`(`\
+`                pip ``=`` ``pipeflow``::`[`pip_clone`](https://rpahl.github.io/pipeflow/reference/pip_clone.html)`(``pip``, out ``=`` ``report``)``,`\
+`                report ``=`` ``report``,`\
+`                revision ``=`` ``revision`\
+`            ``)`\
+`        ``}``,`\
+`        pip ``=`` ``pip``,`\
+`        report ``=`` ``report``,`\
+`        revision ``=`` ``revision``,`\
+`        coef_table ``=`` ``coef_table``,`\
+`        scatter_plot ``=`` ``scatter_plot``,`\
+`        params_table ``=`` ``params_table`\
+`    ``)`\
+`}``)`
+
+A button (`actionButton("update", "Update")`) or a new report starts a
+run. The task runs one run at a time and queues the others, so each run
+gets a number (`revision`), and the result of a run that a newer one
+replaces is dropped:
+
+\
+`revision`` ``<-`` ``0L`\
+`result`` ``<-`` `[`reactiveVal`](https://rdrr.io/pkg/shiny/man/reactiveVal.html)`(``)`\
+[`observe`](https://rdrr.io/pkg/shiny/man/observe.html)`(``{`\
+`    ``revision`` ``<<-`` ``revision`` ``+`` ``1L`\
+`    ``task``$``invoke``(`[`pip_clone`](https://rpahl.github.io/pipeflow/reference/pip_clone.html)`(``pip``)``, ``input``$``report``, ``revision``)`\
+`}``)`` ``|>`\
+`    `[`bindEvent`](https://rdrr.io/pkg/shiny/man/bindEvent.html)`(``input``$``update``, ``input``$``report``)`\
+\
+[`observe`](https://rdrr.io/pkg/shiny/man/observe.html)`(``{`\
+`    `[`req`](https://rdrr.io/pkg/shiny/man/req.html)`(``task``$``status``(``)`` ``==`` ``"success"``)`` ``# "error": a crashed worker, see ?ExtendedTask`\
+`    ``res`` ``<-`` ``task``$``result``(``)`\
+`    ``if`` ``(``res``$``revision`` ``<`` ``revision``)`` ``{`\
+`        `[`return`](https://rdrr.io/r/base/function.html)`(``)`` ``# a newer run is queued`\
+`    ``}`\
+`    ``failed`` ``<-`` ``res``$``pip``[[``"step"``]``]``[``res``$``pip``[[``"state"``]``]`` ``==`` ``"failed"``]`\
+`    ``if`` ``(`[`length`](https://rdrr.io/r/base/length.html)`(``failed``)`` ``>`` ``0L``)`` ``{`\
+`        `[`showNotification`](https://rdrr.io/pkg/shiny/man/showNotification.html)`(`[`paste`](https://rdrr.io/r/base/paste.html)`(``"Failed:"``, `[`toString`](https://rdrr.io/r/base/toString.html)`(``failed``)``)``, type ``=`` ``"warning"``)`\
+`    ``}`\
+`    ``result``(``res``)`\
+`}``)`\
+\
+`doc`` ``<-`` `[`reactive`](https://rdrr.io/pkg/shiny/man/reactive.html)`(``{`\
+`    `[`req`](https://rdrr.io/pkg/shiny/man/req.html)`(``result``(``)``)`\
+`    `[`pub_out`](https://rpahl.github.io/pubflow/reference/pub_out.md)`(``result``(``)``$``pip``, ``result``(``)``$``report``, on_error ``=`` ``"item"``)`\
+`}``)`\
+\
+`# TRUE while the params differ from those of the shown run`\
+`user_values`` ``<-`` ``function``(``x``)`` `[`lapply`](https://rdrr.io/r/base/lapply.html)`(`[`pub_get_params`](https://rpahl.github.io/pubflow/reference/pub_get_params.md)`(``x``, source ``=`` ``"user"``)``, ``param_value``)`\
+`changed`` ``<-`` `[`reactive`](https://rdrr.io/pkg/shiny/man/reactive.html)`(``{`\
+`    ``params``$``revision``(``)`\
+`    ``!`[`is.null`](https://rdrr.io/r/base/NULL.html)`(``result``(``)``)`` ``&&`` ``!`[`identical`](https://rdrr.io/r/base/identical.html)`(``user_values``(``pip``)``, ``user_values``(``result``(``)``$``pip``)``)`\
+`}``)`
+
+The session’s own pipeline is never run, so every run starts from
+scratch.
+
 ## The viewer
 
 [`pub_viewer_ui()`](https://rpahl.github.io/pubflow/reference/pub_viewer_ui.md)
@@ -520,9 +616,8 @@ Runs outside of `doc()`, e.g. in a
 [`shiny::ExtendedTask`](https://rdrr.io/pkg/shiny/man/ExtendedTask.html),
 and params that changed but are applied only by a button are not visible
 to the viewer. For these, `pending` takes a reactive returning the label
-to show, or `NULL` for no marker (here `task` is the `ExtendedTask` and
-`changed()` a reactive that is `TRUE` while the params differ from those
-of the shown run):
+to show, or `NULL` for no marker (`task` and `changed()` as in [Long
+runs in a worker](#long-runs-in-a-worker)):
 
 \
 [`pub_viewer_server`](https://rpahl.github.io/pubflow/reference/pub_viewer_ui.md)`(`\

@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9059</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9060</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -546,6 +546,95 @@ viewer shows it as one box: pass <code>pip[[report, "out"]]</code> on as
 it is, as in the app above. An error is never embedded silently in a
 document.</p>
 </div>
+<div class="section level3">
+<h3 id="long-runs-in-a-worker">Long runs in a worker<a class="anchor" aria-label="anchor" href="#long-runs-in-a-worker"></a>
+</h3>
+<p>A long run blocks the session: the app doesn’t react until the run is
+done. A <code><a href="https://rdrr.io/pkg/shiny/man/ExtendedTask.html" class="external-link">shiny::ExtendedTask</a></code> runs it in another R process
+instead (a worker, e.g. with <a href="https://mirai.r-lib.org" class="external-link">mirai</a>), and the session stays
+responsive.</p>
+<p>The worker gets a copy of the pipeline and runs it. A run pipeline
+holds the outputs of all its steps (the data, the model, the plot), and
+sending all of them back after every run can take seconds. So the worker
+sends back <code>pip_clone(pip, out = report)</code>, a copy that keeps
+the output of the layout step only. The copy still has the states,
+params and failures of the steps, so <code><a href="../reference/pub_out.html">pub_out()</a></code> and
+<code><a href="../reference/pub_get_params.html">pub_get_params()</a></code> work on it as on the pipeline itself. The
+steps that lost their output are <code>outdated</code>, so
+<code><a href="../reference/pub_out.html">pub_out()</a></code> refuses them and nothing old ends up in a
+document.</p>
+<p>The worker is a new R process: it knows only what it gets. The step
+functions travel with the pipeline, but the helpers they call
+(<code>coef_table()</code>, <code>scatter_plot()</code> and
+<code>params_table()</code> above) are defined in the app, so pass them
+to <code>mirai()</code> as well; it puts them in the worker’s global
+environment, where the steps find them. Create the task in
+<code>server()</code>, so that each session has its own task and never
+gets the results of another session:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">task</span> <span class="op">&lt;-</span> <span class="va"><a href="https://rdrr.io/pkg/shiny/man/ExtendedTask.html" class="external-link">ExtendedTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">pip</span>, <span class="va">report</span>, <span class="va">revision</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu">mirai</span><span class="fu">::</span><span class="fu">mirai</span><span class="op">(</span></span>
+<span>        <span class="op">{</span></span>
+<span>            <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rpahl.github.io/pubflow/">pubflow</a></span><span class="op">)</span> <span class="co"># the params need pubflow's methods</span></span>
+<span>            <span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_run.html" class="external-link">pip_run</a></span><span class="op">(</span></span>
+<span>                <span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_view.html" class="external-link">pip_view</a></span><span class="op">(</span><span class="va">pip</span>, step <span class="op">=</span> <span class="va">report</span><span class="op">)</span>,</span>
+<span>                lgr <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                on_error <span class="op">=</span> <span class="st">"continue"</span></span>
+<span>            <span class="op">)</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>                pip <span class="op">=</span> <span class="fu">pipeflow</span><span class="fu">::</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_clone.html" class="external-link">pip_clone</a></span><span class="op">(</span><span class="va">pip</span>, out <span class="op">=</span> <span class="va">report</span><span class="op">)</span>,</span>
+<span>                report <span class="op">=</span> <span class="va">report</span>,</span>
+<span>                revision <span class="op">=</span> <span class="va">revision</span></span>
+<span>            <span class="op">)</span></span>
+<span>        <span class="op">}</span>,</span>
+<span>        pip <span class="op">=</span> <span class="va">pip</span>,</span>
+<span>        report <span class="op">=</span> <span class="va">report</span>,</span>
+<span>        revision <span class="op">=</span> <span class="va">revision</span>,</span>
+<span>        coef_table <span class="op">=</span> <span class="va">coef_table</span>,</span>
+<span>        scatter_plot <span class="op">=</span> <span class="va">scatter_plot</span>,</span>
+<span>        params_table <span class="op">=</span> <span class="va">params_table</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>A button (<code>actionButton("update", "Update")</code>) or a new
+report starts a run. The task runs one run at a time and queues the
+others, so each run gets a number (<code>revision</code>), and the
+result of a run that a newer one replaces is dropped:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">revision</span> <span class="op">&lt;-</span> <span class="fl">0L</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactiveVal.html" class="external-link">reactiveVal</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">revision</span> <span class="op">&lt;&lt;-</span> <span class="va">revision</span> <span class="op">+</span> <span class="fl">1L</span></span>
+<span>    <span class="va">task</span><span class="op">$</span><span class="fu">invoke</span><span class="op">(</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_clone.html" class="external-link">pip_clone</a></span><span class="op">(</span><span class="va">pip</span><span class="op">)</span>, <span class="va">input</span><span class="op">$</span><span class="va">report</span>, <span class="va">revision</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/bindEvent.html" class="external-link">bindEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">update</span>, <span class="va">input</span><span class="op">$</span><span class="va">report</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="va">task</span><span class="op">$</span><span class="fu">status</span><span class="op">(</span><span class="op">)</span> <span class="op">==</span> <span class="st">"success"</span><span class="op">)</span> <span class="co"># "error": a crashed worker, see ?ExtendedTask</span></span>
+<span>    <span class="va">res</span> <span class="op">&lt;-</span> <span class="va">task</span><span class="op">$</span><span class="fu">result</span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">revision</span> <span class="op">&lt;</span> <span class="va">revision</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># a newer run is queued</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="va">failed</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">pip</span><span class="op">[[</span><span class="st">"step"</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="va">res</span><span class="op">$</span><span class="va">pip</span><span class="op">[[</span><span class="st">"state"</span><span class="op">]</span><span class="op">]</span> <span class="op">==</span> <span class="st">"failed"</span><span class="op">]</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">failed</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0L</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/showNotification.html" class="external-link">showNotification</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Failed:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/toString.html" class="external-link">toString</a></span><span class="op">(</span><span class="va">failed</span><span class="op">)</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"warning"</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="fu">result</span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">doc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="fu">result</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="../reference/pub_out.html">pub_out</a></span><span class="op">(</span><span class="fu">result</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">pip</span>, <span class="fu">result</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">report</span>, on_error <span class="op">=</span> <span class="st">"item"</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># TRUE while the params differ from those of the shown run</span></span>
+<span><span class="va">user_values</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="../reference/pub_get_params.html">pub_get_params</a></span><span class="op">(</span><span class="va">x</span>, source <span class="op">=</span> <span class="st">"user"</span><span class="op">)</span>, <span class="va">param_value</span><span class="op">)</span></span>
+<span><span class="va">changed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">params</span><span class="op">$</span><span class="fu">revision</span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="fu">result</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu">user_values</span><span class="op">(</span><span class="va">pip</span><span class="op">)</span>, <span class="fu">user_values</span><span class="op">(</span><span class="fu">result</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">pip</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>The session’s own pipeline is never run, so every run starts from
+scratch.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="the-viewer">The viewer<a class="anchor" aria-label="anchor" href="#the-viewer"></a>
@@ -576,11 +665,10 @@ longer than half a second).</p>
 <code><a href="https://rdrr.io/pkg/shiny/man/ExtendedTask.html" class="external-link">shiny::ExtendedTask</a></code>, and params that changed but are
 applied only by a button are not visible to the viewer. For these,
 <code>pending</code> takes a reactive returning the label to show, or
-<code>NULL</code> for no marker (here <code>task</code> is the
-<code>ExtendedTask</code> and <code>changed()</code> a reactive that is
-<code>TRUE</code> while the params differ from those of the shown
-run):</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code>NULL</code> for no marker (<code>task</code> and
+<code>changed()</code> as in <a href="#long-runs-in-a-worker">Long runs
+in a worker</a>):</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pub_viewer_ui.html">pub_viewer_server</a></span><span class="op">(</span></span>
 <span>    <span class="st">"viewer"</span>,</span>
 <span>    <span class="va">doc</span>,</span>
@@ -603,7 +691,7 @@ HTML of the tables, and the viewer and the render functions use it when
 they get it as <code>cache</code>. So a report downloaded after viewing
 needs not render its figures again: the app above gives the same cache
 to the viewer and to <code><a href="../reference/pub_render.html">pub_render()</a></code>.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cache</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pub_cache.html">pub_cache</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/pub_viewer_ui.html">pub_viewer_server</a></span><span class="op">(</span><span class="st">"viewer"</span>, <span class="va">doc</span>, cache <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span><span class="fu">doc</span><span class="op">(</span><span class="op">)</span>, <span class="st">"docx"</span>, file <span class="op">=</span> <span class="va">file</span>, cache <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span></code></pre></div>
@@ -625,7 +713,7 @@ session, or outside of it to share the entries between sessions.</p>
 <code><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">shiny::fluidPage()</a></code> uses, and with Bootstrap 5, which
 bslib’s page functions use. The app above runs on both by changing the
 page:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu">bslib</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/bslib/reference/page.html" class="external-link">page_fluid</a></span><span class="op">(</span></span>
 <span>    <span class="co"># the same layout as before</span></span>
 <span><span class="op">)</span></span></code></pre></div>

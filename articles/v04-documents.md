@@ -153,7 +153,7 @@ depend on `fit`:
 `# 7:              [NULL]`\
 `# 8:        <pub_doc[3]>`\
 `# --------------------------`\
-`# <continued> last run: 2026-11-15 10:02:18 (0.077 s)`\
+`# <continued> last run: 2026-11-15 11:46:52 (0.069 s)`\
 `# steps: 4 done, 1 failed, 3 new`
 
 The run warns (class `pipeflow_run_failed`), but the document is there.
@@ -261,7 +261,7 @@ Set the param back and the next run repairs the steps that failed:
 `# 7: The model explains **49%** of the varian...`\
 `# 8:                                <pub_doc[3]>`\
 `# --------------------------`\
-`# <ready> last run: 2026-11-15 10:02:18 (0.062 s)`\
+`# <ready> last run: 2026-11-15 11:46:53 (0.069 s)`\
 `# steps: 8 done`
 
 ### Select the steps of a report by tags
@@ -329,7 +329,7 @@ view computes just what its report needs:
 `#  9:                                <pub_doc[3]>           `\
 `# 10:                                      [NULL]           `\
 `# ---------------------------`\
-`# <ready> last run: 2026-11-15 10:02:18 (0.030 s)`\
+`# <ready> last run: 2026-11-15 11:46:53 (0.028 s)`\
 `# steps: 6 done, 4 new`\
 [`show`](https://rdrr.io/r/methods/show.html)`(``tagged``[[``"short"``, ``"out"``]``]``)`
 
@@ -596,7 +596,7 @@ by its key, around the section the step returned:
 `# 6: section data,table,plot months,table,plot  done           <list[5]>   auto`\
 `# 7:     doc        sections           section  done        <pub_doc[3]> reduce`\
 `# -----------------------------`\
-`# <ready> last run: 2026-11-15 10:02:19 (0.126 s)`\
+`# <ready> last run: 2026-11-15 11:46:54 (0.118 s)`\
 `# steps: 7 done`
 
 ## Ozone by month
@@ -785,7 +785,7 @@ in a parallel worker, which does the same and returns the pipeline:
 `# 3:   table        res    mean  done    <huxtable[3x2]>`\
 `# 4: content      table   table  done          <list[1]>`\
 `# ------------------------`\
-`# <ready> last run: 2026-11-15 10:02:20 (0.015 s)`\
+`# <ready> last run: 2026-11-15 11:46:55 (0.014 s)`\
 `# steps: 4 done`
 
 #### Read the parts with `pub_out()`
@@ -907,10 +907,10 @@ gets the new part:
 `# 1: parts  parts          done    <list[3]>`\
 `# 2:   doc  parts   parts  done <pub_doc[3]>`\
 `# ---------------------------`\
-`# <ready> last run: 2026-11-15 10:02:21 (0.004 s)`\
+`# <ready> last run: 2026-11-15 11:46:55 (0.004 s)`\
 `# steps: 2 done`
 
-Two things to know when a worker runs the group’s pipeline:
+Three things to know when a worker runs the group’s pipeline:
 
 - A pipeline survives
   [`saveRDS()`](https://rdrr.io/r/base/readRDS.html), so a worker
@@ -919,6 +919,12 @@ Two things to know when a worker runs the group’s pipeline:
   holds copies of its outputs, in which ggplots get new cache keys, so
   make figures in such steps with `pub_figure(render = TRUE)`: the step
   then returns the picture, not the plot.
+- If the app only needs the part, the worker returns
+  `pip_clone(p, out = "content")`: a copy without the outputs of the
+  other steps, which is much smaller.
+  [`pub_out()`](https://rpahl.github.io/pubflow/reference/pub_out.md)
+  reads the part from it as from the pipeline, but the next run starts
+  from scratch.
 - Computations across groups (e.g. a table of all minima) are steps of
   the report pipeline. Give them the groups’ data as parts read with
   [`pub_out()`](https://rpahl.github.io/pubflow/reference/pub_out.md),
