@@ -3,7 +3,7 @@
 Audience: developers (human or agent) who want to understand how pubflow's
 parts fit together before working on it.
 Companion documents: `DESIGN.md` is the agreed design with the reasons
-(decision log D1-D55); `PLAN.md` the open work; `reference/` the research
+(decision log D1-D58); `PLAN.md` the open work; `reference/` the research
 behind both. This document is the map: what the parts are, how data flows
 between them and where to look in the code. It cites decisions (D) instead
 of repeating them; "§n below" refers to this document.
@@ -97,7 +97,7 @@ flowchart TB
     I -- "stamps figures" --> O
     V --> R
     Rep --> R
-    Rep -- "front matter" --> D
+    Rep -- "front matter<br/>(else the doc's)" --> D
     R --> D
     R --> O
     D --> O
@@ -160,7 +160,7 @@ Other parts of the repository:
 
 | Path | Content |
 |---|---|
-| `inst/www/` | `pubflow.js`/`.css` (param UI: inline messages, warn glow, tooltips), `pubflow-viewer.js`/`.css` (TOC sidebar, scrollspy, MathJax after updates), `pubflow-doc.css` (document typography, used by viewer and HTML files) |
+| `inst/www/` | `pubflow.js`/`.css` (param UI: inline messages, warn glow, tooltips), `pubflow-viewer.js`/`.css` (TOC sidebar, scrollspy, MathJax after updates, pending marker), `pubflow-doc.css` (document typography, used by viewer and HTML files) |
 | `inst/templates/` | `reference.docx` (styles and header/footer bookmarks; built by `data-raw/reference_docx.R`), `pubflow-header.tex` (LaTeX packages, error frame, footer), `pubflow.typ` (Typst template) |
 | `inst/examples/report-app/` | report app: param UI in the sidebar, viewer with a short and a long report of one pipeline selected by tags (`pub_layout_inputs()`), download as DOCX/PDF/HTML with `pub_render()` (Bootstrap 3, `?bs=5` for Bootstrap 5) |
 | `inst/examples/modules-app/` | modules app: the param modules' return values as raw R output, refresh, locked steps, a standalone module (Bootstrap 3, `?bs=5` for Bootstrap 5) |
@@ -365,7 +365,7 @@ classDiagram
 
 `pub_doc$meta` holds `title`, `subtitle`, `author`, `time`, `app`,
 `version`, `header`, `footer` and free entries; an item's `type` is one of
-the types above (table, figure, text, widget, raw, pagebreak, toc, error),
+the types above (table, figure, text, widget, raw, pagebreak, toc, error, missing),
 its `object` the output itself and its `meta` a copy of `pub_meta(object)`.
 
 Placement rules: a named list becomes one sub-section per element
@@ -418,7 +418,7 @@ skips identical param values), so only the affected steps re-run.
 flowchart TB
     doc[("pub_doc")]
     subgraph html["HTML path (htmltools, no pandoc)"]
-        parts[".html_parts(): walk the tree<br/>→ header, body, outline, deps"]
+        parts[".html_parts(): walk the tree<br/>→ header (or front matter), body, outline, deps"]
         pubhtml["pub_html()<br/>HTML fragment"]
         vw["viewer: .viewer_render()"]
         file1[".render_html_file():<br/>standalone page, assets inlined"]
@@ -455,8 +455,8 @@ flowchart TB
     b[".check_report_spec(): spec fits the format"]
     c[".render_doc(): merge render-time meta,<br/>time = now unless given (D30)"]
     d[".render_settings(spec, target):<br/>templates, page, figure device, labels, ..."]
-    e[".front_nodes(): spec's front_matter(doc, format)"]
-    f[".guard_error_items(): refuse<br/>or show + warn (D32)"]
+    e[".front_nodes(): spec's front_matter(doc, format),<br/>else doc$front_matter (D56)"]
+    f[".guard_problems(): refuse<br/>or show + warn (D32)"]
     g["fresh temp work directory"]
     h{"format"}
     h1[".render_html_file()<br/>standalone page"]
@@ -571,7 +571,12 @@ into `output$doc` and the outline into `output$toc` (one reactive, ids
 prefixed with the module namespace). `NULL` shows "No results", a
 condition (the layout step failed) one error box. The client side
 (`pubflow-viewer.js`) only does scrollspy and MathJax typesetting after
-updates. There are no per-item modules or observers: a changed document is
+updates, and sets the marker of a pending document (class `pubflow-pending`
+and a label in a `role="status"` bar): "Updating ..." while Shiny marks the
+document output `recalculating`, else the label of message
+`pubflow:viewerPending`, sent by an observer on the optional `pending`
+reactive. There are no
+per-item modules or observers: a changed document is
 rendered again as a whole, with figures and tables from the cache.
 
 ### 6.7 The Markdown dialect and the formats (`render_markdown.R`, `render.R`)
@@ -624,7 +629,7 @@ flowchart TB
     c2 --> c3["viewer shows an error box;<br/>other steps still run"]
     v -- "report: pip_run() (on_error = 'stop')" --> s1["pipeflow_step_error,<br/>no document"]
     c2 --> r{"pub_render()"}
-    r -- "spec error_items = 'refuse' (default)" --> r1["pubflow_render_error"]
+    r -- "spec problems = 'refuse' (default)" --> r1["pubflow_render_error"]
     r -- "'show'" --> r2["error boxes + pubflow_render_warning"]
 ```
 
@@ -649,7 +654,7 @@ requirement.
 | Same doc + spec → identical Markdown/HTML | renderers | determinism; time only from meta |
 | Identical table cell text in every format | `.format_cells()` | D15, D16 |
 | Documents don't reach the pipeline | pipeflow, `doc.R` | D20; `reaches_pipeline()` in tests |
-| Errors never silently in deliverables | `.guard_error_items()` | D21, D32 |
+| Errors never silently in deliverables | `.guard_problems()` | D21, D32 |
 | Times formatted with `tz = "UTC"` | everywhere | DESIGN.md §3 |
 | No S3 methods for base classes, no options set on load, no Shiny internals, no per-session package state | everywhere | AGENTS.md hard rules |
 | `huxtable::` prefix, no huxtable subclasses | table code | flextable masks names; huxtable forbids subclasses |

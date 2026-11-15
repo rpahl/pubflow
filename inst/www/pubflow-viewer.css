@@ -81,6 +81,40 @@
   text-align: center;
 }
 
+/* Pending document (pubflow-viewer.js): a status bar with the label stays
+   at the top of the document, which is shown in grey. Grey, not faded:
+   grayscale keeps the contrast of the text (WCAG AA), opacity would not;
+   so Shiny's fade of a recalculating output is undone too. */
+.pubflow-viewer-status {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin-bottom: 1em;
+  padding: 0.6em 1em;
+  border: 1px solid #ffe69c;
+  border-radius: 0.25em;
+  background: #fff3cd;
+  color: #664d03;
+}
+/* empty: no height, but still in the accessibility tree (a live region
+   must exist before its text changes to be announced) */
+.pubflow-viewer-status:empty {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.pubflow-viewer-doc {
+  transition: filter 0.2s;
+}
+.pubflow-pending .pubflow-viewer-doc {
+  filter: grayscale(1);
+  opacity: 1;
+}
+/* sections reached from the table of contents stay below the bar */
+.pubflow-pending .pubflow-viewer-doc [id] {
+  scroll-margin-top: 4em;
+}
+
 /* Narrow screens: table of contents above the document */
 @media (max-width: 767px) {
   .pubflow-viewer {
@@ -102,7 +136,11 @@
 }
 
 @media print {
-  .pubflow-viewer-toc {
+  .pubflow-viewer-toc,
+  .pubflow-viewer-status {
     display: none;
+  }
+  .pubflow-pending .pubflow-viewer-doc {
+    filter: none;
   }
 }

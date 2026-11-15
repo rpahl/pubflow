@@ -35,6 +35,20 @@
     Output
       <pubflow document>
 
+---
+
+    Code
+      print(pub_doc(pub_section("Results", "text"), title = "Report", front_matter = list(
+        "Cover", pub_pagebreak())))
+    Output
+      <pubflow document> "Report"
+      Front matter:
+      text "Cover"
+      pagebreak
+      Body:
+      # Results
+        text "text"
+
 # documents made by layout steps (fixtures) / builds the report document
 
     Code

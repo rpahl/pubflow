@@ -23,7 +23,7 @@
 #' * `pub_page()` describes the page (size, orientation, margins) of DOCX and PDF
 #'   reports.
 #'
-#' All arguments except `format` and `error_items` are optional: `NULL` means the
+#' All arguments except `format` and `problems` are optional: `NULL` means the
 #' default (for `figure` and `labels`, an empty list does too).
 #'
 #' ## Which argument acts where
@@ -57,6 +57,8 @@
 #' * `front_matter`: a `function(doc, format)` that returns the front matter, e.g. a
 #'   title page with a signature table. It replaces the title block (in HTML the header)
 #'   in every format; the title and author stay in the file's properties.
+#'   * Without it, the document's front matter is used (see "Front matter" in
+#'     [pub_doc()]), which the viewer shows too.
 #'   * It returns what a document can hold: sections, outputs or lists of them (see
 #'     [pub_doc()]).
 #'   * `doc` is the document with the render-time metadata (see [pub_render()]) and
@@ -93,11 +95,12 @@
 #'   with `pub_set_meta(locked = TRUE)`, and the header and footer if `post_process`
 #'   lists [pub_pp_docx_lock()]. `FALSE` locks nothing, and `post_process` can't list
 #'   [pub_pp_docx_lock()].
-#' * `error_items`: what [pub_render()] does with error items (failed steps placed by a
-#'   layout step run with `on_error = "continue"`, see [pub_doc()]):
+#' * `problems`: what [pub_render()] does with error items (failed steps placed by a
+#'   layout step run with `on_error = "continue"`, see [pub_doc()]) and missing parts
+#'   ([pub_missing()]):
 #'   * `"refuse"` (default) signals a `pubflow_render_error`;
-#'   * `"show"` writes their error boxes and warns (`pubflow_render_warning`), naming
-#'     the failed steps.
+#'   * `"show"` writes their error boxes and placeholders and warns
+#'     (`pubflow_render_warning`), naming the failed steps and missing parts.
 #' * `post_process`: a list of functions `function(path, doc, spec)` that change the
 #'   rendered file before it is copied to its destination.
 #'   * They are called in order. `path` is the file, `doc` the document with the
@@ -142,9 +145,10 @@
 #'   made with xelatex, or `NULL`.
 #' @param typst_template Path of the pandoc template of PDF reports made with Typst, or
 #'   `NULL` (pubflow's).
-#' @param front_matter `function(doc, format)` returning the front matter, or `NULL`
-#'   (the title block: title, subtitle, author and time; shown only with a title,
-#'   subtitle or author).
+#' @param front_matter `function(doc, format)` returning the front matter (`NULL`: the
+#'   title block, `list()`: none), or `NULL` (the document's front matter, else the
+#'   title block: title, subtitle, author and time; shown only with a title, subtitle
+#'   or author).
 #' @param toc `TRUE`: add a table of contents (see Details).
 #' @param toc_depth `integer(1)` deepest heading level in it (1-6).
 #' @param number_sections `TRUE`: number the sections.
@@ -153,7 +157,8 @@
 #' @param figure Device settings of figures (see Details) or `NULL`.
 #' @param placeholder_color Colour of placeholders (`"#rrggbb"`) or `NULL`.
 #' @param lock `TRUE`, `FALSE` or `NULL` (see Details).
-#' @param error_items `"refuse"` or `"show"`.
+#' @param problems What to do with error items and missing parts: `"refuse"` or
+#'   `"show"`.
 #' @param post_process List of post-processors (see Details).
 #' @param pandoc_args `character` extra arguments of pandoc.
 #' @param size Paper size: `"a4"` or `"letter"`.
@@ -174,7 +179,7 @@
 #'     }
 #' )
 #' spec
-#' pub_report_spec("docx", toc = FALSE, error_items = "show")
+#' pub_report_spec("docx", toc = FALSE, problems = "show")
 #'
 #' # Landscape page and vector figures
 #' pub_report_spec("pdf", page = pub_page("a4", "landscape"),
@@ -231,14 +236,14 @@ pub_report_spec <- function(
     placeholder_color = NULL,
     # Checks and protection
     lock = NULL,
-    error_items = c("refuse", "show"),
+    problems = c("refuse", "show"),
     # After rendering
     post_process = list(),
     pandoc_args = character()
 ) {
     fields <- as.list(environment())
     fields$format <- rlang::arg_match(format)
-    fields$error_items <- rlang::arg_match(error_items)
+    fields$problems <- rlang::arg_match(problems)
     .new_report_spec(fields)
 }
 
@@ -278,7 +283,7 @@ pub_report_spec <- function(
         labels = .check_spec_labels(fields[["labels"]] %||% list(), call),
         placeholder_color = fields[["placeholder_color"]],
         lock = fields[["lock"]],
-        error_items = fields[["error_items"]],
+        problems = fields[["problems"]],
         post_process = if (is.function(pp)) list(pp) else pp %||% list(),
         pandoc_args = fields[["pandoc_args"]] %||% character()
     )
@@ -382,7 +387,7 @@ print.pub_page <- function(x, ...) {
     c(
         files,
         front_matter = if (is.null(x$front_matter)) {
-            "title block"
+            "document's or title block"
         } else {
             "function"
         },
@@ -409,7 +414,7 @@ print.pub_page <- function(x, ...) {
             default(x$placeholder_color)
         },
         lock = if (x$format == "docx") default(x$lock, "marked items"),
-        error_items = x$error_items,
+        problems = x$problems,
         post_process = if (length(x$post_process) == 0L) {
             "none"
         } else {
@@ -498,8 +503,8 @@ print.pub_page <- function(x, ...) {
 #' @noRd
 .check_spec_values <- function(spec, call = rlang::caller_env()) {
     abort <- \(msg) rlang::abort(msg, call = call)
-    if (!rlang::is_string(spec$error_items, c("refuse", "show"))) {
-        abort("`error_items` must be \"refuse\" or \"show\".")
+    if (!rlang::is_string(spec$problems, c("refuse", "show"))) {
+        abort("`problems` must be \"refuse\" or \"show\".")
     }
     if (!is.null(spec$front_matter) && !is.function(spec$front_matter)) {
         abort("`front_matter` must be a function or `NULL`.")
@@ -834,7 +839,8 @@ print.pub_page <- function(x, ...) {
 # ------------
 # Front matter
 # ------------
-#' Nodes of the front matter, or `NULL` without a `front_matter` function
+#' Nodes of the front matter: of the spec's `front_matter` function, else the
+#' document's (`NULL` if neither has one)
 #' @param settings settings of the target (`.render_settings()`).
 #' @param doc the `pub_doc` (with the render-time metadata).
 #' @param call the environment of the caller, for the error message.
@@ -842,10 +848,13 @@ print.pub_page <- function(x, ...) {
 .front_nodes <- function(settings, doc, call = rlang::caller_env()) {
     fun <- settings$front_matter
     if (is.null(fun)) {
-        return(NULL)
+        return(doc$front_matter)
     }
     tryCatch(
-        .as_children(list(fun(doc, settings$format))),
+        {
+            front <- fun(doc, settings$format)
+            if (!is.null(front)) .as_children(list(front))
+        },
         error = function(e) {
             rlang::cnd_signal(.render_error(
                 "`front_matter` failed.",

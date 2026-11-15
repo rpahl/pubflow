@@ -61,6 +61,21 @@ describe("pub_viewer_server()", {
         expect_match(res$toc, "<nav class=\"pubflow-toc\">", fixed = TRUE)
     })
 
+    it("shows the document's front matter instead of the header", {
+        doc <- pub_doc(
+            pub_section("Results", "x"),
+            title = "Report",
+            front_matter = list(pub_section("Cover", "Signed."), pub_toc())
+        )
+
+        res <- render_viewer(doc)
+
+        expect_false(grepl("pubflow-title", res$doc, fixed = TRUE))
+        expect_match(res$doc, sprintf("id=\"%s-sec-0-1\"", res$ns), fixed = TRUE)
+        expect_match(res$doc, "Signed.", fixed = TRUE)
+        expect_match(res$toc, "Cover</a>", fixed = TRUE)
+    })
+
     it("warns about unresolved cross-references and still shows the document", {
         expect_warning(
             res <- render_viewer(pub_doc("See @fig:nope.")),
@@ -222,14 +237,71 @@ describe("pub_viewer_server()", {
         expect_identical(second$doc, first$doc)
     })
 
+    it("marks a pending document with a label", {
+        pending <- shiny::reactiveVal(NULL)
+        shiny::testServer(
+            pub_viewer_server,
+            args = list(doc = shiny::reactive(NULL), pending = pending),
+            {
+                log <- capture_messages(session)
+                for (value in list("Running", "Parameters changed", NULL)) {
+                    pending(value)
+                    session$flushReact()
+                }
+                sent <- log$of_type("pubflow:viewerPending")
+                expect_identical(
+                    lapply(sent, \(m) m$message$label),
+                    list("Running", "Parameters changed", NULL)
+                )
+                expect_identical(sent[[1L]]$message$id, session$ns("viewer"))
+
+                # a viewer inserted later asks for the label again
+                session$setInputs(viewer_ready = TRUE)
+                sent <- log$of_type("pubflow:viewerPending")
+                expect_length(sent, 4L)
+                expect_null(sent[[4L]]$message$label)
+            }
+        )
+    })
+
+    it("sends no pending marker without `pending`", {
+        shiny::testServer(
+            pub_viewer_server,
+            args = list(doc = shiny::reactive(NULL)),
+            {
+                log <- capture_messages(session)
+                session$flushReact()
+                expect_length(log$of_type("pubflow:viewerPending"), 0L)
+            }
+        )
+    })
+
     it("validates its arguments", {
         expect_error(
             pub_viewer_server("v", doc = pub_doc()),
             "`doc` must be a reactive"
         )
         expect_error(
+            pub_viewer_server("v", shiny::reactive(NULL), pending = "Updating"),
+            "`pending` must be `NULL` or a reactive"
+        )
+        expect_error(
             pub_viewer_server("v", shiny::reactive(NULL), cache = 1),
             "pub_cache"
         )
+    })
+})
+
+describe(".viewer_pending_label()", {
+    it("gives the label, or NULL for no marker", {
+        expect_null(.viewer_pending_label(NULL))
+        expect_null(.viewer_pending_label(""))
+        expect_identical(.viewer_pending_label("Changed"), "Changed")
+    })
+
+    it("rejects other values", {
+        for (x in list(TRUE, NA, 1, c("a", "b"), NA_character_)) {
+            expect_error(.viewer_pending_label(x), "`pending` must return")
+        }
     })
 })

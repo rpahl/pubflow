@@ -19,7 +19,7 @@ pub_report_spec(
   figure = NULL,
   placeholder_color = NULL,
   lock = NULL,
-  error_items = c("refuse", "show"),
+  problems = c("refuse", "show"),
   post_process = list(),
   pandoc_args = character()
 )
@@ -42,9 +42,10 @@ made with xelatex, or \code{NULL}.}
 \item{typst_template}{Path of the pandoc template of PDF reports made with Typst, or
 \code{NULL} (pubflow's).}
 
-\item{front_matter}{\verb{function(doc, format)} returning the front matter, or \code{NULL}
-(the title block: title, subtitle, author and time; shown only with a title,
-subtitle or author).}
+\item{front_matter}{\verb{function(doc, format)} returning the front matter (\code{NULL}: the
+title block, \code{list()}: none), or \code{NULL} (the document's front matter, else the
+title block: title, subtitle, author and time; shown only with a title, subtitle
+or author).}
 
 \item{toc}{\code{TRUE}: add a table of contents (see Details).}
 
@@ -62,7 +63,8 @@ subtitle or author).}
 
 \item{lock}{\code{TRUE}, \code{FALSE} or \code{NULL} (see Details).}
 
-\item{error_items}{\code{"refuse"} or \code{"show"}.}
+\item{problems}{What to do with error items and missing parts: \code{"refuse"} or
+\code{"show"}.}
 
 \item{post_process}{List of post-processors (see Details).}
 
@@ -91,7 +93,7 @@ front matter, table of contents, page, figures, caption labels and more.
 reports.
 }
 
-All arguments except \code{format} and \code{error_items} are optional: \code{NULL} means the
+All arguments except \code{format} and \code{problems} are optional: \code{NULL} means the
 default (for \code{figure} and \code{labels}, an empty list does too).
 }
 
@@ -129,6 +131,8 @@ edit afterwards (\code{spec$toc <- FALSE}) is checked only when the spec is used
 title page with a signature table. It replaces the title block (in HTML the header)
 in every format; the title and author stay in the file's properties.
 \itemize{
+\item Without it, the document's front matter is used (see "Front matter" in
+\code{\link[=pub_doc]{pub_doc()}}), which the viewer shows too.
 \item It returns what a document can hold: sections, outputs or lists of them (see
 \code{\link[=pub_doc]{pub_doc()}}).
 \item \code{doc} is the document with the render-time metadata (see \code{\link[=pub_render]{pub_render()}}) and
@@ -170,12 +174,13 @@ that isn't \code{pub_set_meta(locked = FALSE)} against accidental editing and de
 with \code{pub_set_meta(locked = TRUE)}, and the header and footer if \code{post_process}
 lists \code{\link[=pub_pp_docx_lock]{pub_pp_docx_lock()}}. \code{FALSE} locks nothing, and \code{post_process} can't list
 \code{\link[=pub_pp_docx_lock]{pub_pp_docx_lock()}}.
-\item \code{error_items}: what \code{\link[=pub_render]{pub_render()}} does with error items (failed steps placed by a
-layout step run with \code{on_error = "continue"}, see \code{\link[=pub_doc]{pub_doc()}}):
+\item \code{problems}: what \code{\link[=pub_render]{pub_render()}} does with error items (failed steps placed by a
+layout step run with \code{on_error = "continue"}, see \code{\link[=pub_doc]{pub_doc()}}) and missing parts
+(\code{\link[=pub_missing]{pub_missing()}}):
 \itemize{
 \item \code{"refuse"} (default) signals a \code{pubflow_render_error};
-\item \code{"show"} writes their error boxes and warns (\code{pubflow_render_warning}), naming
-the failed steps.
+\item \code{"show"} writes their error boxes and placeholders and warns
+(\code{pubflow_render_warning}), naming the failed steps and missing parts.
 }
 \item \code{post_process}: a list of functions \verb{function(path, doc, spec)} that change the
 rendered file before it is copied to its destination.
@@ -236,7 +241,7 @@ spec <- pub_report_spec(
     }
 )
 spec
-pub_report_spec("docx", toc = FALSE, error_items = "show")
+pub_report_spec("docx", toc = FALSE, problems = "show")
 
 # Landscape page and vector figures
 pub_report_spec("pdf", page = pub_page("a4", "landscape"),

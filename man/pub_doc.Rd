@@ -5,7 +5,7 @@
 \alias{pub_section}
 \title{Documents and sections}
 \usage{
-pub_doc(..., title = NULL, subtitle = NULL, meta = list())
+pub_doc(..., title = NULL, subtitle = NULL, meta = list(), front_matter = NULL)
 
 pub_section(
   title,
@@ -24,6 +24,9 @@ pub_section(
 \item{subtitle}{\code{character(1)} subtitle of the document or \code{NULL}.}
 
 \item{meta}{Named list of document metadata (see "Metadata" in Details).}
+
+\item{front_matter}{Outputs placed before the body instead of the title block (see
+"Front matter" in Details), or \code{NULL} (default): the title block.}
 
 \item{numbered}{\code{TRUE}: the section is numbered (children of unnumbered sections are
 unnumbered).}
@@ -61,6 +64,7 @@ The children (\code{...}) are interpreted as follows:\tabular{ll}{
    \code{\link[=pub_pagebreak]{pub_pagebreak()}} \tab a page break (DOCX, PDF) \cr
    \code{\link[=pub_toc]{pub_toc()}} \tab a table of contents \cr
    failed step, error item of \code{\link[=pub_out]{pub_out()}} \tab an error box \cr
+   \code{\link[=pub_missing]{pub_missing()}} \tab a placeholder for a missing part \cr
    \code{NULL}, empty text \tab nothing \cr
    pipeline \tab an error (place the outputs of its steps instead) \cr
 }
@@ -87,6 +91,23 @@ Metadata of a document:\tabular{ll}{
 A blank string (\code{""} or only whitespace) as title, subtitle, author, app or version
 counts as not given. You can add keys of your own: pubflow keeps them but doesn't
 check or use them.
+}
+
+\subsection{Front matter}{
+
+\code{front_matter} holds what comes before the body, e.g. a title page, a signature
+table and a table of contents (\code{\link[=pub_toc]{pub_toc()}}). It takes the same outputs as the
+children (also lists of them) and replaces the title block (in HTML the header), in
+the viewer, in \code{\link[=pub_html]{pub_html()}} and in every format of \code{\link[=pub_render]{pub_render()}}:
+\itemize{
+\item Its sections are unnumbered (the numbers of the body start at 1), while its tables
+and figures count in the caption numbers.
+\item The table of contents of a report spec comes after it; end it with
+\code{\link[=pub_pagebreak]{pub_pagebreak()}} to start the contents on a new page.
+\item \code{list()} drops the title block without putting anything in its place.
+\item The \code{front_matter} function of a \code{\link[=pub_report_spec]{pub_report_spec()}} replaces it (and can build
+on it: \code{doc$front_matter}), e.g. for a title block of one format only.
+}
 }
 
 \subsection{Failed steps}{

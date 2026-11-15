@@ -391,6 +391,19 @@ describe("pub_markdown()", {
         )
     })
 
+    it("writes missing parts as italic paragraphs, escaped", {
+        doc <- pub_doc(pub_section("S", pub_missing("Run *fit*  first.")))
+
+        for (target in c("md", "docx")) {
+            expect_match(
+                markdown(doc, target),
+                "\n*Run \\*fit\\* first.*\n",
+                fixed = TRUE,
+                info = target
+            )
+        }
+    })
+
     it("names the pipeline of an error item of pub_out()", {
         item <- structure(
             list(

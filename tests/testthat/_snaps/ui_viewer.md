@@ -8,7 +8,8 @@
           <div id="viewer-toc" class="shiny-html-output"></div>
         </aside>
         <div class="pubflow-viewer-content">
-          <div id="viewer-doc" class="shiny-html-output"></div>
+          <div class="pubflow-viewer-status" role="status" aria-live="polite"></div>
+          <div class="shiny-html-output pubflow-viewer-doc" id="viewer-doc"></div>
         </div>
       </div>
 
@@ -19,7 +20,8 @@
     Output
       <div id="viewer-viewer" class="pubflow-viewer pubflow-viewer-fixed" style="height: 600px;">
         <div class="pubflow-viewer-content" role="region" aria-label="Document" tabindex="0">
-          <div id="viewer-doc" class="shiny-html-output"></div>
+          <div class="pubflow-viewer-status" role="status" aria-live="polite"></div>
+          <div class="shiny-html-output pubflow-viewer-doc" id="viewer-doc"></div>
         </div>
       </div>
 

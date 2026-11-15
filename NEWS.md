@@ -1,3 +1,38 @@
+# pubflow 0.0.0.9058
+
+* New `pub_missing()` stands in for a part of a document that doesn't exist yet, e.g.
+  the results of an analysis not run: the viewer shows its message as a neutral
+  placeholder, and `pub_render()` refuses it like an error item (or, with
+  `pub_report_spec(problems = "show")`, shows it as an italic paragraph).
+  `pub_problems()` finds these parts too, so it lists everything `pub_render()`
+  refuses; its new argument `type` picks one kind (`"error"` or `"missing"`) (#17,
+  D58).
+
+* Renamed `pub_error_items()` to `pub_problems()` and the report spec field
+  `error_items` to `problems`, as they cover missing parts as well as error items
+  (D58).
+
+# pubflow 0.0.0.9057
+
+* While the document is made again (e.g. while `doc()` runs the pipeline), the viewer
+  shows the previous document in grey and puts "Updating ..." in a bar at its top, so
+  users don't mistake the results of the previous run for the new ones. For runs outside of
+  `doc()` (e.g. in an `ExtendedTask`) or params not applied yet, the new argument
+  `pending` of `pub_viewer_server()` takes a reactive returning the label to show
+  (e.g. `"Parameters changed"`) or `NULL` (#19, D57).
+
+# pubflow 0.0.0.9056
+
+* `pub_doc()` has a new argument `front_matter` (e.g. a title page, a signature table
+  and `pub_toc()`) that replaces the title block in the viewer, in `pub_html()` and in
+  every format of `pub_render()`, with unnumbered sections (#18, D56). The
+  `front_matter` function of `pub_report_spec()` replaces it and can build on it
+  (`doc$front_matter`); so a spec of `\(doc, format) list()` is no longer needed to
+  drop the title block when the document holds its own front matter.
+* A `front_matter` function of `pub_report_spec()` that returns `NULL` now keeps the
+  title block; return `list()` to drop it.
+* `pub_html()` adds no table of contents if the document places one (`pub_toc()`).
+
 # pubflow 0.0.0.9055
 
 * New `pub_layout_sections()` makes the function of a layout step whose document has

@@ -29,7 +29,8 @@
 #'   as LaTeX or Typst code that breaks across pages and repeats the header rows.
 #'   Figures are PNG images unless the spec's `figure` asks for `"pdf"` (LaTeX) or
 #'   `"svg"` (Typst).
-#' * `"md"`: a plain Markdown document with a YAML front matter that holds the header,
+#' * `"md"`: a plain Markdown document with a YAML front matter that holds the header
+#'   (unless a front matter replaces it),
 #'   numbered headings, tables as Pandoc multiline tables and images. Page breaks,
 #'   landscape parts and tables of contents are left out.
 #'
@@ -55,10 +56,11 @@
 #'
 #' ## Report spec
 #'
-#' The report spec (see [pub_report_spec()]) adds the front matter, table of contents,
-#' section numbers, caption labels, figure devices and page. [pub_render()] calls
-#' `pub_markdown()` with its spec. The document's metadata is used as-is (no
-#' render-time metadata), so the Markdown of a document is always the same.
+#' The report spec (see [pub_report_spec()]) adds the front matter (by default the
+#' document's, see [pub_doc()]), table of contents, section numbers, caption labels,
+#' figure devices and page. [pub_render()] calls `pub_markdown()` with its spec. The
+#' document's metadata is used as-is (no render-time metadata), so the Markdown of a
+#' document is always the same.
 #'
 #' @param doc A `pub_doc`.
 #' @param target `"docx"`, `"latex"`, `"typst"` or `"md"`.
@@ -400,6 +402,7 @@ pub_markdown <- function(
         raw = .md_raw(x$object, ctx),
         toc = .md_toc(x$object, ctx),
         error = .md_error(x$object, ctx),
+        missing = .md_missing(x$object),
         NULL
     )
     if (length(content) > 0L) {
@@ -565,6 +568,15 @@ pub_markdown <- function(
         ),
         paste0("> ", gsub("\n", "\n> ", text, fixed = TRUE))
     )
+}
+
+
+#' Missing part: its message as an italic paragraph
+#' @param x a `pub_missing`.
+#' @return `character(1)` block.
+#' @noRd
+.md_missing <- function(x) {
+    paste0("*", .escape_literal(x$message), "*")
 }
 
 

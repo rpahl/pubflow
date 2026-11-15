@@ -183,6 +183,7 @@ describe("pub_type()", {
         expect_identical(pub_type(pub_pagebreak()), "pagebreak")
         expect_identical(pub_type(pub_toc()), "toc")
         expect_identical(pub_type(demo_failures()$fit), "error")
+        expect_identical(pub_type(pub_missing("Run it.")), "missing")
     })
 
     it("handles empty and borderline objects", {
@@ -344,6 +345,34 @@ describe("pub_pagebreak(), pub_toc(), pub_raw()", {
         expect_error(pub_raw(md = factor("a")), "`md` must be a character")
         expect_error(pub_raw(html = "<hr>", typst = 1), "`typst` must be a character")
         expect_error(pub_raw(html = NULL, md = NULL), "at least one target")
+    })
+})
+
+
+# -------------
+# Missing parts
+# -------------
+
+describe("pub_missing()", {
+    it("holds the message", {
+        x <- pub_missing("Run the analysis first.")
+
+        expect_s3_class(x, "pub_missing")
+        expect_identical(unclass(x), list(message = "Run the analysis first."))
+    })
+
+    it("prints the message", {
+        expect_output(
+            print(pub_missing("Run it.")),
+            "<pubflow missing part> \"Run it.\"",
+            fixed = TRUE
+        )
+    })
+
+    it("needs a non-blank string", {
+        for (bad in list(NULL, NA_character_, "", "  ", c("a", "b"), 1)) {
+            expect_error(pub_missing(bad), "non-blank string")
+        }
     })
 })
 

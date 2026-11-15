@@ -126,6 +126,20 @@ describe("pub_html()", {
         expect_match(html, "Step 'table' was not run.", fixed = TRUE)
     })
 
+    it("shows missing parts as neutral placeholders, escaped", {
+        html <- as.character(pub_html(pub_doc(pub_missing("Run <fit> & co."))))
+
+        expect_match(
+            html,
+            paste0(
+                "<div class=\"pubflow-item pubflow-missing\">\n",
+                "Run &lt;fit&gt; &amp; co.\n</div>"
+            ),
+            fixed = TRUE
+        )
+        expect_no_match(html, "pubflow-error", fixed = TRUE)
+    })
+
     it("names the pipeline of an error item of pub_out()", {
         item <- structure(
             list(
@@ -301,6 +315,30 @@ describe(".html_doc() with spec settings", {
         )
         expect_match(html, "Table 1: Y", fixed = TRUE)
         expect_match(html, "Table 2: X", fixed = TRUE)
+    })
+})
+
+describe("pub_html() of a document with front matter", {
+    it("shows the document's front matter instead of the header", {
+        doc <- pub_doc(
+            pub_section("A", pub_table(data.frame(x = 1), caption = "X")),
+            title = "T",
+            front_matter = list(
+                pub_section("Front", pub_table(data.frame(y = 1), caption = "Y"))
+            )
+        )
+
+        html <- as.character(pub_html(doc, toc = FALSE, math = "none"))
+
+        expect_false(grepl("pubflow-doc-header", html, fixed = TRUE))
+        expect_match(html, "id=\"pubflow-sec-0-1\">\n<h2>Front</h2>", fixed = TRUE)
+        expect_match(html, "Table 1: Y", fixed = TRUE)
+        expect_match(html, "Table 2: X", fixed = TRUE)
+        expect_length(gregexpr("<nav", pub_html(doc))[[1L]], 1L)
+        placed <- pub_doc(pub_section("A", "x"), front_matter = list(pub_toc()))
+        expect_length(gregexpr("<nav", pub_html(placed))[[1L]], 1L)
+        empty <- pub_html(pub_doc("x", title = "T", front_matter = list()))
+        expect_false(grepl("pubflow-doc-header", empty, fixed = TRUE))
     })
 })
 

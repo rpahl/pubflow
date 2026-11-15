@@ -17,7 +17,8 @@ pub_html(
 
 \item{cache}{A \code{\link[=pub_cache]{pub_cache()}} or \code{NULL} (render every figure and table).}
 
-\item{toc}{\code{TRUE}: add a table of contents (headings up to level 3).}
+\item{toc}{\code{TRUE}: add a table of contents (headings up to level 3) unless the
+document places one (\code{\link[=pub_toc]{pub_toc()}}).}
 
 \item{math}{\code{"mathjax"}: attach MathJax if the document has math; \code{"none"}: math
 stays as \verb{\\(...\\)} and \verb{\[...\]}.}
@@ -38,7 +39,8 @@ UIs directly. \code{\link[=pub_render]{pub_render()}} writes a standalone HTML f
 
 The result has:
 \itemize{
-\item a header with the title, subtitle and metadata;
+\item a header with the title, subtitle and metadata, or the front matter of the
+document instead (see \code{\link[=pub_doc]{pub_doc()}});
 \item an optional table of contents;
 \item one \verb{<section>} per section, with numbered headings.
 }
