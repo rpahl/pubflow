@@ -104,11 +104,11 @@
 #' default `on_error = "stop"`.
 #'
 #' For drafts, you can instead run the pipeline with `on_error = "continue"` and set
-#' `pub_report_spec(error_items = "show")`. The document is then rendered, with the
+#' `pub_report_spec(problems = "show")`. The document is then rendered, with the
 #' error items shown as error boxes and a warning.
 #'
 #' Missing parts ([pub_missing()]) are treated the same way: refused by default, shown
-#' as an italic placeholder paragraph with `error_items = "show"`.
+#' as an italic placeholder paragraph with `problems = "show"`.
 #'
 #' ## Good to know
 #'
@@ -168,7 +168,7 @@ pub_render <- function(
     doc <- .render_doc(doc, meta)
     settings <- .render_settings(spec, .format_target(format, pdf_engine))
     front <- .front_nodes(settings, doc)
-    .guard_error_items(c(front, doc$children), spec$error_items, format)
+    .guard_problems(c(front, doc$children), spec$problems, format)
     if (is.null(file)) {
         file <- file.path(tempdir(), pub_output_filename(doc$meta, format))
     }
@@ -341,17 +341,17 @@ pub_output_filename <- function(meta, ext) {
 #' Looks in the front matter and the body; `"refuse"` signals a render error, `"show"`
 #' warns.
 #' @param nodes list of nodes (front matter and body).
-#' @param error_items `"refuse"` or `"show"` (the spec's `error_items`).
+#' @param problems `"refuse"` or `"show"` (the spec's `problems`).
 #' @param format output format, for the error.
 #' @param call the environment of the caller, for the error message.
 #' @return `NULL`, invisibly, if the document may be rendered.
 #' @noRd
-.guard_error_items <- function(nodes, error_items, format, call = rlang::caller_env()) {
-    items <- pub_error_items(nodes)
+.guard_problems <- function(nodes, problems, format, call = rlang::caller_env()) {
+    items <- pub_problems(nodes)
     if (length(items) == 0L) {
         return(invisible())
     }
-    if (error_items == "show") {
+    if (problems == "show") {
         rlang::warn(
             c(
                 "The report shows error items (failed steps) or missing parts:",

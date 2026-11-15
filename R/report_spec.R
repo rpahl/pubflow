@@ -23,7 +23,7 @@
 #' * `pub_page()` describes the page (size, orientation, margins) of DOCX and PDF
 #'   reports.
 #'
-#' All arguments except `format` and `error_items` are optional: `NULL` means the
+#' All arguments except `format` and `problems` are optional: `NULL` means the
 #' default (for `figure` and `labels`, an empty list does too).
 #'
 #' ## Which argument acts where
@@ -95,7 +95,7 @@
 #'   with `pub_set_meta(locked = TRUE)`, and the header and footer if `post_process`
 #'   lists [pub_pp_docx_lock()]. `FALSE` locks nothing, and `post_process` can't list
 #'   [pub_pp_docx_lock()].
-#' * `error_items`: what [pub_render()] does with error items (failed steps placed by a
+#' * `problems`: what [pub_render()] does with error items (failed steps placed by a
 #'   layout step run with `on_error = "continue"`, see [pub_doc()]) and missing parts
 #'   ([pub_missing()]):
 #'   * `"refuse"` (default) signals a `pubflow_render_error`;
@@ -157,7 +157,8 @@
 #' @param figure Device settings of figures (see Details) or `NULL`.
 #' @param placeholder_color Colour of placeholders (`"#rrggbb"`) or `NULL`.
 #' @param lock `TRUE`, `FALSE` or `NULL` (see Details).
-#' @param error_items `"refuse"` or `"show"`.
+#' @param problems What to do with error items and missing parts: `"refuse"` or
+#'   `"show"`.
 #' @param post_process List of post-processors (see Details).
 #' @param pandoc_args `character` extra arguments of pandoc.
 #' @param size Paper size: `"a4"` or `"letter"`.
@@ -178,7 +179,7 @@
 #'     }
 #' )
 #' spec
-#' pub_report_spec("docx", toc = FALSE, error_items = "show")
+#' pub_report_spec("docx", toc = FALSE, problems = "show")
 #'
 #' # Landscape page and vector figures
 #' pub_report_spec("pdf", page = pub_page("a4", "landscape"),
@@ -235,14 +236,14 @@ pub_report_spec <- function(
     placeholder_color = NULL,
     # Checks and protection
     lock = NULL,
-    error_items = c("refuse", "show"),
+    problems = c("refuse", "show"),
     # After rendering
     post_process = list(),
     pandoc_args = character()
 ) {
     fields <- as.list(environment())
     fields$format <- rlang::arg_match(format)
-    fields$error_items <- rlang::arg_match(error_items)
+    fields$problems <- rlang::arg_match(problems)
     .new_report_spec(fields)
 }
 
@@ -282,7 +283,7 @@ pub_report_spec <- function(
         labels = .check_spec_labels(fields[["labels"]] %||% list(), call),
         placeholder_color = fields[["placeholder_color"]],
         lock = fields[["lock"]],
-        error_items = fields[["error_items"]],
+        problems = fields[["problems"]],
         post_process = if (is.function(pp)) list(pp) else pp %||% list(),
         pandoc_args = fields[["pandoc_args"]] %||% character()
     )
@@ -413,7 +414,7 @@ print.pub_page <- function(x, ...) {
             default(x$placeholder_color)
         },
         lock = if (x$format == "docx") default(x$lock, "marked items"),
-        error_items = x$error_items,
+        problems = x$problems,
         post_process = if (length(x$post_process) == 0L) {
             "none"
         } else {
@@ -502,8 +503,8 @@ print.pub_page <- function(x, ...) {
 #' @noRd
 .check_spec_values <- function(spec, call = rlang::caller_env()) {
     abort <- \(msg) rlang::abort(msg, call = call)
-    if (!rlang::is_string(spec$error_items, c("refuse", "show"))) {
-        abort("`error_items` must be \"refuse\" or \"show\".")
+    if (!rlang::is_string(spec$problems, c("refuse", "show"))) {
+        abort("`problems` must be \"refuse\" or \"show\".")
     }
     if (!is.null(spec$front_matter) && !is.function(spec$front_matter)) {
         abort("`front_matter` must be a function or `NULL`.")

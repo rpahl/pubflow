@@ -246,7 +246,7 @@ describe("pub_render()", {
     it("shows error items with a warning if the spec says so", {
         doc <- small_doc(demo_failures()$fit)
         file <- withr::local_tempfile(fileext = ".md")
-        show <- pub_report_spec("md", error_items = "show")
+        show <- pub_report_spec("md", problems = "show")
 
         expect_warning(
             pub_render(doc, "md", file = file, spec = show),
@@ -257,7 +257,7 @@ describe("pub_render()", {
         expect_match(read_text(file), "> **Step 'fit' failed**", fixed = TRUE)
         html <- withr::local_tempfile(fileext = ".html")
         expect_warning(
-            pub_render(doc, file = html, spec = pub_report_spec(error_items = "show")),
+            pub_render(doc, file = html, spec = pub_report_spec(problems = "show")),
             class = "pubflow_render_warning"
         )
         expect_match(read_text(html), "pubflow-error-title", fixed = TRUE)
@@ -278,7 +278,7 @@ describe("pub_render()", {
                 doc,
                 "md",
                 file = file,
-                spec = pub_report_spec("md", error_items = "show")
+                spec = pub_report_spec("md", problems = "show")
             ),
             "missing: Run the trend first.",
             class = "pubflow_render_warning"
@@ -306,7 +306,7 @@ describe("pub_render()", {
                 small_doc(),
                 "md",
                 file = file,
-                spec = pub_report_spec("md", front_matter = front, error_items = "show")
+                spec = pub_report_spec("md", front_matter = front, problems = "show")
             ),
             class = "pubflow_render_warning"
         )
@@ -568,7 +568,7 @@ describe("pub_output_filename()", {
 # Error items
 # -----------
 
-describe(".guard_error_items()", {
+describe(".guard_problems()", {
     failures <- demo_failures()
 
     it("lists every error item, also those in nested sections", {
@@ -579,7 +579,7 @@ describe(".guard_error_items()", {
         )$children
 
         err <- expect_error(
-            .guard_error_items(nodes, "refuse", "pdf"),
+            .guard_problems(nodes, "refuse", "pdf"),
             class = "pubflow_render_error"
         )
 
@@ -591,7 +591,7 @@ describe(".guard_error_items()", {
         nodes <- pub_doc(pub_missing("Run it."), failures$fit)$children
 
         err <- expect_error(
-            .guard_error_items(nodes, "refuse", "pdf"),
+            .guard_problems(nodes, "refuse", "pdf"),
             class = "pubflow_render_error"
         )
 
@@ -602,8 +602,8 @@ describe(".guard_error_items()", {
     it("accepts nodes without error items", {
         nodes <- pub_doc(pub_section("A", pub_text("ok")))$children
 
-        expect_no_error(.guard_error_items(nodes, "refuse", "html"))
-        expect_no_warning(.guard_error_items(nodes, "show", "html"))
+        expect_no_error(.guard_problems(nodes, "refuse", "html"))
+        expect_no_warning(.guard_problems(nodes, "show", "html"))
     })
 })
 

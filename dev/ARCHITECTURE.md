@@ -456,7 +456,7 @@ flowchart TB
     c[".render_doc(): merge render-time meta,<br/>time = now unless given (D30)"]
     d[".render_settings(spec, target):<br/>templates, page, figure device, labels, ..."]
     e[".front_nodes(): spec's front_matter(doc, format),<br/>else doc$front_matter (D56)"]
-    f[".guard_error_items(): refuse<br/>or show + warn (D32)"]
+    f[".guard_problems(): refuse<br/>or show + warn (D32)"]
     g["fresh temp work directory"]
     h{"format"}
     h1[".render_html_file()<br/>standalone page"]
@@ -629,7 +629,7 @@ flowchart TB
     c2 --> c3["viewer shows an error box;<br/>other steps still run"]
     v -- "report: pip_run() (on_error = 'stop')" --> s1["pipeflow_step_error,<br/>no document"]
     c2 --> r{"pub_render()"}
-    r -- "spec error_items = 'refuse' (default)" --> r1["pubflow_render_error"]
+    r -- "spec problems = 'refuse' (default)" --> r1["pubflow_render_error"]
     r -- "'show'" --> r2["error boxes + pubflow_render_warning"]
 ```
 
@@ -654,7 +654,7 @@ requirement.
 | Same doc + spec → identical Markdown/HTML | renderers | determinism; time only from meta |
 | Identical table cell text in every format | `.format_cells()` | D15, D16 |
 | Documents don't reach the pipeline | pipeflow, `doc.R` | D20; `reaches_pipeline()` in tests |
-| Errors never silently in deliverables | `.guard_error_items()` | D21, D32 |
+| Errors never silently in deliverables | `.guard_problems()` | D21, D32 |
 | Times formatted with `tz = "UTC"` | everywhere | DESIGN.md §3 |
 | No S3 methods for base classes, no options set on load, no Shiny internals, no per-session package state | everywhere | AGENTS.md hard rules |
 | `huxtable::` prefix, no huxtable subclasses | table code | flextable masks names; huxtable forbids subclasses |

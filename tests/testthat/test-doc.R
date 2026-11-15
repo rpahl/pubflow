@@ -520,7 +520,7 @@ describe("placing failure objects (error items)", {
 # Error items
 # -----------
 
-describe("pub_error_items()", {
+describe("pub_problems()", {
     failures <- demo_failures()
     item <- structure(
         list(step = "content", failed_step = "fit", message = "no trend"),
@@ -536,7 +536,7 @@ describe("pub_error_items()", {
             failures$table
         )
 
-        errors <- pub_error_items(parts)
+        errors <- pub_problems(parts)
 
         expect_identical(steps(errors), c("fit", "content", "table"))
         expect_true(all(vapply(errors, inherits, NA, "pub_error")))
@@ -551,11 +551,11 @@ describe("pub_error_items()", {
             list(C = item)
         )
 
-        expect_identical(steps(pub_error_items(doc)), c("fit", "content"))
+        expect_identical(steps(pub_problems(doc)), c("fit", "content"))
         fronted <- pub_doc(failures$table, front_matter = list(item))
-        expect_identical(steps(pub_error_items(fronted)), c("content", "table"))
-        expect_identical(steps(pub_error_items(doc$children[[2L]])), "fit")
-        expect_identical(pub_error_items(doc$children[[3L]]$children[[1L]]), list(item))
+        expect_identical(steps(pub_problems(fronted)), c("content", "table"))
+        expect_identical(steps(pub_problems(doc$children[[2L]])), "fit")
+        expect_identical(pub_problems(doc$children[[3L]]$children[[1L]]), list(item))
     })
 
     it("converts other objects with as_pub_output(), as a document does", {
@@ -565,20 +565,20 @@ describe("pub_error_items()", {
             class = "fit_result"
         )
 
-        expect_identical(pub_error_items(out), list(item))
+        expect_identical(pub_problems(out), list(item))
         local_as_pub_output_method("fit_section", \(x, ...) {
             pub_section("Fit", unclass(x))
         })
         expect_identical(
-            pub_error_items(structure(list(item), class = "fit_section")),
+            pub_problems(structure(list(item), class = "fit_section")),
             list(item)
         )
-        expect_error(pub_error_items(structure(1, class = "unknown")), "as_pub_output")
+        expect_error(pub_problems(structure(1, class = "unknown")), "as_pub_output")
     })
 
     it("refuses a pipeline, whose outputs are what a document shows", {
         expect_error(
-            pub_error_items(list(pipeflow::pip_new("p"))),
+            pub_problems(list(pipeflow::pip_new("p"))),
             class = "pubflow_pipeline_output"
         )
     })
@@ -588,34 +588,34 @@ describe("pub_error_items()", {
         parts <- list(A = list(missing, failures$fit), B = item)
         doc <- pub_doc(parts)
 
-        both <- pub_error_items(doc)
+        both <- pub_problems(doc)
 
-        expect_identical(pub_error_items(parts), both)
-        expect_identical(steps(pub_error_items(doc, "error")), c("fit", "content"))
-        expect_identical(pub_error_items(parts, "missing"), list(missing))
-        expect_identical(pub_error_items(doc, "missing"), list(missing))
+        expect_identical(pub_problems(parts), both)
+        expect_identical(steps(pub_problems(doc, "error")), c("fit", "content"))
+        expect_identical(pub_problems(parts, "missing"), list(missing))
+        expect_identical(pub_problems(doc, "missing"), list(missing))
         expect_identical(
             vapply(both, \(x) class(x)[[1L]], ""),
             c("pub_missing", "pub_error", "pub_error")
         )
-        expect_identical(both, pub_error_items(parts, c("missing", "error")))
-        expect_identical(both, pub_error_items(parts, c("error", "missing")))
-        expect_error(pub_error_items(doc, "warning"), "must be one of")
-        expect_error(pub_error_items(doc, character()), "at least one")
+        expect_identical(both, pub_problems(parts, c("missing", "error")))
+        expect_identical(both, pub_problems(parts, c("error", "missing")))
+        expect_error(pub_problems(doc, "warning"), "must be one of")
+        expect_error(pub_problems(doc, character()), "at least one")
     })
 
     it("looks into the front matter of a document first", {
         missing <- pub_missing("Sign first.")
         doc <- pub_doc(item, front_matter = list(missing))
 
-        expect_identical(pub_error_items(doc), list(missing, item))
+        expect_identical(pub_problems(doc), list(missing, item))
     })
 
     it("returns an empty list without error items", {
-        expect_identical(pub_error_items(NULL), list())
-        expect_identical(pub_error_items(list()), list())
-        expect_identical(pub_error_items(pub_doc(pub_text("ok"))), list())
-        expect_identical(pub_error_items(list(a = data.frame(x = 1), "b")), list())
+        expect_identical(pub_problems(NULL), list())
+        expect_identical(pub_problems(list()), list())
+        expect_identical(pub_problems(pub_doc(pub_text("ok"))), list())
+        expect_identical(pub_problems(list(a = data.frame(x = 1), "b")), list())
     })
 })
 

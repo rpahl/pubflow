@@ -20,7 +20,7 @@ describe("pub_report_spec()", {
         expect_null(spec$placeholder_color)
         expect_true(spec$toc)
         expect_identical(spec$toc_depth, 3L)
-        expect_identical(spec$error_items, "refuse")
+        expect_identical(spec$problems, "refuse")
         expect_identical(pub_report_spec()$format, "html")
     })
 
@@ -152,8 +152,8 @@ describe("pub_report_spec()", {
         )
         expect_error(pub_report_spec("docx", lock = NA), "`lock` must be")
         expect_error(
-            pub_report_spec("md", error_items = "ignore"),
-            "`error_items` must be one of"
+            pub_report_spec("md", problems = "ignore"),
+            "`problems` must be one of"
         )
         expect_error(
             pub_report_spec("md", post_process = list("x")),
@@ -254,7 +254,7 @@ describe("pub_report_spec()", {
             pub_report_spec(
                 "md",
                 front_matter = function(doc, format) NULL,
-                error_items = "show",
+                problems = "show",
                 post_process = function(path, doc, spec) NULL
             )
         })
@@ -398,8 +398,8 @@ describe(".check_report_spec()", {
         expect_error(.check_report_spec(spec, "docx"), "`reference_docx` must be")
 
         spec <- pub_report_spec("docx")
-        spec$error_items <- "hide"
-        expect_error(.check_report_spec(spec, "docx"), "`error_items` must be")
+        spec$problems <- "hide"
+        expect_error(.check_report_spec(spec, "docx"), "`problems` must be")
 
         spec <- pub_report_spec("docx")
         spec$toc_dpeth <- 2L

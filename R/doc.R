@@ -625,12 +625,15 @@ pub_section <- function(
 #'   [as_pub_output()] first, as in a document.
 #' @param type The items to find: `"error"` (error items), `"missing"` (missing parts)
 #'   or both (default).
-#' @return A list of the items found, in document order; empty if there are none:
-#'   * error items (class `pub_error`, as returned by [pub_out()]): lists with the
-#'     elements `step` (the step whose output it replaces), `failed_step` (the step
-#'     that failed), `message` (its error message) and, for an item of [pub_out()],
-#'     `pipeline` (the pipeline of the steps);
-#'   * missing parts (class `pub_missing`): lists with the element `message`.
+#' @return A list of the items found, in document order; empty if there are none.
+#'   Every item is a list with the element `message`; its class tells the kinds apart:
+#'   * error items (class `pub_error`, as returned by [pub_out()]) have the elements:
+#'     * `message`: the error message.
+#'     * `step`: the step whose output the item replaces.
+#'     * `failed_step`: the step that failed.
+#'     * `pipeline`: the pipeline of the steps; only for an item of [pub_out()].
+#'   * missing parts (class `pub_missing`) have the element:
+#'     * `message`: what is missing and how to get it. No other elements.
 #' @seealso [pub_out()], [pub_missing()]
 #' @examples
 #' p <- pipeflow::pip_new("air") |>
@@ -645,14 +648,14 @@ pub_section <- function(
 #'     Trend = pub_missing("Run the trend analysis first.")
 #' )
 #' # Both kinds, told apart by their class: the report can't be rendered yet
-#' items <- pub_error_items(parts)
+#' items <- pub_problems(parts)
 #' vapply(items, \(x) class(x)[[1]], character(1))
 #' vapply(items, \(x) x$message, character(1))
 #'
 #' # Only the failed steps
-#' pub_error_items(pub_doc(parts), type = "error")[[1]]$failed_step
+#' pub_problems(pub_doc(parts), type = "error")[[1]]$failed_step
 #' @export
-pub_error_items <- function(x, type = c("error", "missing")) {
+pub_problems <- function(x, type = c("error", "missing")) {
     if (length(type) == 0L) {
         rlang::abort("`type` must name at least one item type.")
     }
@@ -661,9 +664,9 @@ pub_error_items <- function(x, type = c("error", "missing")) {
 }
 
 #' The objects of the items of some types, in document order
-#' @param x see `pub_error_items()`.
+#' @param x see `pub_problems()`.
 #' @param type `character` item types: `"error"`, `"missing"`.
-#' @param call the environment of `pub_error_items()`, for the error message.
+#' @param call the environment of `pub_problems()`, for the error message.
 #' @return `list` of `pub_error` and `pub_missing` objects.
 #' @noRd
 .find_items <- function(x, type, call) {

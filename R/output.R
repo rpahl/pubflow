@@ -485,23 +485,23 @@ print.pub_raw <- function(x, ...) {
 #' `pub_missing()` stands in for a part of a document that doesn't exist yet, e.g. the
 #' results of an analysis that has not been run. It is neither content nor an error:
 #' the viewer shows the message as a neutral placeholder, while [pub_render()] refuses
-#' a document with missing parts, like one with error items. [pub_error_items()] finds
+#' a document with missing parts, like one with error items. [pub_problems()] finds
 #' both before rendering.
 #'
 #' Place it like any other output (see [pub_doc()]), e.g. in a layout step for a part
-#' whose input is not available. For drafts, `pub_report_spec(error_items = "show")`
+#' whose input is not available. For drafts, `pub_report_spec(problems = "show")`
 #' renders missing parts as an italic paragraph.
 #'
 #' @param message `character(1)` what is missing and how to get it, as plain text on
 #'   one line (line breaks become spaces in documents).
 #' @return An object of class `pub_missing`.
-#' @seealso [pub_error_items()], [pub_type()]
+#' @seealso [pub_problems()], [pub_type()]
 #' @examples
 #' x <- pub_missing("Run the analysis first.")
 #' pub_type(x)
 #'
 #' doc <- pub_doc(pub_section("Results", x))
-#' pub_error_items(doc)[[1]]$message
+#' pub_problems(doc)[[1]]$message
 #' @export
 pub_missing <- function(message) {
     if (!rlang::is_string(message) || !grepl("[^[:space:]]", message)) {

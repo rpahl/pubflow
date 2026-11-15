@@ -17,12 +17,12 @@ An object of class \code{pub_missing}.
 \code{pub_missing()} stands in for a part of a document that doesn't exist yet, e.g. the
 results of an analysis that has not been run. It is neither content nor an error:
 the viewer shows the message as a neutral placeholder, while \code{\link[=pub_render]{pub_render()}} refuses
-a document with missing parts, like one with error items. \code{\link[=pub_error_items]{pub_error_items()}} finds
+a document with missing parts, like one with error items. \code{\link[=pub_problems]{pub_problems()}} finds
 both before rendering.
 }
 \details{
 Place it like any other output (see \code{\link[=pub_doc]{pub_doc()}}), e.g. in a layout step for a part
-whose input is not available. For drafts, \code{pub_report_spec(error_items = "show")}
+whose input is not available. For drafts, \code{pub_report_spec(problems = "show")}
 renders missing parts as an italic paragraph.
 }
 \examples{
@@ -30,8 +30,8 @@ x <- pub_missing("Run the analysis first.")
 pub_type(x)
 
 doc <- pub_doc(pub_section("Results", x))
-pub_error_items(doc)[[1]]$message
+pub_problems(doc)[[1]]$message
 }
 \seealso{
-\code{\link[=pub_error_items]{pub_error_items()}}, \code{\link[=pub_type]{pub_type()}}
+\code{\link[=pub_problems]{pub_problems()}}, \code{\link[=pub_type]{pub_type()}}
 }
