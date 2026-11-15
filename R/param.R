@@ -422,11 +422,6 @@ param_group <- function(
     invisible(NULL)
 }
 
-#' Check the choices of a choice param
-#' @param choices the allowed values.
-#' @param call see `rlang::abort()`.
-#' @return `choices` as character vector.
-#' @noRd
 .check_choices <- function(choices, call = rlang::caller_env()) {
     ok <- is.atomic(choices) && length(choices) > 0 && !anyNA(choices)
     if (!ok) {
@@ -678,10 +673,6 @@ param_value <- function(x) {
     if (is_param(x)) param_value(x) else x
 }
 
-#' Convert a plain value to the class of the value of param `x`
-#' @param value the plain value.
-#' @param x the param whose value class to convert to.
-#' @noRd
 .coerce_like <- function(value, x) {
     if (is.factor(x)) {
         if (is.factor(value)) {
@@ -736,12 +727,6 @@ param_value <- function(x) {
     if (cls == "POSIXlt") as.POSIXlt(new, tz = tz) else new
 }
 
-#' Set the values of the children of a param group
-#' @param x a param group.
-#' @param value named list with (at least) the names of the children.
-#' @param call see `rlang::abort()`.
-#' @return The updated group.
-#' @noRd
 .set_group_value <- function(x, value, call = rlang::caller_env()) {
     if (!is.list(value) || !all(names(x) %in% names(value))) {
         rlang::abort(
@@ -894,11 +879,6 @@ default_param_validity <- function(x) {
     ""
 }
 
-#' Normalise a validity argument to a list of functions
-#' @param validity `NULL`, a function or a list of functions.
-#' @param call see `rlang::abort()`.
-#' @return A list of functions.
-#' @noRd
 .as_validity_list <- function(validity, call = rlang::caller_env()) {
     if (is.null(validity)) {
         return(list())

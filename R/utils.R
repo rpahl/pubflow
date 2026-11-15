@@ -28,10 +28,6 @@
     list(ok = isTRUE(all(value)), reason = reason)
 }
 
-#' TRUE if `x` is one finite number greater than zero
-#' @param x the value to check.
-#' @return `TRUE` or `FALSE`.
-#' @noRd
 .is_positive_number <- function(x) {
     is.numeric(x) && length(x) == 1L && is.finite(x) && x > 0
 }
@@ -126,11 +122,6 @@
     blocks
 }
 
-#' Signal a render error for unsupported Markdown in a table cell
-#' @param name the name of the commonmark node.
-#' @param cell `integer(2)`: row and column of the cell.
-#' @param format `"docx"` or `"typst"`.
-#' @noRd
 .cell_markdown_error <- function(name, cell, format) {
     rlang::cnd_signal(.render_error(
         sprintf(
@@ -147,9 +138,6 @@
     ))
 }
 
-#' Drop the control characters that XML 1.0 does not allow
-#' @param x `character`.
-#' @noRd
 .strip_control <- function(x) {
     gsub("[\x01-\x08\x0B\x0C\x0E-\x1F]", "", x, perl = TRUE)
 }

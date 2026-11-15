@@ -147,10 +147,6 @@ pub_figure <- function(
     x
 }
 
-#' Check the arguments of `pub_figure()`
-#' @param x,width,height,render the arguments of `pub_figure()`.
-#' @param call the environment of the caller, for the error message.
-#' @noRd
 .check_figure_input <- function(x, width, height, render, call = rlang::caller_env()) {
     if (is.character(x)) {
         .check_image_files(x, call = call)
@@ -185,11 +181,6 @@ pub_figure <- function(
     c("png", "jpg", "jpeg", "svg", "pdf")
 }
 
-#' Check that `x` names existing image files of a supported format
-#' @param x `character` paths of the image files.
-#' @param call the environment of the caller, for the error message.
-#' @return `x`, invisibly.
-#' @noRd
 .check_image_files <- function(x, call = rlang::caller_env()) {
     if (length(x) == 0L || anyNA(x)) {
         rlang::abort("`x` must name at least one image file.", call = call)
@@ -291,10 +282,6 @@ pub_figure <- function(
     )
 }
 
-#' Draw a ggplot or recorded plot on the current device
-#' @param x a ggplot or a recorded plot.
-#' @return `x`, invisibly.
-#' @noRd
 .draw_figure <- function(x) {
     if (inherits(x, "recordedplot")) {
         grDevices::replayPlot(x)
@@ -304,12 +291,6 @@ pub_figure <- function(
     invisible(x)
 }
 
-#' Open the graphics device of a figure file
-#' @param device `"png"`, `"svg"` or `"pdf"`.
-#' @param file path of the output file.
-#' @param width,height size in inches.
-#' @param res resolution of png files in dpi.
-#' @noRd
 .open_device <- function(device, file, width, height, res) {
     switch(
         device,
@@ -420,10 +401,6 @@ pub_figure <- function(
     structure(bytes, class = "pub_png", pubflow = meta)
 }
 
-#' The bytes of a `pub_png` without class and metadata
-#' @param x a `pub_png`.
-#' @return `raw` vector.
-#' @noRd
 .png_bytes <- function(x) {
     attributes(x) <- NULL
     x
@@ -568,10 +545,6 @@ pip_output_value.list <- function(x, ctx = list(), ...) {
     .is_plain_list(x) && any(vapply(x, .has_figures, logical(1)))
 }
 
-#' A ggplot or a recorded plot
-#' @param x any value.
-#' @return `TRUE` or `FALSE`.
-#' @noRd
 .is_plot <- function(x) {
     inherits(x, c("ggplot", "recordedplot"))
 }

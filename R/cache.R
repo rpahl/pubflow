@@ -82,11 +82,6 @@ print.pub_cache <- function(x, ...) {
     invisible(x)
 }
 
-#' Check that `cache` is a `pub_cache` or `NULL`
-#' @param cache the value to check.
-#' @param call the environment of the caller, for the error message.
-#' @return `cache`, invisibly.
-#' @noRd
 .check_cache <- function(cache, call = rlang::caller_env()) {
     if (!is.null(cache) && !inherits(cache, "pub_cache")) {
         rlang::abort("`cache` must be made by `pub_cache()` or `NULL`.", call = call)

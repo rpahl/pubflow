@@ -119,12 +119,6 @@ pub_pp_docx_lock <- function() {
     structure(pp, class = c("pub_pp_docx_lock", "function"))
 }
 
-#' Check the `header` or `footer` argument of `pub_pp_docx_header_footer()`
-#' @param x `NULL`, `character()` or named header or footer lines.
-#' @param arg name of the argument, for the error message.
-#' @param call the environment of the caller, for the error message.
-#' @return `x`, invisibly.
-#' @noRd
 .check_pp_lines <- function(x, arg, call = rlang::caller_env()) {
     ok <- is.null(x) || identical(x, character()) || .is_head_foot(x)
     if (!ok) {

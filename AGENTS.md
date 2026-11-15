@@ -147,9 +147,15 @@ $R -q -e "covr::report(covr::package_coverage(), 'check/coverage.html', browse =
   exported non-param functions start with `pub_`; param functions are named after the
   param concepts (`param()`, `param_value()`, ...); S3 classes `pub_*`; error classes
   `pubflow_*`; CSS/JS prefix `pubflow`.
-- roxygen2 for every function: exported ones with full docs and runnable examples,
-  internal ones with `@noRd`.
-- Keep functions short (ideally <= 50 lines).
+- roxygen2 for every exported function, with full docs and runnable examples. An
+  internal helper (`.name`) gets a roxygen header (ending in `@noRd`) only if it tells
+  the reader something that the name, the signature and the body don't: an invariant,
+  the reason for a design choice, a side effect or ordering constraint, an edge case,
+  or the shape of a returned structure or condition (class and fields). Then the
+  description carries that, and `@param`/`@return` are kept only for the non-obvious
+  ones. A title plus `@param`s that restate the argument names, or a description that
+  retells the body, is noise: leave the header out. When in doubt, ask whether a reader
+  of the body would miss the header; if not, drop it.
 - Source files are split into sections: a full-width `# ====` banner opens a block, a
   short `# ---` rule as long as its title a section within it (small files have
   sections only). In a section the exported function comes first, then its helpers in

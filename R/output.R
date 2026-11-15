@@ -155,11 +155,6 @@ pub_set_meta <- function(x, ...) {
 # ------
 # Checks
 # ------
-#' Validate the known metadata keys
-#' @param meta named list of metadata; keys pubflow doesn't know are not checked.
-#' @param call the environment of the caller, for the error message.
-#' @return `meta`, invisibly.
-#' @noRd
 .check_meta <- function(meta, call = rlang::caller_env()) {
     checks <- list(
         title = rlang::is_string,

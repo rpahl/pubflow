@@ -321,11 +321,6 @@ pub_cell_text <- function(ht) {
     )
 }
 
-#' Error naming a table cell
-#' @param row,col the cell's position.
-#' @param ... parts of the message, pasted with spaces.
-#' @param parent the error that caused it, or `NULL`.
-#' @noRd
 .abort_cell <- function(row, col, ..., parent = NULL) {
     rlang::abort(
         sprintf(

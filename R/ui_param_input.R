@@ -508,11 +508,6 @@ pub_param_input <- function(
     list(min = min, max = max, step = step)
 }
 
-#' The arguments of `args` that function `fun` accepts by name
-#' @param fun a function.
-#' @param args named list of candidate arguments.
-#' @return The subset of `args`.
-#' @noRd
 .accepted_args <- function(fun, args) {
     accepted <- setdiff(names(formals(fun)), "...")
     args[names(args) %in% accepted]
@@ -806,10 +801,6 @@ pub_param_input <- function(
     }
 }
 
-#' CSS rule `#<id> {<ui_style>}` or `NULL`
-#' @param x a param object (not a group).
-#' @param inputId `character(1)` input id.
-#' @noRd
 .input_style_rule <- function(x, inputId) {
     style <- param_attr(x, "ui_style")
     if (rlang::is_string(style) && nzchar(style)) {
