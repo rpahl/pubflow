@@ -25,9 +25,9 @@ The development documents live in `dev/` (excluded from the build).
   problems (DESIGN keeps the decisions, NEWS the history).
 - `dev/reference/` — research you should not need to redo: `pipeflow.md` and
   `benchmarks.md` (measurements behind the engine, cache and table decisions). Read
-  `pipeflow.md` (pipeflow 0.5.0.9040 API facts and quirks) before any pipeline code;
-  add new pipeflow findings to its §9, which also holds the IDs (B1, F7, Q15, ...) that
-  DESIGN and PLAN cite.
+  `pipeflow.md` (pipeflow 0.6.0 facts and quirks that shape pubflow; the API itself is
+  in pipeflow's help pages and NEWS) before any pipeline code; add new pipeflow
+  findings to its "Open issues".
 - If DESIGN and reality disagree (pipeflow, huxtable, pandoc behave differently than
   described), stop and ask; then update DESIGN in the same branch.
 - Before designing a new abstraction (a framework-like layer: tagging, dependency
