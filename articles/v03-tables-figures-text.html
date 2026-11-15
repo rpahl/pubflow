@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9058</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9059</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,7 @@
 
 
 
-<link href="v03-tables-figures-text_files/pubflow-doc-0.0.0.9058/pubflow-doc.css" rel="stylesheet">
+<link href="v03-tables-figures-text_files/pubflow-doc-0.0.0.9059/pubflow-doc.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Tables, figures and text</h1>
@@ -210,7 +210,8 @@ spanner above columns with equal labels, <code>footnotes</code> adds
 numbered footnotes below the table, <code>merge</code> joins consecutive
 equal cells of a column and <code>na</code> is the text for missing
 values. Here the data are the coefficients of a linear model of the
-ozone concentration, one fit per month:</p>
+ozone concentration, one fit per month. The footnotes are given by
+column (on the label) and by body row and column (on a cell):</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">airquality</span>, <span class="va">airquality</span><span class="op">$</span><span class="va">Month</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Temp</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span></span>
@@ -237,7 +238,11 @@ ozone concentration, one fit per month:</p>
 <span>    <span class="op">)</span>,</span>
 <span>    digits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>estimate <span class="op">=</span> <span class="fl">2L</span>, lower <span class="op">=</span> <span class="fl">2L</span>, upper <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span>,</span>
 <span>    header <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>lower <span class="op">=</span> <span class="st">"95% CI"</span>, upper <span class="op">=</span> <span class="st">"95% CI"</span><span class="op">)</span>,</span>
-<span>    footnotes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>estimate <span class="op">=</span> <span class="st">"Least squares fit, one per month."</span><span class="op">)</span>,</span>
+<span>    footnotes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>        row <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">3L</span><span class="op">)</span>,</span>
+<span>        col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"estimate"</span>, <span class="st">"month"</span><span class="op">)</span>,</span>
+<span>        text <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Least squares fit, one per month."</span>, <span class="st">"Only 9 ozone values."</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
 <span>    merge <span class="op">=</span> <span class="st">"month"</span></span>
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">show_doc</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -260,7 +265,7 @@ ozone concentration, one fit per month:</p>
 <tr>
 <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Month</th>
 <th class="huxtable-cell huxtable-header" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Term</th>
-<th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Estimate¹</th>
+<th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt;         font-size: 9pt;">Estimate⁽¹⁾</th>
 <th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">Lower</th>
 <th class="huxtable-cell huxtable-header" style="text-align: right;  border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt;         font-size: 9pt;">Upper</th>
 </tr>
@@ -280,7 +285,7 @@ ozone concentration, one fit per month:</p>
 <td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0pt;         font-size: 9pt;">3.08</td>
 </tr>
 <tr>
-<td class="huxtable-cell" rowspan="2" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.8pt 0pt;         font-size: 9pt;">June</td>
+<td class="huxtable-cell" rowspan="2" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0.8pt 0pt;         font-size: 9pt;">June⁽²⁾</td>
 <td class="huxtable-cell" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0pt;         font-size: 9pt;">Intercept</td>
 <td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0pt;         font-size: 9pt;">-91.99</td>
 <td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0pt;         font-size: 9pt;">-213.32</td>
@@ -292,7 +297,8 @@ ozone concentration, one fit per month:</p>
 <td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.8pt 0pt;         font-size: 9pt;">0.01</td>
 <td class="huxtable-cell" style="text-align: right;  border-style: solid solid solid solid; border-width: 0pt 0pt 0.8pt 0pt;         font-size: 9pt;">3.10</td>
 </tr>
-<tr><td class="huxtable-cell" colspan="5" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0pt 0pt;         font-size: 9pt;">¹ Least squares fit, one per month.</td></tr>
+<tr><td class="huxtable-cell" colspan="5" style="border-style: solid solid solid solid; border-width: 0.8pt 0pt 0pt 0pt;         font-size: 9pt;">⁽¹⁾ Least squares fit, one per month.</td></tr>
+<tr><td class="huxtable-cell" colspan="5" style="border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0pt;         font-size: 9pt;">⁽²⁾ Only 9 ozone values.</td></tr>
 </tbody>
 </table>
 </div>

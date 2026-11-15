@@ -102,7 +102,8 @@ More arguments structure the table: `header` puts a spanner above
 columns with equal labels, `footnotes` adds numbered footnotes below the
 table, `merge` joins consecutive equal cells of a column and `na` is the
 text for missing values. Here the data are the coefficients of a linear
-model of the ozone concentration, one fit per month:
+model of the ozone concentration, one fit per month. The footnotes are
+given by column (on the label) and by body row and column (on a cell):
 
 \
 `fits`` ``<-`` `[`do.call`](https://rdrr.io/r/base/do.call.html)`(``rbind``, `[`lapply`](https://rdrr.io/r/base/lapply.html)`(`[`split`](https://rdrr.io/r/base/split.html)`(``airquality``, ``airquality``$``Month``)``, ``function``(``d``)`` ``{`\
@@ -130,19 +131,24 @@ model of the ozone concentration, one fit per month:
 `    ``)``,`\
 `    digits ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``estimate ``=`` ``2L``, lower ``=`` ``2L``, upper ``=`` ``2L``)``,`\
 `    header ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``lower ``=`` ``"95% CI"``, upper ``=`` ``"95% CI"``)``,`\
-`    footnotes ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``estimate ``=`` ``"Least squares fit, one per month."``)``,`\
+`    footnotes ``=`` `[`data.frame`](https://rdrr.io/r/base/data.frame.html)`(`\
+`        row ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``NA``, ``3L``)``,`\
+`        col ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"estimate"``, ``"month"``)``,`\
+`        text ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"Least squares fit, one per month."``, ``"Only 9 ozone values."``)`\
+`    ``)``,`\
 `    merge ``=`` ``"month"`\
 `)`` ``|>`\
 `    ``show_doc``(``)`
 
-|                                     |           |           |  95% CI |        |
-|-------------------------------------|-----------|----------:|--------:|-------:|
-| Month                               | Term      | Estimate¹ |   Lower |  Upper |
-| May                                 | Intercept |   -102.16 | -182.14 | -22.18 |
-|                                     | Temp      |      1.88 |    0.69 |   3.08 |
-| June                                | Intercept |    -91.99 | -213.32 |  29.34 |
-|                                     | Temp      |      1.55 |    0.01 |   3.10 |
-| ¹ Least squares fit, one per month. |           |           |         |        |
+|                                       |           |             |  95% CI |        |
+|---------------------------------------|-----------|------------:|--------:|-------:|
+| Month                                 | Term      | Estimate⁽¹⁾ |   Lower |  Upper |
+| May                                   | Intercept |     -102.16 | -182.14 | -22.18 |
+|                                       | Temp      |        1.88 |    0.69 |   3.08 |
+| June⁽²⁾                               | Intercept |      -91.99 | -213.32 |  29.34 |
+|                                       | Temp      |        1.55 |    0.01 |   3.10 |
+| ⁽¹⁾ Least squares fit, one per month. |           |             |         |        |
+| ⁽²⁾ Only 9 ozone values.              |           |             |         |        |
 
 Table 1: Linear model of ozone by temperature {#tab:structure .table
 .huxtable quarto-disable-processing="true"

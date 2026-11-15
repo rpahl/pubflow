@@ -106,7 +106,7 @@ instead, where they are merged over the metadata of the document:
 `    meta ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``author ``=`` ``"Jane Doe"``, app ``=`` ``"ozone-app"``, version ``=`` ``"1.2.0"``)`\
 `)`\
 [`basename`](https://rdrr.io/r/base/basename.html)`(``file``)`\
-`# [1] "20261115T095844Z_ozone_in_new_york.docx"`
+`# [1] "20261115T100245Z_ozone_in_new_york.docx"`
 
 - The entries of `meta` win over those of the document, and `NULL`
   removes one.
@@ -405,7 +405,7 @@ document. A look into the file shows them:
 `docx_text``(``file``, ``"header1.xml"``)`\
 `# [1] "Ozone study" ""            "Draft"`\
 `docx_text``(``file``, ``"footer1.xml"``)`\
-`# [1] "Jane Doe at 15-Nov-2026 09:58:44 UTC (ozone-app v1.2.0)"`\
+`# [1] "Jane Doe at 15-Nov-2026 10:02:45 UTC (ozone-app v1.2.0)"`\
 `# [2] ""                                                       `\
 `# [3] "Page "                                                  `\
 `# [4] "1"                                                      `\

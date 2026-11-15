@@ -9,7 +9,7 @@ finishes an existing huxtable."><meta property="og:image" content="https://rpahl
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9058</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9059</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -119,11 +119,17 @@ cell. Data.frames and matrices only.</p></dd>
 
 
 <dt id="arg-footnotes">footnotes<a class="anchor" aria-label="anchor" href="#arg-footnotes"></a></dt>
-<dd><p>Named character vector: column name -&gt; footnote. The label gets a
-numbered marker (superscript digit), the footnotes are listed below the body (equal
-texts share one number). Give all footnotes in one call, for the final table:
-a table that has footnotes keeps them when it is finished again, but after
-binding or subsetting they become body rows.</p></dd>
+<dd><p>Footnotes on labels or body cells, either</p><ul><li><p>a named character vector: column name -&gt; footnote on the label, or</p></li>
+<li><p>a data.frame with columns <code>row</code> (body row <code>i</code>, see <code><a href="pub_table_rows.html">pub_table_rows()</a></code>, or <code>NA</code>
+for the label), <code>col</code> (column name) and <code>text</code>.</p></li>
+</ul><p>Each annotated cell gets a numbered marker (superscript digits in superscript
+parentheses, e.g. "(1)"), and the footnotes are listed below the body. They are
+numbered in reading order (labels, then body cells row by row); equal texts share
+one number, and a note on a merged cell marks the cell shown. A marked body cell
+becomes text with the marker (its number formatted by <code>digits</code>, or the <code>na</code>
+text), so later <code>digits</code> don't change it. Give all footnotes in one call, for the
+final table: a table that has footnotes keeps them when it is finished again, but
+after binding or subsetting the footnote lines become body rows.</p></dd>
 
 
 <dt id="arg-merge">merge<a class="anchor" aria-label="anchor" href="#arg-merge"></a></dt>
@@ -224,22 +230,46 @@ and strikeout on the final table.</p>
 <span class="r-in"><span>    na <span class="op">=</span> <span class="st">"-"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="pub_cell_text.html">pub_cell_text</a></span><span class="op">(</span><span class="va">ht</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]                     [,2]                     [,3]                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] ""                       ""                       "Measured"              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "Month"                  "Day"                    "Ozone (ppb)¹"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] "May"                    "1"                      "41"                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "May"                    "2"                      "36"                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "June"                   "1"                      "-"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] "June"                   "2"                      "-"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] "¹ Mean from 1 to 3 pm." "¹ Mean from 1 to 3 pm." "¹ Mean from 1 to 3 pm."</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,4]                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "Measured"              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "Wind (mph)"            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] "7"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "8"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "9"                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] "10"                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] "¹ Mean from 1 to 3 pm."</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]                       [,2]                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] ""                         ""                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "Month"                    "Day"                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] "May"                      "1"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "May"                      "2"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "June"                     "1"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] "June"                     "2"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] "⁽¹⁾ Mean from 1 to 3 pm." "⁽¹⁾ Mean from 1 to 3 pm."</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      [,3]                       [,4]                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "Measured"                 "Measured"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "Ozone (ppb)⁽¹⁾"           "Wind (mph)"              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] "41"                       "7"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "36"                       "8"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "-"                        "9"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] "-"                        "10"                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] "⁽¹⁾ Mean from 1 to 3 pm." "⁽¹⁾ Mean from 1 to 3 pm."</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Footnotes on body cells: body row, column and text</span></span></span>
+<span class="r-in"><span><span class="va">notes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    row <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Ozone"</span>, <span class="st">"Ozone"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    text <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Mean from 1 to 3 pm."</span>, <span class="st">"Sensor failure."</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="pub_cell_text.html">pub_cell_text</a></span><span class="op">(</span><span class="fu">pub_table</span><span class="op">(</span><span class="va">df</span>, footnotes <span class="op">=</span> <span class="va">notes</span>, na <span class="op">=</span> <span class="st">"-"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]                       [,2]                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "Month"                    "Day"                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "May"                      "1"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] "May"                      "2"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "June"                     "1"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "June"                     "2"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] "⁽¹⁾ Mean from 1 to 3 pm." "⁽¹⁾ Mean from 1 to 3 pm."</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] "⁽²⁾ Sensor failure."      "⁽²⁾ Sensor failure."     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      [,3]                       [,4]                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] "Ozone⁽¹⁾"                 "Wind"                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] "41"                       "7.4000"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] "36"                       "8.0000"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] "-⁽²⁾"                     "8.6000"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] "-"                        "9.7000"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] "⁽¹⁾ Mean from 1 to 3 pm." "⁽¹⁾ Mean from 1 to 3 pm."</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] "⁽²⁾ Sensor failure."      "⁽²⁾ Sensor failure."     </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Style with huxtable: body row i is table row pub_table_rows(ht)$body[i]</span></span></span>
 <span class="r-in"><span><span class="va">body</span> <span class="op">&lt;-</span> <span class="fu"><a href="pub_table_rows.html">pub_table_rows</a></span><span class="op">(</span><span class="va">ht</span><span class="op">)</span><span class="op">$</span><span class="va">body</span></span></span>

@@ -71,12 +71,24 @@ pub_table(
 
 - footnotes:
 
-  Named character vector: column name -\> footnote. The label gets a
-  numbered marker (superscript digit), the footnotes are listed below
-  the body (equal texts share one number). Give all footnotes in one
-  call, for the final table: a table that has footnotes keeps them when
-  it is finished again, but after binding or subsetting they become body
-  rows.
+  Footnotes on labels or body cells, either
+
+  - a named character vector: column name -\> footnote on the label, or
+
+  - a data.frame with columns `row` (body row `i`, see
+    [`pub_table_rows()`](https://rpahl.github.io/pubflow/reference/pub_table_rows.md),
+    or `NA` for the label), `col` (column name) and `text`.
+
+  Each annotated cell gets a numbered marker (superscript digits in
+  superscript parentheses, e.g. "(1)"), and the footnotes are listed
+  below the body. They are numbered in reading order (labels, then body
+  cells row by row); equal texts share one number, and a note on a
+  merged cell marks the cell shown. A marked body cell becomes text with
+  the marker (its number formatted by `digits`, or the `na` text), so
+  later `digits` don't change it. Give all footnotes in one call, for
+  the final table: a table that has footnotes keeps them when it is
+  finished again, but after binding or subsetting the footnote lines
+  become body rows.
 
 - merge:
 
@@ -204,22 +216,46 @@ ht <- pub_table(
     na = "-"
 )
 pub_cell_text(ht)
-#>      [,1]                     [,2]                     [,3]                    
-#> [1,] ""                       ""                       "Measured"              
-#> [2,] "Month"                  "Day"                    "Ozone (ppb)¹"          
-#> [3,] "May"                    "1"                      "41"                    
-#> [4,] "May"                    "2"                      "36"                    
-#> [5,] "June"                   "1"                      "-"                     
-#> [6,] "June"                   "2"                      "-"                     
-#> [7,] "¹ Mean from 1 to 3 pm." "¹ Mean from 1 to 3 pm." "¹ Mean from 1 to 3 pm."
-#>      [,4]                    
-#> [1,] "Measured"              
-#> [2,] "Wind (mph)"            
-#> [3,] "7"                     
-#> [4,] "8"                     
-#> [5,] "9"                     
-#> [6,] "10"                    
-#> [7,] "¹ Mean from 1 to 3 pm."
+#>      [,1]                       [,2]                      
+#> [1,] ""                         ""                        
+#> [2,] "Month"                    "Day"                     
+#> [3,] "May"                      "1"                       
+#> [4,] "May"                      "2"                       
+#> [5,] "June"                     "1"                       
+#> [6,] "June"                     "2"                       
+#> [7,] "⁽¹⁾ Mean from 1 to 3 pm." "⁽¹⁾ Mean from 1 to 3 pm."
+#>      [,3]                       [,4]                      
+#> [1,] "Measured"                 "Measured"                
+#> [2,] "Ozone (ppb)⁽¹⁾"           "Wind (mph)"              
+#> [3,] "41"                       "7"                       
+#> [4,] "36"                       "8"                       
+#> [5,] "-"                        "9"                       
+#> [6,] "-"                        "10"                      
+#> [7,] "⁽¹⁾ Mean from 1 to 3 pm." "⁽¹⁾ Mean from 1 to 3 pm."
+
+# Footnotes on body cells: body row, column and text
+notes <- data.frame(
+    row = c(NA, 3),
+    col = c("Ozone", "Ozone"),
+    text = c("Mean from 1 to 3 pm.", "Sensor failure.")
+)
+pub_cell_text(pub_table(df, footnotes = notes, na = "-"))
+#>      [,1]                       [,2]                      
+#> [1,] "Month"                    "Day"                     
+#> [2,] "May"                      "1"                       
+#> [3,] "May"                      "2"                       
+#> [4,] "June"                     "1"                       
+#> [5,] "June"                     "2"                       
+#> [6,] "⁽¹⁾ Mean from 1 to 3 pm." "⁽¹⁾ Mean from 1 to 3 pm."
+#> [7,] "⁽²⁾ Sensor failure."      "⁽²⁾ Sensor failure."     
+#>      [,3]                       [,4]                      
+#> [1,] "Ozone⁽¹⁾"                 "Wind"                    
+#> [2,] "41"                       "7.4000"                  
+#> [3,] "36"                       "8.0000"                  
+#> [4,] "-⁽²⁾"                     "8.6000"                  
+#> [5,] "-"                        "9.7000"                  
+#> [6,] "⁽¹⁾ Mean from 1 to 3 pm." "⁽¹⁾ Mean from 1 to 3 pm."
+#> [7,] "⁽²⁾ Sensor failure."      "⁽²⁾ Sensor failure."     
 
 # Style with huxtable: body row i is table row pub_table_rows(ht)$body[i]
 body <- pub_table_rows(ht)$body

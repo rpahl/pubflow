@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9058</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9059</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,12 @@
       <small>Source: <a href="https://github.com/rpahl/pubflow/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.0.9059" id="pubflow-0009059">pubflow 0.0.0.9059<a class="anchor" aria-label="anchor" href="#pubflow-0009059"></a></h2>
+<ul><li>
+<code>pub_table(footnotes = )</code> also takes footnotes on body cells: a data.frame with the columns <code>row</code> (body row, <code>NA</code> for the label), <code>col</code> and <code>text</code>. pubflow numbers the markers in reading order, lists equal texts once and keeps the borders and the number format of the marked cells (<a href="https://github.com/rpahl/pubflow/issues/16" class="external-link">#16</a>, D59).</li>
+<li>Footnote markers are superscript numbers in parentheses, e.g. <code>Ozone⁽¹⁾</code>, also on labels (was <code>Ozone¹</code>), so that several markers in one cell stay apart.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9058" id="pubflow-0009058">pubflow 0.0.0.9058<a class="anchor" aria-label="anchor" href="#pubflow-0009058"></a></h2>
 <ul><li><p>New <code><a href="../reference/pub_missing.html">pub_missing()</a></code> stands in for a part of a document that doesn’t exist yet, e.g. the results of an analysis not run: the viewer shows its message as a neutral placeholder, and <code><a href="../reference/pub_render.html">pub_render()</a></code> refuses it like an error item (or, with <code>pub_report_spec(problems = "show")</code>, shows it as an italic paragraph). <code><a href="../reference/pub_problems.html">pub_problems()</a></code> finds these parts too, so it lists everything <code><a href="../reference/pub_render.html">pub_render()</a></code> refuses; its new argument <code>type</code> picks one kind (<code>"error"</code> or <code>"missing"</code>) (<a href="https://github.com/rpahl/pubflow/issues/17" class="external-link">#17</a>, D58).</p></li>

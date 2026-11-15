@@ -1,5 +1,17 @@
 # Changelog
 
+## pubflow 0.0.0.9059
+
+- `pub_table(footnotes = )` also takes footnotes on body cells: a
+  data.frame with the columns `row` (body row, `NA` for the label),
+  `col` and `text`. pubflow numbers the markers in reading order, lists
+  equal texts once and keeps the borders and the number format of the
+  marked cells ([\#16](https://github.com/rpahl/pubflow/issues/16),
+  D59).
+- Footnote markers are superscript numbers in parentheses,
+  e.g. `Ozone⁽¹⁾`, also on labels (was `Ozone¹`), so that several
+  markers in one cell stay apart.
+
 ## pubflow 0.0.0.9058
 
 - New
