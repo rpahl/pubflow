@@ -47,11 +47,21 @@ the page shrinks its columns to their content.)}
 labels. Consecutive equal labels are merged; columns without a spanner get an empty
 cell. Data.frames and matrices only.}
 
-\item{footnotes}{Named character vector: column name -> footnote. The label gets a
-numbered marker (superscript digit), the footnotes are listed below the body (equal
-texts share one number). Give all footnotes in one call, for the final table:
-a table that has footnotes keeps them when it is finished again, but after
-binding or subsetting they become body rows.}
+\item{footnotes}{Footnotes on labels or body cells, either
+\itemize{
+\item a named character vector: column name -> footnote on the label, or
+\item a data.frame with columns \code{row} (body row \code{i}, see \code{\link[=pub_table_rows]{pub_table_rows()}}, or \code{NA}
+for the label), \code{col} (column name) and \code{text}.
+}
+
+Each annotated cell gets a numbered marker (superscript digits in superscript
+parentheses, e.g. "(1)"), and the footnotes are listed below the body. They are
+numbered in reading order (labels, then body cells row by row); equal texts share
+one number, and a note on a merged cell marks the cell shown. A marked body cell
+becomes text with the marker (its number formatted by \code{digits}, or the \code{na}
+text), so later \code{digits} don't change it. Give all footnotes in one call, for the
+final table: a table that has footnotes keeps them when it is finished again, but
+after binding or subsetting the footnote lines become body rows.}
 
 \item{merge}{Character vector of column names whose consecutive equal body cells are
 merged vertically.}
@@ -142,6 +152,14 @@ ht <- pub_table(
     na = "-"
 )
 pub_cell_text(ht)
+
+# Footnotes on body cells: body row, column and text
+notes <- data.frame(
+    row = c(NA, 3),
+    col = c("Ozone", "Ozone"),
+    text = c("Mean from 1 to 3 pm.", "Sensor failure.")
+)
+pub_cell_text(pub_table(df, footnotes = notes, na = "-"))
 
 # Style with huxtable: body row i is table row pub_table_rows(ht)$body[i]
 body <- pub_table_rows(ht)$body

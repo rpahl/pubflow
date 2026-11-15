@@ -114,7 +114,8 @@ More arguments structure the table: `header` puts a spanner above columns with
 equal labels, `footnotes` adds numbered footnotes below the table, `merge` joins
 consecutive equal cells of a column and `na` is the text for missing values. Here
 the data are the coefficients of a linear model of the ozone concentration, one
-fit per month:
+fit per month. The footnotes are given by column (on the label) and by body row
+and column (on a cell):
 
 ```{r structure}
 fits <- do.call(rbind, lapply(split(airquality, airquality$Month), function(d) {
@@ -142,7 +143,11 @@ pub_table(
     ),
     digits = c(estimate = 2L, lower = 2L, upper = 2L),
     header = c(lower = "95% CI", upper = "95% CI"),
-    footnotes = c(estimate = "Least squares fit, one per month."),
+    footnotes = data.frame(
+        row = c(NA, 3L),
+        col = c("estimate", "month"),
+        text = c("Least squares fit, one per month.", "Only 9 ozone values.")
+    ),
     merge = "month"
 ) |>
     show_doc()

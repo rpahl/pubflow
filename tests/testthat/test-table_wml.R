@@ -132,7 +132,7 @@ describe(".huxtable_to_wml()", {
     it("writes footnote rows spanning all columns", {
         doc <- wml_doc(report_footnote_table())
         text <- wml_row_text(doc)
-        expect_identical(text[[length(text)]], "¹ Site IDs: A, B, C")
+        expect_identical(text[[length(text)]], "\u207d\u00b9\u207e Site IDs: A, B, C")
         last <- wml_find(doc, "//w:tr[last()]/w:tc")
         expect_length(last, 1L)
         expect_identical(wml_val(last[[1L]], ".//w:gridSpan"), "2")

@@ -432,7 +432,7 @@ describe("demo_report_pipeline() (fixture for documents)", {
             cell_text(data)[1:3, 1:3],
             rbind(
                 c("", "Time [months]", "Time [months]"),
-                c("Site\u00b9", "0", "3"),
+                c("Site\u207d\u00b9\u207e", "0", "3"),
                 c("A", "100.00", "99.10")
             )
         )
