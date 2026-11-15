@@ -6,7 +6,7 @@ parameter UIs, result viewers and reports ("publishing workflow").
 This is the single source of agent instructions. `CLAUDE.md` (for Claude Code) and
 `.github/copilot-instructions.md` only point here, so add new instructions to this file.
 Keep it to instructions agents can't get from the code or the docs: overviews, file maps
-and module descriptions belong in `dev/ARCHITECTURE.md` and `dev/reference/README.md`.
+and module descriptions belong in `dev/ARCHITECTURE.md`.
 
 ## Start here
 
@@ -23,10 +23,11 @@ The development documents live in `dev/` (excluded from the build).
   steps (D19); check them before starting work. "Later" → "Parked" holds deferred
   ideas: mention the ones that touch the current work. Remove done items and settled
   problems (DESIGN keeps the decisions, NEWS the history).
-- `dev/reference/` — research you should not need to redo; its `README.md` lists the
-  files. Read `pipeflow.md` (pipeflow 0.5.0.9040 API facts and quirks) before any
-  pipeline code; add new pipeflow findings to its §9, which also holds the IDs (B1, F7,
-  Q15, ...) that DESIGN and PLAN cite.
+- `dev/reference/` — research you should not need to redo: `pipeflow.md` and
+  `benchmarks.md` (measurements behind the engine, cache and table decisions). Read
+  `pipeflow.md` (pipeflow 0.5.0.9040 API facts and quirks) before any pipeline code;
+  add new pipeflow findings to its §9, which also holds the IDs (B1, F7, Q15, ...) that
+  DESIGN and PLAN cite.
 - If DESIGN and reality disagree (pipeflow, huxtable, pandoc behave differently than
   described), stop and ask; then update DESIGN in the same branch.
 - Before designing a new abstraction (a framework-like layer: tagging, dependency
