@@ -1,6 +1,6 @@
 # Fails a pull request whose DESCRIPTION version is not higher than the one
-# on the base branch: every milestone PR bumps the development version
-# (dev/PLAN.md, definition of done). Label a PR "no-version-bump" to skip the
+# on the base branch: every PR bumps the development version
+# (AGENTS.md, "Before opening a PR"). Label a PR "no-version-bump" to skip the
 # check, e.g. for changes to documentation or CI only.
 on:
   pull_request:
@@ -32,7 +32,7 @@ jobs:
           if [ "$head" = "$base" ] || [ "$highest" != "$head" ]; then
             echo "::error file=DESCRIPTION::Version $head is not higher" \
               "than $base on $BASE_REF. Bump the development version" \
-              "(dev/PLAN.md, definition of done) or label the pull request" \
+              "(AGENTS.md, Before opening a PR) or label the pull request" \
               "'no-version-bump'."
             exit 1
           fi
