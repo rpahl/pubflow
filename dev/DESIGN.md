@@ -1,7 +1,7 @@
 # pubflow — design
 
 The agreed design of pubflow and the reasons behind it. `ARCHITECTURE.md` maps the
-code; `PLAN.md` lists the open work; the help pages and vignettes document the API.
+code; the open work is in the GitHub issues; the help pages and vignettes document the API.
 This file keeps what none of them show: **why** things are the way they are. Cite a
 decision by its number (e.g. D19) in code comments, commits and PRs, and add a new one
 here (not a renumbering) when a change settles a design question.
