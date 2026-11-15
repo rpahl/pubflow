@@ -1656,3 +1656,72 @@ describe("nested pipelines (as.function())", {
         expect_match(out$b$message, "key 'b': .*negative input")
     })
 })
+
+
+# ----------------
+# Runs in a worker
+# ----------------
+
+describe("runs in a worker (pip_clone(out = ))", {
+    # 'data' is big, 'check' fails, the layout step 'doc' places both
+    worker_pipeline <- function() {
+        pipeflow::pip_new("worker") |>
+            pipeflow::pip_add("data", \(n = 1e5) data.frame(x = stats::runif(n))) |>
+            pipeflow::pip_add("table", \(data = ~data) {
+                pub_table(utils::head(data), caption = "Head")
+            }) |>
+            pipeflow::pip_add("check", \(data = ~data) stop("check failed")) |>
+            pipeflow::pip_add("doc", \(table = ~ try(table), check = ~ try(check)) {
+                pub_doc(pub_section("Data", table, check), title = "Run")
+            }) |>
+            pipeflow::pip_set_params(
+                list(n = numeric_param(1e5, label = "Rows", source = "user"))
+            )
+    }
+    # what a worker does: run, then return a copy with the document only
+    worker_result <- function(p) {
+        suppressWarnings(run_quietly(p, on_error = "continue"))
+        unserialize(serialize(pipeflow::pip_clone(p, out = "doc"), NULL))
+    }
+
+    it("returns the document and its problems without the data", {
+        p <- worker_pipeline()
+        result <- worker_result(p)
+
+        doc <- pub_out(result, "doc", on_error = "item")
+        expect_equal(doc, pub_out(p, "doc", on_error = "item"))
+        problems <- pub_problems(doc)
+        expect_length(problems, 1L)
+        expect_match(problems[[1L]]$message, "check failed")
+        # the step functions of a test drag the test environment along, so only the
+        # outputs are compared
+        expect_lt(
+            length(serialize(result[["out"]], NULL)),
+            length(serialize(p[["out"]], NULL)) / 10
+        )
+    })
+
+    it("refuses the outputs it dropped", {
+        result <- worker_result(worker_pipeline())
+
+        expect_identical(result[["data", "state"]], "outdated")
+        expect_error(pub_out(result, "data"), class = "pubflow_not_done")
+        expect_s3_class(
+            pub_out(result, "check", on_error = "item"),
+            "pub_error"
+        )
+    })
+
+    it("holds the params of the run", {
+        p <- worker_pipeline()
+        result <- worker_result(pipeflow::pip_clone(p))
+        user_values <- function(x) {
+            lapply(pub_get_params(x, source = "user"), param_value)
+        }
+        expect_identical(user_values(result), user_values(p))
+
+        pipeflow::pip_set_params(p, list(n = 10))
+
+        expect_false(identical(user_values(result), user_values(p)))
+    })
+})

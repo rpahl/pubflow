@@ -467,6 +467,95 @@ If the layout step itself fails, its output is the error, and the viewer shows
 it as one box: pass `pip[[report, "out"]]` on as it is, as in the app above. An
 error is never embedded silently in a document.
 
+### Long runs in a worker
+
+A long run blocks the session: the app doesn't react until the run is done. A
+`shiny::ExtendedTask` runs it in another R process instead (a worker, e.g. with
+[mirai](https://mirai.r-lib.org)), and the session stays responsive.
+
+The worker gets a copy of the pipeline and runs it. A run pipeline holds the
+outputs of all its steps (the data, the model, the plot), and sending all of
+them back after every run can take seconds. So the worker sends back
+`pip_clone(pip, out = report)`, a copy that keeps the output of the layout step
+only. The copy still has the states, params and failures of the steps, so
+`pub_out()` and `pub_get_params()` work on it as on the pipeline itself. The
+steps that lost their output are `outdated`, so `pub_out()` refuses them and
+nothing old ends up in a document.
+
+The worker is a new R process: it knows only what it gets. The step functions
+travel with the pipeline, but the helpers they call (`coef_table()`,
+`scatter_plot()` and `params_table()` above) are defined in the app, so pass them
+to `mirai()` as well; it puts them in the worker's global environment, where the
+steps find them. Create the task in `server()`, so that each session has its own
+task and never gets the results of another session:
+
+```{r worker, eval = FALSE}
+task <- ExtendedTask$new(function(pip, report, revision) {
+    mirai::mirai(
+        {
+            library(pubflow) # the params need pubflow's methods
+            pipeflow::pip_run(
+                pipeflow::pip_view(pip, step = report),
+                lgr = NULL,
+                on_error = "continue"
+            )
+            list(
+                pip = pipeflow::pip_clone(pip, out = report),
+                report = report,
+                revision = revision
+            )
+        },
+        pip = pip,
+        report = report,
+        revision = revision,
+        coef_table = coef_table,
+        scatter_plot = scatter_plot,
+        params_table = params_table
+    )
+})
+```
+
+A button (`actionButton("update", "Update")`) or a new report starts a run. The
+task runs one run at a time and queues the others, so each run gets a number
+(`revision`), and the result of a run that a newer one replaces is dropped:
+
+```{r worker-server, eval = FALSE}
+revision <- 0L
+result <- reactiveVal()
+observe({
+    revision <<- revision + 1L
+    task$invoke(pip_clone(pip), input$report, revision)
+}) |>
+    bindEvent(input$update, input$report)
+
+observe({
+    req(task$status() == "success") # "error": a crashed worker, see ?ExtendedTask
+    res <- task$result()
+    if (res$revision < revision) {
+        return() # a newer run is queued
+    }
+    failed <- res$pip[["step"]][res$pip[["state"]] == "failed"]
+    if (length(failed) > 0L) {
+        showNotification(paste("Failed:", toString(failed)), type = "warning")
+    }
+    result(res)
+})
+
+doc <- reactive({
+    req(result())
+    pub_out(result()$pip, result()$report, on_error = "item")
+})
+
+# TRUE while the params differ from those of the shown run
+user_values <- function(x) lapply(pub_get_params(x, source = "user"), param_value)
+changed <- reactive({
+    params$revision()
+    !is.null(result()) && !identical(user_values(pip), user_values(result()$pip))
+})
+```
+
+The session's own pipeline is never run, so every run starts from scratch.
+
 ## The viewer
 
 `pub_viewer_ui()` and `pub_viewer_server()` show a document as one scrollable
@@ -491,8 +580,7 @@ pipeline, the viewer keeps showing the previous one, in grey, and shows
 Runs outside of `doc()`, e.g. in a `shiny::ExtendedTask`, and params that changed
 but are applied only by a button are not visible to the viewer. For these,
 `pending` takes a reactive returning the label to show, or `NULL` for no marker
-(here `task` is the `ExtendedTask` and `changed()` a reactive that is `TRUE` while
-the params differ from those of the shown run):
+(`task` and `changed()` as in [Long runs in a worker](#long-runs-in-a-worker)):
 
 ```{r pending, eval = FALSE}
 pub_viewer_server(

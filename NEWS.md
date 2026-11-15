@@ -1,3 +1,12 @@
+# pubflow 0.0.0.9060
+
+* pubflow requires pipeflow 0.5.0.9040, whose `pip_clone(out = )` copies a pipeline
+  with the outputs of the named steps only (#20).
+* New section "Long runs in a worker" in `vignette("v05-shiny")`: a Shiny app runs
+  the pipeline in a `shiny::ExtendedTask` and the worker sends back only the document
+  (`pip_clone(out = )`), which `pub_out()` reads; with the params of the run, so the
+  viewer can mark results that don't match the current params.
+
 # pubflow 0.0.0.9059
 
 * `pub_table(footnotes = )` also takes footnotes on body cells: a data.frame with

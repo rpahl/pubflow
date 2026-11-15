@@ -41,7 +41,7 @@ out = NULL)` (deep copy, full pipeline only), `x[]` (copy). `out`
 (0.5.0.9040) names the steps whose outputs the copy keeps (`character(0)`:
 none): the other steps lose theirs, and those that were "done" become
 "outdated"; failed and locked steps keep their outputs. For results sent back
-from a worker (D59).
+from a worker (D60).
 
 Steps:
 - `pip_add(x, step, fun, tags = character(0), params = list(),
@@ -537,8 +537,8 @@ or that many R users need).
   pipelines.
 
 **Landed in pipeflow 0.5.0.9033-0.5.0.9040** (pubflow requires it from
-0.0.0.9059): `pip_clone(out = )` (requested here 2026-11-15 for runs in
-workers, issue #20, D59); fixes of runs whose steps change their pipeline
+0.0.0.9060): `pip_clone(out = )` (requested here 2026-11-15 for runs in
+workers, issue #20, D60); fixes of runs whose steps change their pipeline
 through `.self` (tracked by node id), `NULL` keys of partitioned outputs
 kept, shared checks and messages of the step editing functions. No other
 pubflow code change needed, the tests pass unchanged.
