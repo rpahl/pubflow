@@ -380,9 +380,9 @@ outdated and run again:
 `# 4:                             <huxtable[3x4]>`\
 `# 5: **Temp.Celsius** explains 28% of the var...`\
 `# 6:                             <huxtable[5x3]>`\
-`# 7:                                <pub_doc[2]>`\
+`# 7:                                <pub_doc[3]>`\
 `# --------------------------`\
-`# <ready> last run: 2026-11-14 15:52:56 (0.071 s)`\
+`# <ready> last run: 2026-11-15 09:58:19 (0.052 s)`\
 `# steps: 1 done, 6 outdated`
 
 ### One value per name

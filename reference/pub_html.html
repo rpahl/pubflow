@@ -9,7 +9,7 @@ UIs directly. pub_render() writes a standalone HTML file instead."><meta propert
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9055</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9058</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,7 +79,8 @@ UIs directly. <code><a href="pub_render.html">pub_render()</a></code> writes a s
 
 
 <dt id="arg-toc">toc<a class="anchor" aria-label="anchor" href="#arg-toc"></a></dt>
-<dd><p><code>TRUE</code>: add a table of contents (headings up to level 3).</p></dd>
+<dd><p><code>TRUE</code>: add a table of contents (headings up to level 3) unless the
+document places one (<code><a href="pub_pagebreak.html">pub_toc()</a></code>).</p></dd>
 
 
 <dt id="arg-math">math<a class="anchor" aria-label="anchor" href="#arg-math"></a></dt>
@@ -104,7 +105,8 @@ stays as <code>\(...\)</code> and <code>\[...\]</code>.</p></dd>
 <h3 id="contents">Contents<a class="anchor" aria-label="anchor" href="#contents"></a></h3>
 
 
-<p>The result has:</p><ul><li><p>a header with the title, subtitle and metadata;</p></li>
+<p>The result has:</p><ul><li><p>a header with the title, subtitle and metadata, or the front matter of the
+document instead (see <code><a href="pub_doc.html">pub_doc()</a></code>);</p></li>
 <li><p>an optional table of contents;</p></li>
 <li><p>one <code>&lt;section&gt;</code> per section, with numbered headings.</p></li>
 </ul><p>Tables are rendered with huxtable (see <code><a href="pub_table.html">pub_table()</a></code>), figures as inline PNG (or SVG)

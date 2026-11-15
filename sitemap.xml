@@ -25,7 +25,6 @@
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_cache.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_cell_text.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_doc.html</loc></url>
-<url><loc>https://rpahl.github.io/pubflow/reference/pub_error_items.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_figure.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_get_params.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_html.html</loc></url>
@@ -34,6 +33,7 @@
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_markdown.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_md_escape.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_meta.html</loc></url>
+<url><loc>https://rpahl.github.io/pubflow/reference/pub_missing.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_out.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_output_filename.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_pagebreak.html</loc></url>
@@ -41,6 +41,7 @@
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_params_table.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_params_ui.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_pp_docx.html</loc></url>
+<url><loc>https://rpahl.github.io/pubflow/reference/pub_problems.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_render.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_report_spec.html</loc></url>
 <url><loc>https://rpahl.github.io/pubflow/reference/pub_round.html</loc></url>

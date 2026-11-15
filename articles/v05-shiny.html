@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9055</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9058</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -566,6 +566,34 @@ above, the viewer has that height and scrolls itself.</li>
 Figures and tables are not made again for that, they come from the
 render cache.</p>
 <div class="section level3">
+<h3 id="pending-results">Pending results<a class="anchor" aria-label="anchor" href="#pending-results"></a>
+</h3>
+<p>While the document is made again, e.g. while <code>doc()</code> of
+the app above runs the pipeline, the viewer keeps showing the previous
+one, in grey, and shows “Updating …” in a bar at its top (if it takes
+longer than half a second).</p>
+<p>Runs outside of <code>doc()</code>, e.g. in a
+<code><a href="https://rdrr.io/pkg/shiny/man/ExtendedTask.html" class="external-link">shiny::ExtendedTask</a></code>, and params that changed but are
+applied only by a button are not visible to the viewer. For these,
+<code>pending</code> takes a reactive returning the label to show, or
+<code>NULL</code> for no marker (here <code>task</code> is the
+<code>ExtendedTask</code> and <code>changed()</code> a reactive that is
+<code>TRUE</code> while the params differ from those of the shown
+run):</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/pub_viewer_ui.html">pub_viewer_server</a></span><span class="op">(</span></span>
+<span>    <span class="st">"viewer"</span>,</span>
+<span>    <span class="va">doc</span>,</span>
+<span>    pending <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>        <span class="kw">if</span> <span class="op">(</span><span class="va">task</span><span class="op">$</span><span class="fu">status</span><span class="op">(</span><span class="op">)</span> <span class="op">==</span> <span class="st">"running"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>            <span class="st">"Updating ..."</span></span>
+<span>        <span class="op">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="fu">changed</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>            <span class="st">"Parameters changed: click 'Update' to update the results."</span></span>
+<span>        <span class="op">}</span></span>
+<span>    <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
 <h3 id="the-render-cache">The render cache<a class="anchor" aria-label="anchor" href="#the-render-cache"></a>
 </h3>
 <p>Rendering a figure takes about 0.1 s, and the viewer would repeat
@@ -575,7 +603,7 @@ HTML of the tables, and the viewer and the render functions use it when
 they get it as <code>cache</code>. So a report downloaded after viewing
 needs not render its figures again: the app above gives the same cache
 to the viewer and to <code><a href="../reference/pub_render.html">pub_render()</a></code>.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cache</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pub_cache.html">pub_cache</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/pub_viewer_ui.html">pub_viewer_server</a></span><span class="op">(</span><span class="st">"viewer"</span>, <span class="va">doc</span>, cache <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span><span class="fu">doc</span><span class="op">(</span><span class="op">)</span>, <span class="st">"docx"</span>, file <span class="op">=</span> <span class="va">file</span>, cache <span class="op">=</span> <span class="va">cache</span><span class="op">)</span></span></code></pre></div>
@@ -597,7 +625,7 @@ session, or outside of it to share the entries between sessions.</p>
 <code><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">shiny::fluidPage()</a></code> uses, and with Bootstrap 5, which
 bslib’s page functions use. The app above runs on both by changing the
 page:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu">bslib</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/bslib/reference/page.html" class="external-link">page_fluid</a></span><span class="op">(</span></span>
 <span>    <span class="co"># the same layout as before</span></span>
 <span><span class="op">)</span></span></code></pre></div>

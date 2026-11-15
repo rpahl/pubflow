@@ -21,7 +21,7 @@ pub_report_spec(
   figure = NULL,
   placeholder_color = NULL,
   lock = NULL,
-  error_items = c("refuse", "show"),
+  problems = c("refuse", "show"),
   post_process = list(),
   pandoc_args = character()
 )
@@ -55,9 +55,10 @@ pub_page(
 
 - front_matter:
 
-  `function(doc, format)` returning the front matter, or `NULL` (the
-  title block: title, subtitle, author and time; shown only with a
-  title, subtitle or author).
+  `function(doc, format)` returning the front matter (`NULL`: the title
+  block, [`list()`](https://rdrr.io/r/base/list.html): none), or `NULL`
+  (the document's front matter, else the title block: title, subtitle,
+  author and time; shown only with a title, subtitle or author).
 
 - toc:
 
@@ -91,9 +92,9 @@ pub_page(
 
   `TRUE`, `FALSE` or `NULL` (see Details).
 
-- error_items:
+- problems:
 
-  `"refuse"` or `"show"`.
+  What to do with error items and missing parts: `"refuse"` or `"show"`.
 
 - post_process:
 
@@ -132,8 +133,8 @@ A `pub_report_spec` or `pub_page` object.
 - `pub_page()` describes the page (size, orientation, margins) of DOCX
   and PDF reports.
 
-All arguments except `format` and `error_items` are optional: `NULL`
-means the default (for `figure` and `labels`, an empty list does too).
+All arguments except `format` and `problems` are optional: `NULL` means
+the default (for `figure` and `labels`, an empty list does too).
 
 ### Which argument acts where
 
@@ -170,6 +171,11 @@ checked only when the spec is used.
   matter, e.g. a title page with a signature table. It replaces the
   title block (in HTML the header) in every format; the title and author
   stay in the file's properties.
+
+  - Without it, the document's front matter is used (see "Front matter"
+    in
+    [`pub_doc()`](https://rpahl.github.io/pubflow/reference/pub_doc.md)),
+    which the viewer shows too.
 
   - It returns what a document can hold: sections, outputs or lists of
     them (see
@@ -235,16 +241,19 @@ checked only when the spec is used.
   `FALSE` locks nothing, and `post_process` can't list
   [`pub_pp_docx_lock()`](https://rpahl.github.io/pubflow/reference/pub_pp_docx.md).
 
-- `error_items`: what
+- `problems`: what
   [`pub_render()`](https://rpahl.github.io/pubflow/reference/pub_render.md)
   does with error items (failed steps placed by a layout step run with
   `on_error = "continue"`, see
-  [`pub_doc()`](https://rpahl.github.io/pubflow/reference/pub_doc.md)):
+  [`pub_doc()`](https://rpahl.github.io/pubflow/reference/pub_doc.md))
+  and missing parts
+  ([`pub_missing()`](https://rpahl.github.io/pubflow/reference/pub_missing.md)):
 
   - `"refuse"` (default) signals a `pubflow_render_error`;
 
-  - `"show"` writes their error boxes and warns
-    (`pubflow_render_warning`), naming the failed steps.
+  - `"show"` writes their error boxes and placeholders and warns
+    (`pubflow_render_warning`), naming the failed steps and missing
+    parts.
 
 - `post_process`: a list of functions `function(path, doc, spec)` that
   change the rendered file before it is copied to its destination.
@@ -334,20 +343,20 @@ spec
 #>   figure            default
 #>   labels            Tab., Fig.
 #>   placeholder_color default
-#>   error_items       refuse
+#>   problems          refuse
 #>   post_process      none
 #>   pandoc_args       none
-pub_report_spec("docx", toc = FALSE, error_items = "show")
+pub_report_spec("docx", toc = FALSE, problems = "show")
 #> <pubflow report spec: docx>
 #>   reference_docx    default
-#>   front_matter      title block
+#>   front_matter      document's or title block
 #>   toc               no
 #>   number_sections   yes
 #>   page              reference document
 #>   figure            default
 #>   labels            Table, Figure
 #>   lock              marked items
-#>   error_items       show
+#>   problems          show
 #>   post_process      none
 #>   pandoc_args       none
 
@@ -357,14 +366,14 @@ pub_report_spec("pdf", page = pub_page("a4", "landscape"),
 #> <pubflow report spec: pdf>
 #>   latex_preamble    none
 #>   typst_template    default
-#>   front_matter      title block
+#>   front_matter      document's or title block
 #>   toc               depth 3
 #>   number_sections   yes
 #>   page              A4 landscape, margins top 2.5, bottom 2, left 2.5, right 2.5 cm
 #>   figure            device = pdf
 #>   labels            Table, Figure
 #>   placeholder_color default
-#>   error_items       refuse
+#>   problems          refuse
 #>   post_process      none
 #>   pandoc_args       none
 
@@ -406,7 +415,7 @@ my_report_spec("docx")
 #>   figure            default
 #>   labels            Tab., Fig.
 #>   lock              marked items
-#>   error_items       refuse
+#>   problems          refuse
 #>   post_process      none
 #>   pandoc_args       none
 my_report_spec("md")
@@ -416,7 +425,7 @@ my_report_spec("md")
 #>   number_sections   yes
 #>   figure            default
 #>   labels            Tab., Fig.
-#>   error_items       refuse
+#>   problems          refuse
 #>   post_process      none
 
 # An argument that the format can't use is refused

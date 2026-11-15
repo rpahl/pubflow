@@ -118,14 +118,14 @@ spec <- pub_report_spec("docx", post_process = list(
 spec
 #> <pubflow report spec: docx>
 #>   reference_docx    default
-#>   front_matter      title block
+#>   front_matter      document's or title block
 #>   toc               depth 3
 #>   number_sections   yes
 #>   page              reference document
 #>   figure            default
 #>   labels            Table, Figure
 #>   lock              marked items
-#>   error_items       refuse
+#>   problems          refuse
 #>   post_process      3 function(s)
 #>   pandoc_args       none
 ```

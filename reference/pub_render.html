@@ -11,7 +11,7 @@ front matter, table of contents, page, figure settings and post-processors."><me
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9055</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9058</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -167,9 +167,9 @@ when, e.g. "Jane Doe at 07-Oct-2026 12:00:00 UTC (myapp v1.2.0)" (see
 <h3 id="title-block-and-table-of-contents">Title block and table of contents<a class="anchor" aria-label="anchor" href="#title-block-and-table-of-contents"></a></h3>
 
 
-<p>The title block appears only if the document has a title, subtitle or author. A table
-of contents follows it if the document has sections, unless the document places one
-itself.</p>
+<p>The title block appears only if the document has a title, subtitle or author, and
+a front matter (of the document or the spec) replaces it. A table of contents
+follows it if the document has sections, unless the document places one itself.</p>
 </div>
 
 <div class="section">
@@ -196,8 +196,10 @@ then receives the failure and may place it in the document as an <em>error item<
 never contains errors. For a final report, therefore, run the pipeline with the
 default <code>on_error = "stop"</code>.</p>
 <p>For drafts, you can instead run the pipeline with <code>on_error = "continue"</code> and set
-<code>pub_report_spec(error_items = "show")</code>. The document is then rendered, with the
+<code>pub_report_spec(problems = "show")</code>. The document is then rendered, with the
 error items shown as error boxes and a warning.</p>
+<p>Missing parts (<code><a href="pub_missing.html">pub_missing()</a></code>) are treated the same way: refused by default, shown
+as an italic placeholder paragraph with <code>problems = "show"</code>.</p>
 </div>
 
 <div class="section">

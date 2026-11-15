@@ -11,7 +11,7 @@ read."><meta property="og:image" content="https://rpahl.github.io/pubflow/logo.p
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9055</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9058</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,7 @@ read.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pub_viewer_ui</span><span class="op">(</span><span class="va">id</span>, toc <span class="op">=</span> <span class="cn">TRUE</span>, height <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">pub_viewer_server</span><span class="op">(</span><span class="va">id</span>, <span class="va">doc</span>, cache <span class="op">=</span> <span class="fu"><a href="pub_cache.html">pub_cache</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">pub_viewer_server</span><span class="op">(</span><span class="va">id</span>, <span class="va">doc</span>, cache <span class="op">=</span> <span class="fu"><a href="pub_cache.html">pub_cache</a></span><span class="op">(</span><span class="op">)</span>, pending <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -91,6 +91,11 @@ condition (shows an error box).</p></dd>
 <dt id="arg-cache">cache<a class="anchor" aria-label="anchor" href="#arg-cache"></a></dt>
 <dd><p>A <code><a href="pub_cache.html">pub_cache()</a></code>.</p></dd>
 
+
+<dt id="arg-pending">pending<a class="anchor" aria-label="anchor" href="#arg-pending"></a></dt>
+<dd><p><code>NULL</code> or a reactive returning the label of a pending document, or
+<code>NULL</code> (see "Pending results").</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -117,6 +122,21 @@ viewer shows it as one error box.</p>
 
 <p>The document is rendered again as a whole when <code>doc</code> changes. Figures and tables come
 from the render <code>cache</code> (<code><a href="pub_cache.html">pub_cache()</a></code>), which can be shared with report rendering.</p>
+</div>
+
+<div class="section">
+<h3 id="pending-results">Pending results<a class="anchor" aria-label="anchor" href="#pending-results"></a></h3>
+
+
+<p>While the document is being made again (<code>doc</code> or the viewer's outputs recalculate,
+e.g. while <code>doc</code> runs the pipeline), the viewer shows the previous document in grey
+and "Updating ..." in a bar at its top (after half a second, so fast updates don't
+flash it). The bar is a live region, so screen readers announce it. While the marker
+is shown, the viewer has the class <code>pubflow-pending</code> (e.g. for end-to-end tests to
+wait on).</p>
+<p>Shiny can't see runs outside of <code>doc</code>, e.g. in a <a href="https://rdrr.io/pkg/shiny/man/ExtendedTask.html" class="external-link">shiny::ExtendedTask</a>, or params
+that changed but are applied only by a button. For these, pass a <code>pending</code> reactive
+returning the label to show (e.g. <code>"Parameters changed: click 'Update' to update the results."</code>), or <code>NULL</code> for no marker.</p>
 </div>
 
     </div>

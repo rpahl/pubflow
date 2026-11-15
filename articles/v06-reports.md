@@ -106,7 +106,7 @@ instead, where they are merged over the metadata of the document:
 `    meta ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``author ``=`` ``"Jane Doe"``, app ``=`` ``"ozone-app"``, version ``=`` ``"1.2.0"``)`\
 `)`\
 [`basename`](https://rdrr.io/r/base/basename.html)`(``file``)`\
-`# [1] "20261114T155330Z_ozone_in_new_york.docx"`
+`# [1] "20261115T095844Z_ozone_in_new_york.docx"`
 
 - The entries of `meta` win over those of the document, and `NULL`
   removes one.
@@ -173,14 +173,14 @@ defaults. Printing a spec shows what it uses:
 [`pub_report_spec`](https://rpahl.github.io/pubflow/reference/pub_report_spec.md)`(``"docx"``)`\
 `# <pubflow report spec: docx>`\
 `#   reference_docx    default`\
-`#   front_matter      title block`\
+`#   front_matter      document's or title block`\
 `#   toc               depth 3`\
 `#   number_sections   yes`\
 `#   page              reference document`\
 `#   figure            default`\
 `#   labels            Table, Figure`\
 `#   lock              marked items`\
-`#   error_items       refuse`\
+`#   problems          refuse`\
 `#   post_process      none`\
 `#   pandoc_args       none`
 
@@ -199,7 +199,7 @@ has the details):
 | Field | What it sets |
 |----|----|
 | `reference_docx`, `latex_preamble`, `typst_template` | The template of DOCX, of PDF via LaTeX, of PDF via Typst |
-| `front_matter` | A function that returns what replaces the title block, e.g. a title page |
+| `front_matter` | A function that returns what replaces the title block, e.g. a title page (default: the document’s front matter) |
 | `toc`, `toc_depth` | A table of contents after the front matter, and its depth |
 | `number_sections` | Number the headings or not |
 | `labels` | The words before the caption numbers |
@@ -207,7 +207,7 @@ has the details):
 | `figure` | Image format and resolution of figures |
 | `placeholder_color` | Colour of placeholders in HTML and PDF |
 | `lock` | Lock tables, figures, header and footer of DOCX files |
-| `error_items` | Refuse or show failed steps |
+| `problems` | Refuse or show failed steps and missing parts |
 | `post_process` | Functions that change the finished file |
 | `pandoc_args` | Extra pandoc arguments |
 
@@ -245,9 +245,38 @@ with a page break to start the contents on a new page:
 `#   figure            default`\
 `#   labels            Tab., Fig.`\
 `#   placeholder_color default`\
-`#   error_items       refuse`\
+`#   problems          refuse`\
 `#   post_process      none`\
 `#   pandoc_args       none`
+
+The viewer doesn’t show the front matter of a spec. A front matter that
+should be previewed too belongs to the document:
+`pub_doc(front_matter = )` takes the same outputs as the body and
+replaces the title block in the viewer and in every format. The spec’s
+function then is only needed for front matter of one format (or with the
+render-time metadata); it replaces the document’s and can build on it
+with `doc$front_matter`:
+
+\
+`doc_front`` ``<-`` `[`pub_doc`](https://rpahl.github.io/pubflow/reference/pub_doc.md)`(`\
+`    `[`pub_section`](https://rpahl.github.io/pubflow/reference/pub_doc.md)`(``"Results"``, ``"Ozone peaks in July and August."``)``,`\
+`    title ``=`` ``"Ozone report"``,`\
+`    front_matter ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(`\
+`        `[`pub_section`](https://rpahl.github.io/pubflow/reference/pub_doc.md)`(``"Approval"``, ``"Signed by the analyst."``)``,`\
+`        `[`pub_pagebreak`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md)`(``)``,`\
+`        `[`pub_toc`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md)`(``)`\
+`    ``)`\
+`)`\
+`doc_front`\
+`# <pubflow document> "Ozone report"`\
+`# Front matter:`\
+`# # Approval`\
+`#   text "Signed by the analyst."`\
+`# pagebreak`\
+`# toc`\
+`# Body:`\
+`# # Results`\
+`#   text "Ozone peaks in July and August."`
 
 A document that places
 [`pub_toc()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md)
@@ -312,12 +341,12 @@ error items instead:
 \
 [`pub_render`](https://rpahl.github.io/pubflow/reference/pub_render.md)`(``draft``, ``"md"``, file ``=`` `[`tempfile`](https://rdrr.io/r/base/tempfile.html)`(``fileext ``=`` ``".md"``)``)`\
 `# ``Error```  in `pub_render()`: ``\
-`# ``!`` Can't render a document with error items (failed steps):`\
+`# ``!`` Can't render a document with error items (failed steps) or missing parts:`\
 `# ``✖`` step 'fit' failed: object 'Height' not found`\
-`# ``ℹ```  Reports run the pipeline with `on_error = "stop"`; error items are for the viewer. ``
+`# ``ℹ```  Reports run the pipeline with `on_error = "stop"` and have all their parts; error items and missing parts are for the viewer. ``
 
 \
-`spec`` ``<-`` `[`pub_report_spec`](https://rpahl.github.io/pubflow/reference/pub_report_spec.md)`(``"md"``, error_items ``=`` ``"show"``)`\
+`spec`` ``<-`` `[`pub_report_spec`](https://rpahl.github.io/pubflow/reference/pub_report_spec.md)`(``"md"``, problems ``=`` ``"show"``)`\
 [`withCallingHandlers`](https://rdrr.io/r/base/conditions.html)`(`\
 `    `[`pub_render`](https://rpahl.github.io/pubflow/reference/pub_render.md)`(``draft``, ``"md"``, file ``=`` `[`tempfile`](https://rdrr.io/r/base/tempfile.html)`(``fileext ``=`` ``".md"``)``, spec ``=`` ``spec``)``,`\
 `    pubflow_render_warning ``=`` ``function``(``w``)`` ``{`\
@@ -326,7 +355,7 @@ error items instead:
 `    ``}`\
 `)`` ``|>`\
 `    `[`invisible`](https://rdrr.io/r/base/invisible.html)`(``)`\
-`# Warning: The report shows error items (failed steps):`\
+`# Warning: The report shows error items (failed steps) or missing parts:`\
 `# ``✖`` step 'fit' failed: object 'Height' not found`
 
 The file has an error box where the model of the failed step would be,
@@ -334,12 +363,27 @@ and the warning names the failed step. Use this for drafts only.
 
 To check a document before rendering it, e.g. to tell the user of an app
 why a report can’t be downloaded yet,
-[`pub_error_items()`](https://rpahl.github.io/pubflow/reference/pub_error_items.md)
-lists its error items:
+[`pub_problems()`](https://rpahl.github.io/pubflow/reference/pub_problems.md)
+lists its error items (and missing parts, see below):
 
 \
-[`vapply`](https://rdrr.io/r/base/lapply.html)`(`[`pub_error_items`](https://rpahl.github.io/pubflow/reference/pub_error_items.md)`(``draft``)``, \``(``x``)`` ``x``$``message``, `[`character`](https://rdrr.io/r/base/character.html)`(``1``)``)`\
+[`vapply`](https://rdrr.io/r/base/lapply.html)`(`[`pub_problems`](https://rpahl.github.io/pubflow/reference/pub_problems.md)`(``draft``)``, \``(``x``)`` ``x``$``message``, `[`character`](https://rdrr.io/r/base/character.html)`(``1``)``)`\
 `# [1] "object 'Height' not found"`
+
+A part that doesn’t exist yet, e.g. the results of an analysis the user
+has not run, is not an error. Place
+`pub_missing("Run the analysis first.")` there: the viewer shows the
+message as a neutral placeholder, and
+[`pub_render()`](https://rpahl.github.io/pubflow/reference/pub_render.md)
+refuses the document like one with error items.
+[`pub_problems()`](https://rpahl.github.io/pubflow/reference/pub_problems.md)
+finds both, so it lists everything that blocks a download
+(`type = "error"` or `"missing"` picks one kind):
+
+\
+`parts`` ``<-`` `[`list`](https://rdrr.io/r/base/list.html)`(``Model ``=`` `[`pub_missing`](https://rpahl.github.io/pubflow/reference/pub_missing.md)`(``"Run the model first."``)``, Data ``=`` ``draft``)`\
+[`vapply`](https://rdrr.io/r/base/lapply.html)`(`[`pub_problems`](https://rpahl.github.io/pubflow/reference/pub_problems.md)`(``parts``)``, \``(``x``)`` ``x``$``message``, `[`character`](https://rdrr.io/r/base/character.html)`(``1``)``)`\
+`# [1] "Run the model first."      "object 'Height' not found"`
 
 ## Word files
 
@@ -361,7 +405,7 @@ document. A look into the file shows them:
 `docx_text``(``file``, ``"header1.xml"``)`\
 `# [1] "Ozone study" ""            "Draft"`\
 `docx_text``(``file``, ``"footer1.xml"``)`\
-`# [1] "Jane Doe at 14-Nov-2026 15:53:30 UTC (ozone-app v1.2.0)"`\
+`# [1] "Jane Doe at 15-Nov-2026 09:58:44 UTC (ozone-app v1.2.0)"`\
 `# [2] ""                                                       `\
 `# [3] "Page "                                                  `\
 `# [4] "1"                                                      `\

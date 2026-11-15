@@ -39,6 +39,7 @@ method for a class of your own.
 | `"widget"` | an htmlwidget |
 | `"raw"`, `"pagebreak"`, `"toc"` | see [`pub_raw()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md), [`pub_pagebreak()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md), [`pub_toc()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md) |
 | `"error"` | a failed step or an error item of [`pub_out()`](https://rpahl.github.io/pubflow/reference/pub_out.md) (an error box) |
+| `"missing"` | a missing part ([`pub_missing()`](https://rpahl.github.io/pubflow/reference/pub_missing.md), a placeholder) |
 | `"null"` | `NULL`, skipped |
 
 Objects of any other class are converted with

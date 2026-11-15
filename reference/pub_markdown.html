@@ -11,7 +11,7 @@ to see or post-process the Markdown that pandoc gets."><meta property="og:image"
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9055</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9058</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,7 +114,8 @@ their own sections and, if the spec locks, tables and figures are locked.</p></l
 as LaTeX or Typst code that breaks across pages and repeats the header rows.
 Figures are PNG images unless the spec's <code>figure</code> asks for <code>"pdf"</code> (LaTeX) or
 <code>"svg"</code> (Typst).</p></li>
-<li><p><code>"md"</code>: a plain Markdown document with a YAML front matter that holds the header,
+<li><p><code>"md"</code>: a plain Markdown document with a YAML front matter that holds the header
+(unless a front matter replaces it),
 numbered headings, tables as Pandoc multiline tables and images. Page breaks,
 landscape parts and tables of contents are left out.</p></li>
 </ul><p>The document header (title, subtitle, author, time) of DOCX is not part of the
@@ -147,10 +148,11 @@ error.</p>
 <h3 id="report-spec">Report spec<a class="anchor" aria-label="anchor" href="#report-spec"></a></h3>
 
 
-<p>The report spec (see <code><a href="pub_report_spec.html">pub_report_spec()</a></code>) adds the front matter, table of contents,
-section numbers, caption labels, figure devices and page. <code><a href="pub_render.html">pub_render()</a></code> calls
-<code>pub_markdown()</code> with its spec. The document's metadata is used as-is (no
-render-time metadata), so the Markdown of a document is always the same.</p>
+<p>The report spec (see <code><a href="pub_report_spec.html">pub_report_spec()</a></code>) adds the front matter (by default the
+document's, see <code><a href="pub_doc.html">pub_doc()</a></code>), table of contents, section numbers, caption labels,
+figure devices and page. <code><a href="pub_render.html">pub_render()</a></code> calls <code>pub_markdown()</code> with its spec. The
+document's metadata is used as-is (no render-time metadata), so the Markdown of a
+document is always the same.</p>
 </div>
 
     </div>

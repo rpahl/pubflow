@@ -151,9 +151,9 @@ depend on `fit`:
 `# 5:              [NULL]`\
 `# 6:              [NULL]`\
 `# 7:              [NULL]`\
-`# 8:        <pub_doc[2]>`\
+`# 8:        <pub_doc[3]>`\
 `# --------------------------`\
-`# <continued> last run: 2026-11-14 15:53:13 (0.057 s)`\
+`# <continued> last run: 2026-11-15 09:58:32 (0.044 s)`\
 `# steps: 4 done, 1 failed, 3 new`
 
 The run warns (class `pipeflow_run_failed`), but the document is there.
@@ -228,11 +228,11 @@ and passes the output of the layout step. A few rules go with it:
 \
 [`pub_render`](https://rpahl.github.io/pubflow/reference/pub_render.md)`(``doc``, ``"docx"``)`\
 `# ``Error```  in `pub_render()`: ``\
-`# ``!`` Can't render a document with error items (failed steps):`\
+`# ``!`` Can't render a document with error items (failed steps) or missing parts:`\
 `# ``✖`` step 'fit' failed: object 'Height' not found`\
 `# ``✖`` step 'fit' failed: object 'Height' not found`\
 `# ``✖`` step 'fit' failed: object 'Height' not found`\
-`# ``ℹ```  Reports run the pipeline with `on_error = "stop"`; error items are for the viewer. ``
+`# ``ℹ```  Reports run the pipeline with `on_error = "stop"` and have all their parts; error items and missing parts are for the viewer. ``
 
 Set the param back and the next run repairs the steps that failed:
 
@@ -259,9 +259,9 @@ Set the param back and the next run repairs the steps that failed:
 `# 5:                             <huxtable[3x4]>`\
 `# 6:                           <ggplot2::ggplot>`\
 `# 7: The model explains **49%** of the varian...`\
-`# 8:                                <pub_doc[2]>`\
+`# 8:                                <pub_doc[3]>`\
 `# --------------------------`\
-`# <ready> last run: 2026-11-14 15:53:13 (0.047 s)`\
+`# <ready> last run: 2026-11-15 09:58:32 (0.038 s)`\
 `# steps: 8 done`
 
 ### Select the steps of a report by tags
@@ -326,10 +326,10 @@ view computes just what its report needs:
 `#  6:                                      [NULL]       long`\
 `#  7: The model explains **49%** of the varian... short,long`\
 `#  8:                                      [NULL]           `\
-`#  9:                                <pub_doc[2]>           `\
+`#  9:                                <pub_doc[3]>           `\
 `# 10:                                      [NULL]           `\
 `# ---------------------------`\
-`# <ready> last run: 2026-11-14 15:53:13 (0.021 s)`\
+`# <ready> last run: 2026-11-15 09:58:32 (0.016 s)`\
 `# steps: 6 done, 4 new`\
 [`show`](https://rdrr.io/r/methods/show.html)`(``tagged``[[``"short"``, ``"out"``]``]``)`
 
@@ -594,9 +594,9 @@ by its key, around the section the step returned:
 `# 4:   table           model               fit  done           <list[5]>   auto`\
 `# 5:    plot      model,data        fit,months  done           <list[5]>   auto`\
 `# 6: section data,table,plot months,table,plot  done           <list[5]>   auto`\
-`# 7:     doc        sections           section  done        <pub_doc[2]> reduce`\
+`# 7:     doc        sections           section  done        <pub_doc[3]> reduce`\
 `# -----------------------------`\
-`# <ready> last run: 2026-11-14 15:53:14 (0.088 s)`\
+`# <ready> last run: 2026-11-15 09:58:32 (0.067 s)`\
 `# steps: 7 done`
 
 ## Ozone by month
@@ -785,7 +785,7 @@ in a parallel worker, which does the same and returns the pipeline:
 `# 3:   table        res    mean  done    <huxtable[3x2]>`\
 `# 4: content      table   table  done          <list[1]>`\
 `# ------------------------`\
-`# <ready> last run: 2026-11-14 15:53:15 (0.010 s)`\
+`# <ready> last run: 2026-11-15 09:58:33 (0.008 s)`\
 `# steps: 4 done`
 
 #### Read the parts with `pub_out()`
@@ -905,9 +905,9 @@ gets the new part:
 `# ---------------------------`\
 `#     step params depends state          out`\
 `# 1: parts  parts          done    <list[3]>`\
-`# 2:   doc  parts   parts  done <pub_doc[2]>`\
+`# 2:   doc  parts   parts  done <pub_doc[3]>`\
 `# ---------------------------`\
-`# <ready> last run: 2026-11-14 15:53:15 (0.003 s)`\
+`# <ready> last run: 2026-11-15 09:58:33 (0.006 s)`\
 `# steps: 2 done`
 
 Two things to know when a worker runs the group’s pipeline:

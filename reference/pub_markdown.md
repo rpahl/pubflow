@@ -68,9 +68,9 @@ pub_markdown(
   `figure` asks for `"pdf"` (LaTeX) or `"svg"` (Typst).
 
 - `"md"`: a plain Markdown document with a YAML front matter that holds
-  the header, numbered headings, tables as Pandoc multiline tables and
-  images. Page breaks, landscape parts and tables of contents are left
-  out.
+  the header (unless a front matter replaces it), numbered headings,
+  tables as Pandoc multiline tables and images. Page breaks, landscape
+  parts and tables of contents are left out.
 
 The document header (title, subtitle, author, time) of DOCX is not part
 of the Markdown.
@@ -106,8 +106,10 @@ defines macros, is an error.
 
 The report spec (see
 [`pub_report_spec()`](https://rpahl.github.io/pubflow/reference/pub_report_spec.md))
-adds the front matter, table of contents, section numbers, caption
-labels, figure devices and page.
+adds the front matter (by default the document's, see
+[`pub_doc()`](https://rpahl.github.io/pubflow/reference/pub_doc.md)),
+table of contents, section numbers, caption labels, figure devices and
+page.
 [`pub_render()`](https://rpahl.github.io/pubflow/reference/pub_render.md)
 calls `pub_markdown()` with its spec. The document's metadata is used
 as-is (no render-time metadata), so the Markdown of a document is always

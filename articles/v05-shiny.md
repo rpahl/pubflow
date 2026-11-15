@@ -509,6 +509,34 @@ The viewer renders the document again as a whole when it changes.
 Figures and tables are not made again for that, they come from the
 render cache.
 
+### Pending results
+
+While the document is made again, e.g. while `doc()` of the app above
+runs the pipeline, the viewer keeps showing the previous one, in grey,
+and shows “Updating …” in a bar at its top (if it takes longer than half
+a second).
+
+Runs outside of `doc()`, e.g. in a
+[`shiny::ExtendedTask`](https://rdrr.io/pkg/shiny/man/ExtendedTask.html),
+and params that changed but are applied only by a button are not visible
+to the viewer. For these, `pending` takes a reactive returning the label
+to show, or `NULL` for no marker (here `task` is the `ExtendedTask` and
+`changed()` a reactive that is `TRUE` while the params differ from those
+of the shown run):
+
+\
+[`pub_viewer_server`](https://rpahl.github.io/pubflow/reference/pub_viewer_ui.md)`(`\
+`    ``"viewer"``,`\
+`    ``doc``,`\
+`    pending ``=`` `[`reactive`](https://rdrr.io/pkg/shiny/man/reactive.html)`(``{`\
+`        ``if`` ``(``task``$``status``(``)`` ``==`` ``"running"``)`` ``{`\
+`            ``"Updating ..."`\
+`        ``}`` ``else`` ``if`` ``(``changed``(``)``)`` ``{`\
+`            ``"Parameters changed: click 'Update' to update the results."`\
+`        ``}`\
+`    ``}``)`\
+`)`
+
 ### The render cache
 
 Rendering a figure takes about 0.1 s, and the viewer would repeat that

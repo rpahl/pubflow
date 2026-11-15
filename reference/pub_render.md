@@ -159,8 +159,9 @@ DOCX and PDF files show the `header` and `footer` lines of the document
 ### Title block and table of contents
 
 The title block appears only if the document has a title, subtitle or
-author. A table of contents follows it if the document has sections,
-unless the document places one itself.
+author, and a front matter (of the document or the spec) replaces it. A
+table of contents follows it if the document has sections, unless the
+document places one itself.
 
 ### Render-time metadata
 
@@ -189,9 +190,14 @@ contains errors. For a final report, therefore, run the pipeline with
 the default `on_error = "stop"`.
 
 For drafts, you can instead run the pipeline with
-`on_error = "continue"` and set `pub_report_spec(error_items = "show")`.
+`on_error = "continue"` and set `pub_report_spec(problems = "show")`.
 The document is then rendered, with the error items shown as error boxes
 and a warning.
+
+Missing parts
+([`pub_missing()`](https://rpahl.github.io/pubflow/reference/pub_missing.md))
+are treated the same way: refused by default, shown as an italic
+placeholder paragraph with `problems = "show"`.
 
 ### Good to know
 

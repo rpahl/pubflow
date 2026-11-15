@@ -32,7 +32,9 @@ pub_html(
 
 - toc:
 
-  `TRUE`: add a table of contents (headings up to level 3).
+  `TRUE`: add a table of contents (headings up to level 3) unless the
+  document places one
+  ([`pub_toc()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md)).
 
 - math:
 
@@ -59,7 +61,9 @@ string with dependencies).
 
 The result has:
 
-- a header with the title, subtitle and metadata;
+- a header with the title, subtitle and metadata, or the front matter of
+  the document instead (see
+  [`pub_doc()`](https://rpahl.github.io/pubflow/reference/pub_doc.md));
 
 - an optional table of contents;
 

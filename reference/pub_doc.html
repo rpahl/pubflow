@@ -13,7 +13,7 @@ steps, and then a layout step arranges them into sections (see Examples)."><meta
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9055</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9058</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@ steps, and then a <em>layout step</em> arranges them into sections (see Examples
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pub_doc</span><span class="op">(</span><span class="va">...</span>, title <span class="op">=</span> <span class="cn">NULL</span>, subtitle <span class="op">=</span> <span class="cn">NULL</span>, meta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pub_doc</span><span class="op">(</span><span class="va">...</span>, title <span class="op">=</span> <span class="cn">NULL</span>, subtitle <span class="op">=</span> <span class="cn">NULL</span>, meta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, front_matter <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">pub_section</span><span class="op">(</span></span>
 <span>  <span class="va">title</span>,</span>
@@ -93,6 +93,11 @@ steps, and then a <em>layout step</em> arranges them into sections (see Examples
 
 <dt id="arg-meta">meta<a class="anchor" aria-label="anchor" href="#arg-meta"></a></dt>
 <dd><p>Named list of document metadata (see "Metadata" in Details).</p></dd>
+
+
+<dt id="arg-front-matter">front_matter<a class="anchor" aria-label="anchor" href="#arg-front-matter"></a></dt>
+<dd><p>Outputs placed before the body instead of the title block (see
+"Front matter" in Details), or <code>NULL</code> (default): the title block.</p></dd>
 
 
 <dt id="arg-numbered">numbered<a class="anchor" aria-label="anchor" href="#arg-numbered"></a></dt>
@@ -125,7 +130,7 @@ dropped (<code>"drop"</code>, default), kept (<code>"keep"</code>) or an error i
 <h3 id="children">Children<a class="anchor" aria-label="anchor" href="#children"></a></h3>
 
 
-<p>The children (<code>...</code>) are interpreted as follows:</p><table class="table table"><tr><td>Child</td><td>Becomes</td></tr><tr><td>section</td><td>a section</td></tr><tr><td>list</td><td>one sub-section per named element (see below)</td></tr><tr><td>data.frame, matrix</td><td>a table with default settings (see <code><a href="pub_table.html">pub_table()</a></code>)</td></tr><tr><td>huxtable</td><td>a table</td></tr><tr><td>character vector</td><td>Markdown text (see <code><a href="pub_text.html">pub_text()</a></code>)</td></tr><tr><td>ggplot, <code><a href="https://rdrr.io/r/grDevices/recordplot.html" class="external-link">grDevices::recordPlot()</a></code>, <code><a href="pub_figure.html">pub_figure()</a></code></td><td>a figure</td></tr><tr><td>htmlwidget</td><td>an interactive widget</td></tr><tr><td><code><a href="pub_pagebreak.html">pub_raw()</a></code></td><td>your own code, inserted as-is</td></tr><tr><td><code><a href="pub_pagebreak.html">pub_pagebreak()</a></code></td><td>a page break (DOCX, PDF)</td></tr><tr><td><code><a href="pub_pagebreak.html">pub_toc()</a></code></td><td>a table of contents</td></tr><tr><td>failed step, error item of <code><a href="pub_out.html">pub_out()</a></code></td><td>an error box</td></tr><tr><td><code>NULL</code>, empty text</td><td>nothing</td></tr><tr><td>pipeline</td><td>an error (place the outputs of its steps instead)</td></tr></table><p>Names of list elements become the titles of their sub-sections while unnamed elements
+<p>The children (<code>...</code>) are interpreted as follows:</p><table class="table table"><tr><td>Child</td><td>Becomes</td></tr><tr><td>section</td><td>a section</td></tr><tr><td>list</td><td>one sub-section per named element (see below)</td></tr><tr><td>data.frame, matrix</td><td>a table with default settings (see <code><a href="pub_table.html">pub_table()</a></code>)</td></tr><tr><td>huxtable</td><td>a table</td></tr><tr><td>character vector</td><td>Markdown text (see <code><a href="pub_text.html">pub_text()</a></code>)</td></tr><tr><td>ggplot, <code><a href="https://rdrr.io/r/grDevices/recordplot.html" class="external-link">grDevices::recordPlot()</a></code>, <code><a href="pub_figure.html">pub_figure()</a></code></td><td>a figure</td></tr><tr><td>htmlwidget</td><td>an interactive widget</td></tr><tr><td><code><a href="pub_pagebreak.html">pub_raw()</a></code></td><td>your own code, inserted as-is</td></tr><tr><td><code><a href="pub_pagebreak.html">pub_pagebreak()</a></code></td><td>a page break (DOCX, PDF)</td></tr><tr><td><code><a href="pub_pagebreak.html">pub_toc()</a></code></td><td>a table of contents</td></tr><tr><td>failed step, error item of <code><a href="pub_out.html">pub_out()</a></code></td><td>an error box</td></tr><tr><td><code><a href="pub_missing.html">pub_missing()</a></code></td><td>a placeholder for a missing part</td></tr><tr><td><code>NULL</code>, empty text</td><td>nothing</td></tr><tr><td>pipeline</td><td>an error (place the outputs of its steps instead)</td></tr></table><p>Names of list elements become the titles of their sub-sections while unnamed elements
 are placed directly (no sub-section). To define the caption, digits and other
 settings of a table, use <code><a href="pub_table.html">pub_table()</a></code>. Any other classes are converted with
 <code><a href="as_pub_output.html">as_pub_output()</a></code> (see <code><a href="pub_type.html">pub_type()</a></code>).</p>
@@ -139,6 +144,22 @@ settings of a table, use <code><a href="pub_table.html">pub_table()</a></code>. 
 counts as not given. You can add keys of your own: pubflow keeps them but doesn't
 check or use them.</p>
 </div>
+
+<div class="section">
+<h3 id="front-matter">Front matter<a class="anchor" aria-label="anchor" href="#front-matter"></a></h3>
+
+
+<p><code>front_matter</code> holds what comes before the body, e.g. a title page, a signature
+table and a table of contents (<code><a href="pub_pagebreak.html">pub_toc()</a></code>). It takes the same outputs as the
+children (also lists of them) and replaces the title block (in HTML the header), in
+the viewer, in <code><a href="pub_html.html">pub_html()</a></code> and in every format of <code><a href="pub_render.html">pub_render()</a></code>:</p><ul><li><p>Its sections are unnumbered (the numbers of the body start at 1), while its tables
+and figures count in the caption numbers.</p></li>
+<li><p>The table of contents of a report spec comes after it; end it with
+<code><a href="pub_pagebreak.html">pub_pagebreak()</a></code> to start the contents on a new page.</p></li>
+<li><p><code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> drops the title block without putting anything in its place.</p></li>
+<li><p>The <code>front_matter</code> function of a <code><a href="pub_report_spec.html">pub_report_spec()</a></code> replaces it (and can build
+on it: <code>doc$front_matter</code>), e.g. for a title block of one format only.</p></li>
+</ul></div>
 
 <div class="section">
 <h3 id="failed-steps">Failed steps<a class="anchor" aria-label="anchor" href="#failed-steps"></a></h3>

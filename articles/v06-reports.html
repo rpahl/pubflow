@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9055</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9058</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -200,7 +200,7 @@ the metadata of the document:</p>
 <span>    meta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>author <span class="op">=</span> <span class="st">"Jane Doe"</span>, app <span class="op">=</span> <span class="st">"ozone-app"</span>, version <span class="op">=</span> <span class="st">"1.2.0"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">file</span><span class="op">)</span></span>
-<span><span class="co"># [1] "20261114T155330Z_ozone_in_new_york.docx"</span></span></code></pre></div>
+<span><span class="co"># [1] "20261115T095844Z_ozone_in_new_york.docx"</span></span></code></pre></div>
 <ul>
 <li>The entries of <code>meta</code> win over those of the document, and
 <code>NULL</code> removes one.</li>
@@ -265,14 +265,14 @@ spec shows what it uses:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pub_report_spec.html">pub_report_spec</a></span><span class="op">(</span><span class="st">"docx"</span><span class="op">)</span></span>
 <span><span class="co"># &lt;pubflow report spec: docx&gt;</span></span>
 <span><span class="co">#   reference_docx    default</span></span>
-<span><span class="co">#   front_matter      title block</span></span>
+<span><span class="co">#   front_matter      document's or title block</span></span>
 <span><span class="co">#   toc               depth 3</span></span>
 <span><span class="co">#   number_sections   yes</span></span>
 <span><span class="co">#   page              reference document</span></span>
 <span><span class="co">#   figure            default</span></span>
 <span><span class="co">#   labels            Table, Figure</span></span>
 <span><span class="co">#   lock              marked items</span></span>
-<span><span class="co">#   error_items       refuse</span></span>
+<span><span class="co">#   problems          refuse</span></span>
 <span><span class="co">#   post_process      none</span></span>
 <span><span class="co">#   pandoc_args       none</span></span></code></pre></div>
 <p>Every field acts in every format that can show it. A field that the
@@ -304,7 +304,7 @@ details):</p>
 <tr class="even">
 <td><code>front_matter</code></td>
 <td>A function that returns what replaces the title block, e.g. a title
-page</td>
+page (default: the document’s front matter)</td>
 </tr>
 <tr class="odd">
 <td>
@@ -338,8 +338,8 @@ DOCX and PDF</td>
 <td>Lock tables, figures, header and footer of DOCX files</td>
 </tr>
 <tr class="even">
-<td><code>error_items</code></td>
-<td>Refuse or show failed steps</td>
+<td><code>problems</code></td>
+<td>Refuse or show failed steps and missing parts</td>
 </tr>
 <tr class="odd">
 <td><code>post_process</code></td>
@@ -385,9 +385,36 @@ with a page break to start the contents on a new page:</p>
 <span><span class="co">#   figure            default</span></span>
 <span><span class="co">#   labels            Tab., Fig.</span></span>
 <span><span class="co">#   placeholder_color default</span></span>
-<span><span class="co">#   error_items       refuse</span></span>
+<span><span class="co">#   problems          refuse</span></span>
 <span><span class="co">#   post_process      none</span></span>
 <span><span class="co">#   pandoc_args       none</span></span></code></pre></div>
+<p>The viewer doesn’t show the front matter of a spec. A front matter
+that should be previewed too belongs to the document:
+<code>pub_doc(front_matter = )</code> takes the same outputs as the body
+and replaces the title block in the viewer and in every format. The
+spec’s function then is only needed for front matter of one format (or
+with the render-time metadata); it replaces the document’s and can build
+on it with <code>doc$front_matter</code>:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">doc_front</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pub_doc.html">pub_doc</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="../reference/pub_doc.html">pub_section</a></span><span class="op">(</span><span class="st">"Results"</span>, <span class="st">"Ozone peaks in July and August."</span><span class="op">)</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Ozone report"</span>,</span>
+<span>    front_matter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        <span class="fu"><a href="../reference/pub_doc.html">pub_section</a></span><span class="op">(</span><span class="st">"Approval"</span>, <span class="st">"Signed by the analyst."</span><span class="op">)</span>,</span>
+<span>        <span class="fu"><a href="../reference/pub_pagebreak.html">pub_pagebreak</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        <span class="fu"><a href="../reference/pub_pagebreak.html">pub_toc</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">doc_front</span></span>
+<span><span class="co"># &lt;pubflow document&gt; "Ozone report"</span></span>
+<span><span class="co"># Front matter:</span></span>
+<span><span class="co"># # Approval</span></span>
+<span><span class="co">#   text "Signed by the analyst."</span></span>
+<span><span class="co"># pagebreak</span></span>
+<span><span class="co"># toc</span></span>
+<span><span class="co"># Body:</span></span>
+<span><span class="co"># # Results</span></span>
+<span><span class="co">#   text "Ozone peaks in July and August."</span></span></code></pre></div>
 <p>A document that places <code><a href="../reference/pub_pagebreak.html">pub_toc()</a></code> itself
 (<code>what = "sections"</code>) gets no second table of contents. Lists
 of figures and tables (<code>pub_toc(what = "figures")</code>) don’t
@@ -395,7 +422,7 @@ count: to have only those, set <code>toc = FALSE</code> in the spec.</p>
 <p>A spec is a plain list that is checked when it is used. To have one
 spec for every format, write a function that builds them, so the front
 matter and the labels are in one place:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_spec</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">format</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="../reference/pub_report_spec.html">pub_report_spec</a></span><span class="op">(</span></span>
 <span>        <span class="va">format</span>,</span>
@@ -406,7 +433,7 @@ matter and the labels are in one place:</p>
 <span><span class="va">spec_docx</span> <span class="op">&lt;-</span> <span class="fu">my_spec</span><span class="op">(</span><span class="st">"docx"</span><span class="op">)</span></span></code></pre></div>
 <p>Markdown shows the effect of a spec without any tool; the table
 caption now starts with “Tab.”:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span></span>
 <span>    <span class="va">doc</span>,</span>
 <span>    <span class="st">"md"</span>,</span>
@@ -427,7 +454,7 @@ pipeline of a report with the default <code>on_error = "stop"</code>,
 and a failed step stops it before any document exists.</p>
 <p>For a draft, run with <code>on_error = "continue"</code> and let the
 spec show the error items instead:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pip</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_new.html" class="external-link">pip_new</a></span><span class="op">(</span><span class="st">"draft"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"table"</span>, <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="fu"><a href="../reference/pub_table.html">pub_table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span>, caption <span class="op">=</span> <span class="st">"Data"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_add.html" class="external-link">pip_add</a></span><span class="op">(</span><span class="st">"fit"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">data</span> <span class="op">=</span> <span class="va">airquality</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Height</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -439,14 +466,14 @@ spec show the error items instead:</p>
 <span>    <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="https://rpahl.github.io/pipeflow/reference/pip_run.html" class="external-link">pip_run</a></span><span class="op">(</span><span class="va">pip</span>, on_error <span class="op">=</span> <span class="st">"continue"</span>, lgr <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">draft</span> <span class="op">&lt;-</span> <span class="va">pip</span><span class="op">[[</span><span class="st">"report"</span>, <span class="st">"out"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span><span class="va">draft</span>, <span class="st">"md"</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".md"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `pub_render()`:</span></span></span>
-<span><span class="co"># <span style="color: #BBBB00;">!</span> Can't render a document with error items (failed steps):</span></span>
+<span><span class="co"># <span style="color: #BBBB00;">!</span> Can't render a document with error items (failed steps) or missing parts:</span></span>
 <span><span class="co"># <span style="color: #BB0000;">✖</span> step 'fit' failed: object 'Height' not found</span></span>
-<span><span class="co"># <span style="color: #0000BB;">ℹ</span> Reports run the pipeline with `on_error = "stop"`; error items are for the viewer.</span></span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pub_report_spec.html">pub_report_spec</a></span><span class="op">(</span><span class="st">"md"</span>, error_items <span class="op">=</span> <span class="st">"show"</span><span class="op">)</span></span>
+<span><span class="co"># <span style="color: #0000BB;">ℹ</span> Reports run the pipeline with `on_error = "stop"` and have all their parts; error items and missing parts are for the viewer.</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pub_report_spec.html">pub_report_spec</a></span><span class="op">(</span><span class="st">"md"</span>, problems <span class="op">=</span> <span class="st">"show"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">withCallingHandlers</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span><span class="va">draft</span>, <span class="st">"md"</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".md"</span><span class="op">)</span>, spec <span class="op">=</span> <span class="va">spec</span><span class="op">)</span>,</span>
 <span>    pubflow_render_warning <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">w</span><span class="op">)</span> <span class="op">{</span></span>
@@ -455,16 +482,28 @@ spec show the error items instead:</p>
 <span>    <span class="op">}</span></span>
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co"># Warning: The report shows error items (failed steps):</span></span>
+<span><span class="co"># Warning: The report shows error items (failed steps) or missing parts:</span></span>
 <span><span class="co"># <span style="color: #BB0000;">✖</span> step 'fit' failed: object 'Height' not found</span></span></code></pre></div>
 <p>The file has an error box where the model of the failed step would
 be, and the warning names the failed step. Use this for drafts only.</p>
 <p>To check a document before rendering it, e.g. to tell the user of an
-app why a report can’t be downloaded yet, <code><a href="../reference/pub_error_items.html">pub_error_items()</a></code>
-lists its error items:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="../reference/pub_error_items.html">pub_error_items</a></span><span class="op">(</span><span class="va">draft</span><span class="op">)</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">message</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+app why a report can’t be downloaded yet, <code><a href="../reference/pub_problems.html">pub_problems()</a></code>
+lists its error items (and missing parts, see below):</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="../reference/pub_problems.html">pub_problems</a></span><span class="op">(</span><span class="va">draft</span><span class="op">)</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">message</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># [1] "object 'Height' not found"</span></span></code></pre></div>
+<p>A part that doesn’t exist yet, e.g. the results of an analysis the
+user has not run, is not an error. Place
+<code>pub_missing("Run the analysis first.")</code> there: the viewer
+shows the message as a neutral placeholder, and
+<code><a href="../reference/pub_render.html">pub_render()</a></code> refuses the document like one with error
+items. <code><a href="../reference/pub_problems.html">pub_problems()</a></code> finds both, so it lists everything
+that blocks a download (<code>type = "error"</code> or
+<code>"missing"</code> picks one kind):</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">parts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Model <span class="op">=</span> <span class="fu"><a href="../reference/pub_missing.html">pub_missing</a></span><span class="op">(</span><span class="st">"Run the model first."</span><span class="op">)</span>, Data <span class="op">=</span> <span class="va">draft</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="../reference/pub_problems.html">pub_problems</a></span><span class="op">(</span><span class="va">parts</span><span class="op">)</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">message</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># [1] "Run the model first."      "object 'Height' not found"</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="word-files">Word files<a class="anchor" aria-label="anchor" href="#word-files"></a>
@@ -476,7 +515,7 @@ lists its error items:</p>
 of the document, with <a href="https://zachariahmclean.github.io/trace/" class="external-link">trace</a> expanded. They go into the
 header and footer part of the reference document. A look into the file
 shows them:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">docx_text</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">file</span>, <span class="va">part</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/on.exit.html" class="external-link">on.exit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
@@ -487,7 +526,7 @@ shows them:</p>
 <span><span class="fu">docx_text</span><span class="op">(</span><span class="va">file</span>, <span class="st">"header1.xml"</span><span class="op">)</span></span>
 <span><span class="co"># [1] "Ozone study" ""            "Draft"</span></span>
 <span><span class="fu">docx_text</span><span class="op">(</span><span class="va">file</span>, <span class="st">"footer1.xml"</span><span class="op">)</span></span>
-<span><span class="co"># [1] "Jane Doe at 14-Nov-2026 15:53:30 UTC (ozone-app v1.2.0)"</span></span>
+<span><span class="co"># [1] "Jane Doe at 15-Nov-2026 09:58:44 UTC (ozone-app v1.2.0)"</span></span>
 <span><span class="co"># [2] ""                                                       </span></span>
 <span><span class="co"># [3] "Page "                                                  </span></span>
 <span><span class="co"># [4] "1"                                                      </span></span>
@@ -522,7 +561,7 @@ tables and figures with <code>pub_set_meta(locked = TRUE)</code>.</p>
 <code>function(path, doc, spec)</code>. They change the finished file in
 place, are called in order, and a failing one stops the render, so no
 file is written. This one adds a note to a Markdown report:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">add_note</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span>, <span class="va">doc</span>, <span class="va">spec</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span>, <span class="st">""</span>, <span class="st">"&lt;!-- checked --&gt;"</span><span class="op">)</span>, <span class="va">path</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -617,7 +656,7 @@ the spec overrides the page of the reference document.</p>
 </h2>
 <p><code><a href="../reference/pub_render.html">pub_render()</a></code> takes the engine in
 <code>pdf_engine</code>:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span><span class="va">doc</span>, <span class="st">"pdf"</span>, file <span class="op">=</span> <span class="st">"ozone.pdf"</span>, meta <span class="op">=</span> <span class="va">meta</span><span class="op">)</span> <span class="co"># xelatex</span></span>
 <span><span class="fu"><a href="../reference/pub_render.html">pub_render</a></span><span class="op">(</span><span class="va">doc</span>, <span class="st">"pdf"</span>, file <span class="op">=</span> <span class="st">"ozone.pdf"</span>, meta <span class="op">=</span> <span class="va">meta</span>, pdf_engine <span class="op">=</span> <span class="st">"typst"</span><span class="op">)</span></span></code></pre></div>
 <p>To change the look of a PDF, use <code>latex_preamble</code> (a file

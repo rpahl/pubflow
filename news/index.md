@@ -1,5 +1,66 @@
 # Changelog
 
+## pubflow 0.0.0.9058
+
+- New
+  [`pub_missing()`](https://rpahl.github.io/pubflow/reference/pub_missing.md)
+  stands in for a part of a document that doesn’t exist yet, e.g. the
+  results of an analysis not run: the viewer shows its message as a
+  neutral placeholder, and
+  [`pub_render()`](https://rpahl.github.io/pubflow/reference/pub_render.md)
+  refuses it like an error item (or, with
+  `pub_report_spec(problems = "show")`, shows it as an italic
+  paragraph).
+  [`pub_problems()`](https://rpahl.github.io/pubflow/reference/pub_problems.md)
+  finds these parts too, so it lists everything
+  [`pub_render()`](https://rpahl.github.io/pubflow/reference/pub_render.md)
+  refuses; its new argument `type` picks one kind (`"error"` or
+  `"missing"`) ([\#17](https://github.com/rpahl/pubflow/issues/17),
+  D58).
+
+- Renamed `pub_error_items()` to
+  [`pub_problems()`](https://rpahl.github.io/pubflow/reference/pub_problems.md)
+  and the report spec field `error_items` to `problems`, as they cover
+  missing parts as well as error items (D58).
+
+## pubflow 0.0.0.9057
+
+- While the document is made again (e.g. while `doc()` runs the
+  pipeline), the viewer shows the previous document in grey and puts
+  “Updating …” in a bar at its top, so users don’t mistake the results
+  of the previous run for the new ones. For runs outside of `doc()`
+  (e.g. in an `ExtendedTask`) or params not applied yet, the new
+  argument `pending` of
+  [`pub_viewer_server()`](https://rpahl.github.io/pubflow/reference/pub_viewer_ui.md)
+  takes a reactive returning the label to show
+  (e.g. `"Parameters changed"`) or `NULL`
+  ([\#19](https://github.com/rpahl/pubflow/issues/19), D57).
+
+## pubflow 0.0.0.9056
+
+- [`pub_doc()`](https://rpahl.github.io/pubflow/reference/pub_doc.md)
+  has a new argument `front_matter` (e.g. a title page, a signature
+  table and
+  [`pub_toc()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md))
+  that replaces the title block in the viewer, in
+  [`pub_html()`](https://rpahl.github.io/pubflow/reference/pub_html.md)
+  and in every format of
+  [`pub_render()`](https://rpahl.github.io/pubflow/reference/pub_render.md),
+  with unnumbered sections
+  ([\#18](https://github.com/rpahl/pubflow/issues/18), D56). The
+  `front_matter` function of
+  [`pub_report_spec()`](https://rpahl.github.io/pubflow/reference/pub_report_spec.md)
+  replaces it and can build on it (`doc$front_matter`); so a spec of
+  `\(doc, format) list()` is no longer needed to drop the title block
+  when the document holds its own front matter.
+- A `front_matter` function of
+  [`pub_report_spec()`](https://rpahl.github.io/pubflow/reference/pub_report_spec.md)
+  that returns `NULL` now keeps the title block; return
+  [`list()`](https://rdrr.io/r/base/list.html) to drop it.
+- [`pub_html()`](https://rpahl.github.io/pubflow/reference/pub_html.md)
+  adds no table of contents if the document places one
+  ([`pub_toc()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md)).
+
 ## pubflow 0.0.0.9055
 
 - New
@@ -46,10 +107,9 @@
 
 ## pubflow 0.0.0.9051
 
-- New
-  [`pub_error_items()`](https://rpahl.github.io/pubflow/reference/pub_error_items.md)
-  finds the error items (failed steps) in a document or in step outputs,
-  e.g. to list the problems of a report before rendering it (D53).
+- New `pub_error_items()` finds the error items (failed steps) in a
+  document or in step outputs, e.g. to list the problems of a report
+  before rendering it (D53).
 
 ## pubflow 0.0.0.9050
 

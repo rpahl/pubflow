@@ -9,7 +9,7 @@ front matter, table of contents, page, figures, caption labels and more."><meta 
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9055</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9058</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,7 +71,7 @@ front matter, table of contents, page, figures, caption labels and more.</p>
 <span>  figure <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  placeholder_color <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  lock <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  error_items <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"refuse"</span>, <span class="st">"show"</span><span class="op">)</span>,</span>
+<span>  problems <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"refuse"</span>, <span class="st">"show"</span><span class="op">)</span>,</span>
 <span>  post_process <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  pandoc_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -107,9 +107,10 @@ made with xelatex, or <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-front-matter">front_matter<a class="anchor" aria-label="anchor" href="#arg-front-matter"></a></dt>
-<dd><p><code>function(doc, format)</code> returning the front matter, or <code>NULL</code>
-(the title block: title, subtitle, author and time; shown only with a title,
-subtitle or author).</p></dd>
+<dd><p><code>function(doc, format)</code> returning the front matter (<code>NULL</code>: the
+title block, <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>: none), or <code>NULL</code> (the document's front matter, else the
+title block: title, subtitle, author and time; shown only with a title, subtitle
+or author).</p></dd>
 
 
 <dt id="arg-toc">toc<a class="anchor" aria-label="anchor" href="#arg-toc"></a></dt>
@@ -144,8 +145,9 @@ subtitle or author).</p></dd>
 <dd><p><code>TRUE</code>, <code>FALSE</code> or <code>NULL</code> (see Details).</p></dd>
 
 
-<dt id="arg-error-items">error_items<a class="anchor" aria-label="anchor" href="#arg-error-items"></a></dt>
-<dd><p><code>"refuse"</code> or <code>"show"</code>.</p></dd>
+<dt id="arg-problems">problems<a class="anchor" aria-label="anchor" href="#arg-problems"></a></dt>
+<dd><p>What to do with error items and missing parts: <code>"refuse"</code> or
+<code>"show"</code>.</p></dd>
 
 
 <dt id="arg-post-process">post_process<a class="anchor" aria-label="anchor" href="#arg-post-process"></a></dt>
@@ -183,7 +185,7 @@ ones are 2.5, at the bottom 2), or <code>NULL</code>.</p></dd>
 <code><a href="pub_markdown.html">pub_markdown()</a></code>.</p></li>
 <li><p><code>pub_page()</code> describes the page (size, orientation, margins) of DOCX and PDF
 reports.</p></li>
-</ul><p>All arguments except <code>format</code> and <code>error_items</code> are optional: <code>NULL</code> means the
+</ul><p>All arguments except <code>format</code> and <code>problems</code> are optional: <code>NULL</code> means the
 default (for <code>figure</code> and <code>labels</code>, an empty list does too).</p>
 </div>
 
@@ -209,7 +211,9 @@ edit afterwards (<code>spec$toc &lt;- FALSE</code>) is checked only when the spe
 
 <ul><li><p><code>front_matter</code>: a <code>function(doc, format)</code> that returns the front matter, e.g. a
 title page with a signature table. It replaces the title block (in HTML the header)
-in every format; the title and author stay in the file's properties.</p><ul><li><p>It returns what a document can hold: sections, outputs or lists of them (see
+in every format; the title and author stay in the file's properties.</p><ul><li><p>Without it, the document's front matter is used (see "Front matter" in
+<code><a href="pub_doc.html">pub_doc()</a></code>), which the viewer shows too.</p></li>
+<li><p>It returns what a document can hold: sections, outputs or lists of them (see
 <code><a href="pub_doc.html">pub_doc()</a></code>).</p></li>
 <li><p><code>doc</code> is the document with the render-time metadata (see <code><a href="pub_render.html">pub_render()</a></code>) and
 <code>format</code> the output format.</p></li>
@@ -246,10 +250,11 @@ that isn't <code>pub_set_meta(locked = FALSE)</code> against accidental editing 
 with <code>pub_set_meta(locked = TRUE)</code>, and the header and footer if <code>post_process</code>
 lists <code><a href="pub_pp_docx.html">pub_pp_docx_lock()</a></code>. <code>FALSE</code> locks nothing, and <code>post_process</code> can't list
 <code><a href="pub_pp_docx.html">pub_pp_docx_lock()</a></code>.</p></li>
-<li><p><code>error_items</code>: what <code><a href="pub_render.html">pub_render()</a></code> does with error items (failed steps placed by a
-layout step run with <code>on_error = "continue"</code>, see <code><a href="pub_doc.html">pub_doc()</a></code>):</p><ul><li><p><code>"refuse"</code> (default) signals a <code>pubflow_render_error</code>;</p></li>
-<li><p><code>"show"</code> writes their error boxes and warns (<code>pubflow_render_warning</code>), naming
-the failed steps.</p></li>
+<li><p><code>problems</code>: what <code><a href="pub_render.html">pub_render()</a></code> does with error items (failed steps placed by a
+layout step run with <code>on_error = "continue"</code>, see <code><a href="pub_doc.html">pub_doc()</a></code>) and missing parts
+(<code><a href="pub_missing.html">pub_missing()</a></code>):</p><ul><li><p><code>"refuse"</code> (default) signals a <code>pubflow_render_error</code>;</p></li>
+<li><p><code>"show"</code> writes their error boxes and placeholders and warns
+(<code>pubflow_render_warning</code>), naming the failed steps and missing parts.</p></li>
 </ul></li>
 <li><p><code>post_process</code>: a list of functions <code>function(path, doc, spec)</code> that change the
 rendered file before it is copied to its destination.</p><ul><li><p>They are called in order. <code>path</code> is the file, <code>doc</code> the document with the
@@ -319,20 +324,20 @@ empty part also sets <code>$footer-right-empty$</code> etc.).</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   figure            default</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   labels            Tab., Fig.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   placeholder_color default</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   error_items       refuse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   problems          refuse</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   post_process      none</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   pandoc_args       none</span>
-<span class="r-in"><span><span class="fu">pub_report_spec</span><span class="op">(</span><span class="st">"docx"</span>, toc <span class="op">=</span> <span class="cn">FALSE</span>, error_items <span class="op">=</span> <span class="st">"show"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">pub_report_spec</span><span class="op">(</span><span class="st">"docx"</span>, toc <span class="op">=</span> <span class="cn">FALSE</span>, problems <span class="op">=</span> <span class="st">"show"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;pubflow report spec: docx&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   reference_docx    default</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   front_matter      title block</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   front_matter      document's or title block</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   toc               no</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   number_sections   yes</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   page              reference document</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   figure            default</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   labels            Table, Figure</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   lock              marked items</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   error_items       show</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   problems          show</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   post_process      none</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   pandoc_args       none</span>
 <span class="r-in"><span></span></span>
@@ -342,14 +347,14 @@ empty part also sets <code>$footer-right-empty$</code> etc.).</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;pubflow report spec: pdf&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   latex_preamble    none</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   typst_template    default</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   front_matter      title block</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   front_matter      document's or title block</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   toc               depth 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   number_sections   yes</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   page              A4 landscape, margins top 2.5, bottom 2, left 2.5, right 2.5 cm</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   figure            device = pdf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   labels            Table, Figure</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   placeholder_color default</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   error_items       refuse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   problems          refuse</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   post_process      none</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   pandoc_args       none</span>
 <span class="r-in"><span></span></span>
@@ -391,7 +396,7 @@ empty part also sets <code>$footer-right-empty$</code> etc.).</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   figure            default</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   labels            Tab., Fig.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   lock              marked items</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   error_items       refuse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   problems          refuse</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   post_process      none</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   pandoc_args       none</span>
 <span class="r-in"><span><span class="fu">my_report_spec</span><span class="op">(</span><span class="st">"md"</span><span class="op">)</span></span></span>
@@ -401,7 +406,7 @@ empty part also sets <code>$footer-right-empty$</code> etc.).</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   number_sections   yes</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   figure            default</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   labels            Tab., Fig.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   error_items       refuse</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   problems          refuse</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   post_process      none</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># An argument that the format can't use is refused</span></span></span>

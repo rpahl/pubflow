@@ -72,12 +72,15 @@ Arrange step outputs into documents in layout steps.
 - [`pub_doc()`](https://rpahl.github.io/pubflow/reference/pub_doc.md)
   [`pub_section()`](https://rpahl.github.io/pubflow/reference/pub_doc.md)
   : Documents and sections
-- [`pub_error_items()`](https://rpahl.github.io/pubflow/reference/pub_error_items.md)
-  : Error items of a document or of step outputs
+- [`pub_problems()`](https://rpahl.github.io/pubflow/reference/pub_problems.md)
+  : Problems (error items and missing parts) of a document or of step
+  outputs
 - [`pub_layout_inputs()`](https://rpahl.github.io/pubflow/reference/pub_layout_inputs.md)
   : Inputs of a layout step: the steps of a view
 - [`pub_layout_sections()`](https://rpahl.github.io/pubflow/reference/pub_layout_sections.md)
   : Layout step with one section per view
+- [`pub_missing()`](https://rpahl.github.io/pubflow/reference/pub_missing.md)
+  : Placeholder for a missing part
 - [`pub_out()`](https://rpahl.github.io/pubflow/reference/pub_out.md) :
   Get up-to-date step outputs from outside pipelines
 - [`pub_pagebreak()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md)

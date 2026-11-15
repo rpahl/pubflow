@@ -10,7 +10,7 @@ stays visible next to it and highlights the section being read.
 ``` r
 pub_viewer_ui(id, toc = TRUE, height = NULL)
 
-pub_viewer_server(id, doc, cache = pub_cache())
+pub_viewer_server(id, doc, cache = pub_cache(), pending = NULL)
 ```
 
 ## Arguments
@@ -40,6 +40,11 @@ pub_viewer_server(id, doc, cache = pub_cache())
   A
   [`pub_cache()`](https://rpahl.github.io/pubflow/reference/pub_cache.md).
 
+- pending:
+
+  `NULL` or a reactive returning the label of a pending document, or
+  `NULL` (see "Pending results").
+
 ## Value
 
 `pub_viewer_ui()`: a tag list. `pub_viewer_server()`: `NULL`, invisibly.
@@ -64,6 +69,23 @@ The document is rendered again as a whole when `doc` changes. Figures
 and tables come from the render `cache`
 ([`pub_cache()`](https://rpahl.github.io/pubflow/reference/pub_cache.md)),
 which can be shared with report rendering.
+
+### Pending results
+
+While the document is being made again (`doc` or the viewer's outputs
+recalculate, e.g. while `doc` runs the pipeline), the viewer shows the
+previous document in grey and "Updating ..." in a bar at its top (after
+half a second, so fast updates don't flash it). The bar is a live
+region, so screen readers announce it. While the marker is shown, the
+viewer has the class `pubflow-pending` (e.g. for end-to-end tests to
+wait on).
+
+Shiny can't see runs outside of `doc`, e.g. in a
+[shiny::ExtendedTask](https://rdrr.io/pkg/shiny/man/ExtendedTask.html),
+or params that changed but are applied only by a button. For these, pass
+a `pending` reactive returning the label to show (e.g.
+`"Parameters changed: click 'Update' to update the results."`), or
+`NULL` for no marker.
 
 ## See also
 

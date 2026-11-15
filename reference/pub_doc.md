@@ -9,7 +9,7 @@ them into sections (see Examples).
 ## Usage
 
 ``` r
-pub_doc(..., title = NULL, subtitle = NULL, meta = list())
+pub_doc(..., title = NULL, subtitle = NULL, meta = list(), front_matter = NULL)
 
 pub_section(
   title,
@@ -38,6 +38,11 @@ pub_section(
 - meta:
 
   Named list of document metadata (see "Metadata" in Details).
+
+- front_matter:
+
+  Outputs placed before the body instead of the title block (see "Front
+  matter" in Details), or `NULL` (default): the title block.
 
 - numbered:
 
@@ -83,6 +88,7 @@ The children (`...`) are interpreted as follows:
 | [`pub_pagebreak()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md) | a page break (DOCX, PDF) |
 | [`pub_toc()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md) | a table of contents |
 | failed step, error item of [`pub_out()`](https://rpahl.github.io/pubflow/reference/pub_out.md) | an error box |
+| [`pub_missing()`](https://rpahl.github.io/pubflow/reference/pub_missing.md) | a placeholder for a missing part |
 | `NULL`, empty text | nothing |
 | pipeline | an error (place the outputs of its steps instead) |
 
@@ -111,6 +117,32 @@ Metadata of a document:
 A blank string (`""` or only whitespace) as title, subtitle, author, app
 or version counts as not given. You can add keys of your own: pubflow
 keeps them but doesn't check or use them.
+
+### Front matter
+
+`front_matter` holds what comes before the body, e.g. a title page, a
+signature table and a table of contents
+([`pub_toc()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md)).
+It takes the same outputs as the children (also lists of them) and
+replaces the title block (in HTML the header), in the viewer, in
+[`pub_html()`](https://rpahl.github.io/pubflow/reference/pub_html.md)
+and in every format of
+[`pub_render()`](https://rpahl.github.io/pubflow/reference/pub_render.md):
+
+- Its sections are unnumbered (the numbers of the body start at 1),
+  while its tables and figures count in the caption numbers.
+
+- The table of contents of a report spec comes after it; end it with
+  [`pub_pagebreak()`](https://rpahl.github.io/pubflow/reference/pub_pagebreak.md)
+  to start the contents on a new page.
+
+- [`list()`](https://rdrr.io/r/base/list.html) drops the title block
+  without putting anything in its place.
+
+- The `front_matter` function of a
+  [`pub_report_spec()`](https://rpahl.github.io/pubflow/reference/pub_report_spec.md)
+  replaces it (and can build on it: `doc$front_matter`), e.g. for a
+  title block of one format only.
 
 ### Failed steps
 
