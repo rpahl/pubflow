@@ -1,4 +1,4 @@
-# pubflow (development version)
+# pubflow 0.0.0.9059
 
 * `pub_table(footnotes = )` also takes footnotes on body cells: a data.frame with
   the columns `row` (body row, `NA` for the label), `col` and `text`. pubflow numbers
