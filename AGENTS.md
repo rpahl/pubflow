@@ -18,11 +18,9 @@ The development documents live in `dev/` (excluded from the build).
 - `dev/DESIGN.md` — the agreed design (source of truth): principles and the decision
   log (D1, D2, ...) with the reasons. Add a decision there when a change settles a
   design question.
-- `dev/PLAN.md` — the open work of v0.1 with acceptance criteria. Work on one PR per
-  session/branch. Its last section lists open problems of building documents in layout
-  steps (D19); check them before starting work. "Later" → "Parked" holds deferred
-  ideas: mention the ones that touch the current work. Remove done items and settled
-  problems (DESIGN keeps the decisions, NEWS the history).
+- `dev/PLAN.md` — the open work of v0.1: the release checklist and the deferred ideas
+  ("Later" → "Parked"; mention the ones that touch the current work). Work on one PR per
+  session/branch. Remove done items (DESIGN keeps the decisions, NEWS the history).
 - `dev/reference/` — research you should not need to redo: `pipeflow.md` and
   `benchmarks.md` (measurements behind the engine, cache and table decisions). Read
   `pipeflow.md` (pipeflow 0.6.0 facts and quirks that shape pubflow; the API itself is
