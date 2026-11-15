@@ -7,12 +7,9 @@ contradicts what pipeflow, huxtable or pandoc do, stop and ask, and record the o
 in the decision log in the same PR.
 
 **Definition of done** (every PR): the checks of "Before opening a PR" in `AGENTS.md`,
-a NEWS entry and the development version bumped by one (M9 releases 0.1.0), see
+a NEWS entry and the development version bumped by one, see
 `.github/workflows/version-bump.yaml`; label PRs that change only documentation or CI
 `no-version-bump`.
-
-**Status:** M1-M8 are done; M9 (reports, traceability, post-processors, docs) is in its
-last step, the release.
 
 ## Release v0.1.0 (first CRAN version)
 
