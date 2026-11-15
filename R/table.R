@@ -91,11 +91,20 @@
 #' @param header Named character vector: column name -> spanner label shown above the
 #'   labels. Consecutive equal labels are merged; columns without a spanner get an empty
 #'   cell. Data.frames and matrices only.
-#' @param footnotes Named character vector: column name -> footnote. The label gets a
-#'   numbered marker (superscript digit), the footnotes are listed below the body (equal
-#'   texts share one number). Give all footnotes in one call, for the final table:
-#'   a table that has footnotes keeps them when it is finished again, but after
-#'   binding or subsetting they become body rows.
+#' @param footnotes Footnotes on labels or body cells, either
+#'
+#'   * a named character vector: column name -> footnote on the label, or
+#'   * a data.frame with columns `row` (body row `i`, see [pub_table_rows()], or `NA`
+#'     for the label), `col` (column name) and `text`.
+#'
+#'   Each annotated cell gets a numbered marker (superscript digits in superscript
+#'   parentheses, e.g. "(1)"), and the footnotes are listed below the body. They are
+#'   numbered in reading order (labels, then body cells row by row); equal texts share
+#'   one number, and a note on a merged cell marks the cell shown. A marked body cell
+#'   becomes text with the marker (its number formatted by `digits`, or the `na`
+#'   text), so later `digits` don't change it. Give all footnotes in one call, for the
+#'   final table: a table that has footnotes keeps them when it is finished again, but
+#'   after binding or subsetting the footnote lines become body rows.
 #' @param merge Character vector of column names whose consecutive equal body cells are
 #'   merged vertically.
 #' @param na `character(1)` text shown for missing values.
@@ -119,6 +128,14 @@
 #'     na = "-"
 #' )
 #' pub_cell_text(ht)
+#'
+#' # Footnotes on body cells: body row, column and text
+#' notes <- data.frame(
+#'     row = c(NA, 3),
+#'     col = c("Ozone", "Ozone"),
+#'     text = c("Mean from 1 to 3 pm.", "Sensor failure.")
+#' )
+#' pub_cell_text(pub_table(df, footnotes = notes, na = "-"))
 #'
 #' # Style with huxtable: body row i is table row pub_table_rows(ht)$body[i]
 #' body <- pub_table_rows(ht)$body
@@ -177,14 +194,18 @@ pub_table <- function(
         .column_spec(widths, cols, "widths", default = NA_character_)
     )
     merge <- .check_merge(merge, cols)
-    notes <- .check_notes(footnotes, cols)
+    body <- .table_rows(ht, nOldNotes)$body
+    # merge first: notes on merged cells mark the shown cell, numbered by its place
+    ht <- .merge_body(ht, body, merge)
+    notes <- .check_notes(footnotes, cols, length(body))
+    notes <- .place_notes(ht, notes, body)
+    marks <- if (nOldNotes > 0L) old$marks else .label_marks(ht, notes)
     ht <- .add_footnotes(ht, notes, nOldNotes)
-    marks <- old$marks %||% .footnote_marks(notes)
-    rows <- .table_rows(ht, nOldNotes + length(.unique_notes(notes)))
+    rows <- .table_rows(ht, nOldNotes + max(notes$number, 0L))
     ht <- .apply_theme(ht, rows, theme, font_size)
     ht <- .apply_align(ht, rows, align)
     ht <- .apply_na(ht, rows, na)
-    ht <- .merge_body(ht, rows, merge)
+    ht <- .mark_cells(ht, notes)
     ht <- .apply_borders(ht, rows, theme)
     ht <- .apply_widths(ht, widths)
     if (!is.null(caption)) {
@@ -422,37 +443,123 @@ pub_table <- function(
 # Footnotes
 # ---------
 #' Validate footnotes
-#' @param footnotes the footnotes of pub_table() (`NULL` or named by column).
+#'
+#' A named character vector is short for notes on the labels (`row` `NA`).
+#' @param footnotes the footnotes of pub_table(): `NULL`, a character vector named by
+#'   column or a data.frame with columns `row`, `col` and `text`.
 #' @param cols the column names.
+#' @param nBody number of body rows.
 #' @param call the environment of the caller, for the error message.
-#' @return character vector, one note per column (`NA`: none).
+#' @return data.frame: `row` (body row, `NA`: the label), `col` (column position) and
+#'   `text`.
 #' @noRd
-.check_notes <- function(footnotes, cols, call = rlang::caller_env()) {
-    if (!is.null(footnotes)) {
-        .check_text_spec(footnotes, "footnotes", call)
-        if (!all(grepl("[^[:space:]]", footnotes))) {
-            rlang::abort("`footnotes` must not be blank.", call = call)
-        }
+.check_notes <- function(footnotes, cols, nBody, call = rlang::caller_env()) {
+    if (is.null(footnotes)) {
+        return(data.frame(row = integer(0), col = integer(0), text = character(0)))
     }
-    unname(.column_spec(
-        footnotes,
-        cols,
-        "footnotes",
-        default = NA_character_,
-        call = call
-    ))
+    notes <- if (is.data.frame(footnotes)) {
+        .check_note_frame(footnotes, cols, nBody, call)
+    } else {
+        .check_text_spec(footnotes, "footnotes", call)
+        spec <- .column_spec(footnotes, cols, "footnotes", NA_character_, call)
+        has <- which(!is.na(spec))
+        data.frame(
+            row = rep(NA_integer_, length(has)),
+            col = has,
+            text = unname(spec[has])
+        )
+    }
+    if (!all(grepl("[^[:space:]]", notes$text))) {
+        rlang::abort("`footnotes` must not be blank.", call = call)
+    }
+    notes
 }
 
-#' Footnote markers in the label row and footnote rows below the table
+#' Validate footnotes given as a data.frame of cell positions
+#' @param x data.frame with columns `row`, `col` and `text`.
+#' @param cols the column names.
+#' @param nBody number of body rows.
+#' @param call the environment of the caller, for the error message.
+#' @return data.frame: `row` (integer, `NA`: the label), `col` (column position) and
+#'   `text`.
+#' @noRd
+.check_note_frame <- function(x, cols, nBody, call) {
+    if (!setequal(names(x), c("row", "col", "text"))) {
+        rlang::abort(
+            "A data.frame of `footnotes` needs the columns `row`, `col` and `text`.",
+            call = call
+        )
+    }
+    x[] <- lapply(x, \(v) if (is.factor(v)) as.character(v) else v)
+    .check_text_spec(x$text, "footnotes$text", call)
+    .check_columns(x$col, cols, "footnotes$col", call)
+    row <- x$row
+    if (all(is.na(row))) {
+        row <- rep(NA_integer_, length(row))
+    }
+    given <- row[!is.na(row)]
+    if (!is.numeric(row) || !all(given == round(given) & given %in% seq_len(nBody))) {
+        rlang::abort(
+            sprintf(
+                "`footnotes$row` must be body rows (1 to %d) or `NA` for the label.",
+                nBody
+            ),
+            call = call
+        )
+    }
+    data.frame(row = as.integer(row), col = match(x$col, cols), text = x$text)
+}
+
+#' Place and number footnotes
+#'
+#' Label notes go to the label row, body notes to their table row; a note on a cell
+#' hidden by a merge goes to the cell that shows the merge. Notes are numbered in
+#' reading order (labels, then body cells row by row); equal texts share one number.
+#' @param ht a huxtable (merged).
+#' @param notes footnotes from .check_notes().
+#' @param body the table rows of the body.
+#' @param call the environment of the caller, for the error message.
+#' @return data.frame of the distinct notes in reading order: `row` and `col` (table
+#'   position), `text` and `number`.
+#' @noRd
+.place_notes <- function(ht, notes, body, call = rlang::caller_env()) {
+    if (nrow(notes) == 0L) {
+        notes$number <- integer(0)
+        return(notes)
+    }
+    onLabel <- is.na(notes$row)
+    labelRow <- .label_row(ht)
+    if (any(onLabel) && length(labelRow) == 0L) {
+        rlang::abort(
+            "`footnotes` on labels need a table with a header row.",
+            call = call
+        )
+    }
+    row <- notes$row
+    row[onLabel] <- labelRow
+    row[!onLabel] <- body[row[!onLabel]]
+    isMerged <- huxtable::rowspan(ht) > 1L | huxtable::colspan(ht) > 1L
+    if (any(isMerged)) {
+        shown <- .wml_spans(ht)$origin[cbind(row, notes$col)] - 1L
+        row <- shown %% nrow(ht) + 1L
+        notes$col <- shown %/% nrow(ht) + 1L
+    }
+    notes$row <- row
+    notes <- unique(notes[order(notes$row, notes$col), ])
+    notes$number <- match(notes$text, unique(notes$text))
+    rownames(notes) <- NULL
+    notes
+}
+
+#' Footnote rows below the table, one per distinct footnote
 #' @param ht a huxtable.
-#' @param notes footnotes from .check_notes(), one per column.
+#' @param notes footnotes from .place_notes().
 #' @param nOld number of footnotes the table already has.
 #' @param call the environment of the caller, for the error message.
-#' @return `ht` with the markers and footnote rows.
+#' @return `ht` with the footnote rows.
 #' @noRd
 .add_footnotes <- function(ht, notes, nOld, call = rlang::caller_env()) {
-    texts <- .footnote_text(notes)
-    if (length(texts) == 0L) {
+    if (nrow(notes) == 0L) {
         return(ht)
     }
     if (nOld > 0L) {
@@ -461,46 +568,73 @@ pub_table <- function(
             call = call
         )
     }
-    labelRow <- .label_row(ht)
-    if (length(labelRow) == 0L) {
-        rlang::abort("`footnotes` need a table with a header row.", call = call)
-    }
-    marks <- .footnote_marks(notes)
-    for (j in which(nzchar(marks))) {
-        label <- .text_of(ht[[j]][[labelRow]])
-        ht[labelRow, j] <- paste0(label, marks[[j]])
-    }
-    for (text in texts) {
-        ht <- huxtable::add_footnote(ht, text, border = NULL)
+    texts <- notes$text[!duplicated(notes$number)]
+    for (k in seq_along(texts)) {
+        ht <- huxtable::add_footnote(
+            ht,
+            paste(.footnote_mark(k), texts[[k]]),
+            border = NULL
+        )
     }
     ht
 }
 
-#' Footnote lines ("<marker> <text>"), one per distinct footnote
-#' @param notes footnotes from .check_notes(), one per column.
+#' Footnote markers of the labels, one per column (`""` without footnote)
+#' @param ht a huxtable.
+#' @param notes footnotes from .place_notes().
 #' @return character vector.
 #' @noRd
-.footnote_text <- function(notes) {
-    texts <- .unique_notes(notes)
-    if (length(texts) == 0L) {
-        return(character(0))
-    }
-    paste(.superscript(seq_along(texts)), texts)
+.label_marks <- function(ht, notes) {
+    marks <- rep("", ncol(ht))
+    cells <- .cell_marks(notes[notes$row %in% .label_row(ht), ])
+    marks[cells$col] <- cells$mark
+    marks
 }
 
-#' Distinct footnotes in column order
-#' @param notes footnotes from .check_notes(), one per column.
-#' @return character vector without `NA`.
+#' Footnote markers in the labels and body cells
+#'
+#' A marked cell holds its display text (see pub_cell_text(): rounded, or the `na`
+#' text) followed by the markers, which is no number: the formatter shows it as it is,
+#' and the cell keeps its number format (alignment of numeric columns). So the marker
+#' stays with the cell when the table is bound, subset or finished again.
+#' @param ht a huxtable (with its `na` texts).
+#' @param notes footnotes from .place_notes().
+#' @return `ht` with the markers.
 #' @noRd
-.unique_notes <- function(notes) {
-    unique(notes[!is.na(notes)])
+.mark_cells <- function(ht, notes) {
+    if (nrow(notes) == 0L) {
+        return(ht)
+    }
+    cells <- .cell_marks(notes)
+    cols <- unique(cells$col)
+    text <- .format_cells(ht, cols)
+    for (k in seq_along(cols)) {
+        at <- cells[cells$col == cols[[k]], ]
+        ht[at$row, cols[[k]]] <- paste0(text[at$row, k], at$mark)
+    }
+    ht
 }
 
-#' Superscript digits (Unicode) for footnote markers
-#' @param n whole numbers >= 0.
+#' Footnote markers of each annotated cell (in increasing order)
+#' @param notes footnotes from .place_notes().
+#' @return data.frame: `row`, `col` and `mark`, one row per cell.
+#' @noRd
+.cell_marks <- function(notes) {
+    cell <- paste(notes$row, notes$col)
+    first <- !duplicated(cell)
+    marks <- vapply(
+        split(notes$number, factor(cell, unique(cell))),
+        \(n) paste(.footnote_mark(sort(unique(n))), collapse = ""),
+        character(1)
+    )
+    data.frame(row = notes$row[first], col = notes$col[first], mark = unname(marks))
+}
+
+#' Footnote markers: superscript numbers in superscript parentheses
+#' @param n whole numbers >= 1.
 #' @return character vector, one marker per number.
 #' @noRd
-.superscript <- function(n) {
+.footnote_mark <- function(n) {
     digits <- c(
         "\u2070",
         "\u00b9",
@@ -513,22 +647,26 @@ pub_table <- function(
         "\u2078",
         "\u2079"
     )
-    vapply(
+    number <- vapply(
         strsplit(as.character(n), ""),
         \(d) paste(digits[as.integer(d) + 1L], collapse = ""),
         character(1)
     )
+    paste0("\u207d", number, "\u207e")
 }
 
-#' Footnote marker of each column (`""` without footnote)
-#' @param notes footnotes from .check_notes(), one per column.
-#' @return character vector, one per column.
+#' Split footnote markers off the end of cell texts
+#' @param text character vector.
+#' @return list of `text` (without markers) and `marks` (`""` without markers).
 #' @noRd
-.footnote_marks <- function(notes) {
-    marks <- rep("", length(notes))
-    has <- !is.na(notes)
-    marks[has] <- .superscript(match(notes[has], .unique_notes(notes)))
-    marks
+.split_marks <- function(text) {
+    pattern <- "(\u207d[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+\u207e)+$"
+    at <- regexpr(pattern, text)
+    marks <- rep("", length(text))
+    has <- !is.na(at) & at > 0L
+    marks[has] <- substring(text[has], at[has])
+    text[has] <- substring(text[has], 1L, at[has] - 1L)
+    list(text = text, marks = marks)
 }
 
 
@@ -713,14 +851,15 @@ pub_table_rows <- function(ht) {
 
 #' Merge runs of equal body cells in the given columns
 #' @param ht a huxtable.
-#' @param rows the rows from .table_rows().
+#' @param body the table rows of the body.
 #' @param merge names of the columns to merge.
 #' @noRd
-.merge_body <- function(ht, rows, merge) {
+.merge_body <- function(ht, body, merge) {
     for (col in merge) {
         j <- match(col, names(ht))
-        for (run in .runs(ht[[j]][rows$body])) {
-            ht <- huxtable::merge_cells(ht, rows$body[run], j)
+        # a footnote marker on the shown cell of a merge doesn't split its run
+        for (run in .runs(.split_marks(ht[[j]][body])$text)) {
+            ht <- huxtable::merge_cells(ht, body[run], j)
         }
     }
     ht
@@ -883,17 +1022,31 @@ pub_table_rows <- function(ht) {
     if (is.null(merge)) {
         return(character(0))
     }
-    if (!is.character(merge) || anyNA(merge)) {
-        rlang::abort("`merge` must be a character vector of column names.", call = call)
-    }
-    unknown <- setdiff(merge, cols)
-    if (length(unknown) > 0L) {
+    .check_columns(merge, cols, "merge", call)
+}
+
+#' Validate column names
+#' @param x the names to check.
+#' @param cols the column names.
+#' @param arg the name of the argument, for the error message.
+#' @param call the environment of the caller, for the error message.
+#' @return `x`.
+#' @noRd
+.check_columns <- function(x, cols, arg, call) {
+    if (!is.character(x) || anyNA(x)) {
         rlang::abort(
-            sprintf("`merge` names unknown columns: %s.", toString(unknown)),
+            sprintf("`%s` must be a character vector of column names.", arg),
             call = call
         )
     }
-    merge
+    unknown <- setdiff(x, cols)
+    if (length(unknown) > 0L) {
+        rlang::abort(
+            sprintf("`%s` names unknown columns: %s.", arg, toString(unknown)),
+            call = call
+        )
+    }
+    x
 }
 
 #' Complete a per-column specification
@@ -1001,14 +1154,17 @@ pub_strikeout <- function(ht, row, col) {
     dimnames(text) <- dimnames(ht)
     text <- trimws(text[rows, cols, drop = FALSE])
     isMarkdown <- huxtable::markdown(ht)[rows, cols, drop = FALSE]
-    for (i in which(nzchar(text))) {
+    # footnote markers stay outside the strikeout
+    parts <- .split_marks(text)
+    for (i in which(nzchar(parts$text))) {
         text[[i]] <- if (isMarkdown[[i]]) {
-            .strike_markdown(text[[i]])
+            .strike_markdown(parts$text[[i]])
         } else {
             # a line starting with `~~` starts no block: inline escapes suffice
-            lines <- trimws(strsplit(text[[i]], "\r\n|\r|\n")[[1L]])
+            lines <- trimws(strsplit(parts$text[[i]], "\r\n|\r|\n")[[1L]])
             paste0("~~", .escape_inline(lines[nzchar(lines)]), "~~", collapse = "  \n")
         }
+        text[[i]] <- paste0(text[[i]], parts$marks[[i]])
     }
     text
 }

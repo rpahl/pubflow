@@ -84,17 +84,19 @@ pub_cell_text <- function(ht) {
 #' The numbers of all columns are formatted together, in one call per number format
 #' (half the time of one call per column, as rounding has a fixed cost per call).
 #' @param ht a huxtable.
-#' @return character matrix `nrow(ht)` x `ncol(ht)`.
+#' @param cols the positions of the columns to format (default: all).
+#' @return character matrix `nrow(ht)` x `length(cols)`.
 #' @noRd
-.format_cells <- function(ht) {
-    numberFormat <- huxtable::number_format(ht)
-    isMarkdown <- huxtable::markdown(ht)
-    text <- matrix(NA_character_, nrow(ht), ncol(ht))
-    value <- matrix(NA_real_, nrow(ht), ncol(ht))
-    for (j in seq_len(ncol(ht))) {
-        cells <- .column_cells(ht[[j]], numberFormat[, j], isMarkdown[, j], col = j)
-        text[, j] <- cells$text
-        value[, j] <- cells$value
+.format_cells <- function(ht, cols = seq_len(ncol(ht))) {
+    numberFormat <- huxtable::number_format(ht)[, cols, drop = FALSE]
+    isMarkdown <- huxtable::markdown(ht)[, cols, drop = FALSE]
+    text <- matrix(NA_character_, nrow(ht), length(cols))
+    value <- matrix(NA_real_, nrow(ht), length(cols))
+    for (k in seq_along(cols)) {
+        j <- cols[[k]]
+        cells <- .column_cells(ht[[j]], numberFormat[, k], isMarkdown[, k], col = j)
+        text[, k] <- cells$text
+        value[, k] <- cells$value
     }
     isValue <- which(!is.na(value))
     if (length(isValue) > 0L) {
@@ -103,11 +105,11 @@ pub_cell_text <- function(ht) {
             value[isValue],
             numberFormat[isValue],
             rows = row(text)[isValue],
-            cols = col(text)[isValue]
+            cols = cols[col(text)[isValue]]
         )
     }
     missing <- is.na(text)
-    text[missing] <- huxtable::na_string(ht)[missing]
+    text[missing] <- huxtable::na_string(ht)[, cols, drop = FALSE][missing]
     text
 }
 

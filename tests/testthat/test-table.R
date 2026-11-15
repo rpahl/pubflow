@@ -136,9 +136,16 @@ describe("pub_table()", {
 
         expect_identical(
             cell_text(ht)[c(1, 4, 5), 1],
-            c("Site\u00b9", "\u00b9 Origin.", "\u00b2 Count.")
+            c(
+                "Site\u207d\u00b9\u207e",
+                "\u207d\u00b9\u207e Origin.",
+                "\u207d\u00b2\u207e Count."
+            )
         )
-        expect_identical(cell_text(ht)[1, 3:4], c("n\u00b2", "grade\u00b9"))
+        expect_identical(
+            cell_text(ht)[1, 3:4],
+            c("n\u207d\u00b2\u207e", "grade\u207d\u00b9\u207e")
+        )
         expect_identical(unname(huxtable::colspan(ht)[4:5, 1]), c(4, 4))
         expect_true(all(huxtable::align(ht)[4:5, ] == "left"))
         expect_false(any(huxtable::header_rows(ht)[4:5]))
@@ -155,8 +162,127 @@ describe("pub_table()", {
 
         ht <- pub_table(data, footnotes = notes)
 
-        expect_identical(cell_text(ht)[1, 10], "x10\u00b9\u2070")
-        expect_identical(cell_text(ht)[12, 1], "\u00b9\u2070 Note 10")
+        expect_identical(cell_text(ht)[1, 10], "x10\u207d\u00b9\u2070\u207e")
+        expect_identical(cell_text(ht)[12, 1], "\u207d\u00b9\u2070\u207e Note 10")
+    })
+
+    it("marks body cells and numbers all footnotes in reading order", {
+        notes <- data.frame(
+            row = c(2, NA, 1, 1, 2),
+            col = c("n", "site", "slope", "slope", "n"),
+            text = c("Origin.", "Count.", "Origin.", "Rounded.", "Origin.")
+        )
+
+        ht <- pub_table(df, digits = c(slope = 2), footnotes = notes, na = "-")
+
+        m <- c("\u207d\u00b9\u207e", "\u207d\u00b2\u207e", "\u207d\u00b3\u207e")
+        expect_identical(cell_text(ht)[1, 1], paste0("site", m[[1]]))
+        expect_identical(cell_text(ht)[2, 2], paste0("0.12", m[[2]], m[[3]]))
+        expect_identical(cell_text(ht)[3, 3], paste0("2", m[[2]]))
+        expect_identical(
+            cell_text(ht)[4:6, 1],
+            paste(m, c("Count.", "Origin.", "Rounded."))
+        )
+        expect_identical(pub_table_rows(ht)$footnote, 4:6)
+        expect_identical(huxtable::number_format(ht)[[2, 2]], 2L)
+        expect_true(all(border(ht, "bottom")[3, ] == 0.8))
+        expect_true(all(border(ht, "bottom")[4:6, ] == 0))
+    })
+
+    it("marks missing values with the `na` text", {
+        notes <- data.frame(row = 2, col = "slope", text = "Not measured.")
+
+        ht <- pub_table(df, footnotes = notes, na = "-")
+
+        expect_identical(cell_text(ht)[3, 2], "-\u207d\u00b9\u207e")
+    })
+
+    it("keeps cell markers when the table is subset or finished again", {
+        notes <- data.frame(row = 1, col = "n", text = "Count.")
+        ht <- pub_table(df, footnotes = notes)
+
+        again <- pub_table(ht, digits = c(n = 2))
+        part <- pub_table(ht[1:3, ])
+
+        expect_identical(cell_text(again)[2, 3], "1\u207d\u00b9\u207e")
+        expect_identical(pub_table_rows(again)$footnote, 4L)
+        expect_identical(cell_text(part)[2, 3], "1\u207d\u00b9\u207e")
+        expect_true(all(border(again, "bottom")[3, ] == 0.8))
+        expect_true(all(border(again, "bottom")[4, ] == 0))
+    })
+
+    it("marks the shown cell of a merge and numbers it by its place", {
+        data <- data.frame(g = c("a", "a", "b"), x = 1:3)
+        notes <- data.frame(row = c(1, 2), col = c("x", "g"), text = c("X.", "G."))
+
+        ht <- pub_table(data, merge = "g", footnotes = notes)
+
+        expect_identical(unname(huxtable::rowspan(ht)[2, 1]), 2)
+        expect_identical(
+            cell_text(ht)[2, ],
+            paste0(
+                c("a", "1"),
+                c(
+                    "\u207d\u00b9\u207e",
+                    "\u207d\u00b2\u207e"
+                )
+            )
+        )
+        expect_identical(cell_text(ht)[3, 1], "a")
+        expect_identical(cell_text(ht)[5, 1], "\u207d\u00b9\u207e G.")
+        long <- data.frame(g = c("a", "a", "a"), x = 1:3)
+        marked <- data.frame(row = 1, col = "g", text = "G.")
+        ht <- pub_table(long, merge = "g", footnotes = marked)
+        again <- pub_table(ht, merge = "g")
+        expect_identical(huxtable::rowspan(again), huxtable::rowspan(ht))
+    })
+
+    it("keeps marked numeric columns right-aligned when finished again", {
+        data <- data.frame(a = "z", k = 5L)
+        notes <- data.frame(row = 1, col = "k", text = "K.")
+
+        again <- pub_table(pub_table(data, footnotes = notes))
+
+        expect_identical(unname(huxtable::align(again)[2, 2]), "right")
+    })
+
+    it("keeps markers outside the strikeout of a marked cell", {
+        ht <- pub_table(df, footnotes = data.frame(row = 1, col = "n", text = "N."))
+
+        struck <- pub_strikeout(ht, 2, "n")
+
+        expect_identical(cell_text(struck)[2, 3], "~~1~~\u207d\u00b9\u207e")
+    })
+
+    it("marks Markdown cells in their Markdown", {
+        hx <- pub_strikeout(pub_table(df), 2, "n")
+        notes <- data.frame(row = 1, col = "n", text = "Excluded.")
+
+        ht <- pub_table(hx, footnotes = notes)
+
+        expect_identical(cell_text(ht)[2, 3], "~~1~~\u207d\u00b9\u207e")
+        expect_true(huxtable::markdown(ht)[2, 3])
+    })
+
+    it("validates cell footnotes", {
+        note <- \(row = 1, col = "n", text = "N.", ...) {
+            data.frame(row = row, col = col, text = text, ...)
+        }
+        expect_error(pub_table(df, footnotes = note(extra = 1)), "columns `row`")
+        expect_error(pub_table(df, footnotes = note(col = "z")), "unknown columns: z")
+        expect_error(pub_table(df, footnotes = note(col = 1)), "column names")
+        expect_no_error(pub_table(df, footnotes = note(col = factor("n"))))
+        expect_error(pub_table(df, footnotes = note(row = 3)), "body rows \\(1 to 2\\)")
+        expect_error(pub_table(df, footnotes = note(row = 1.5)), "body rows")
+        expect_error(pub_table(df, footnotes = note(row = "1")), "body rows")
+        expect_error(pub_table(df, footnotes = note(text = " ")), "must not be blank")
+        expect_error(pub_table(df, footnotes = note(text = NA)), "`footnotes\\$text`")
+        headerless <- huxtable::as_hux(df, add_colnames = FALSE)
+        expect_no_error(pub_table(headerless, footnotes = note()))
+        expect_error(
+            pub_table(headerless, footnotes = note(row = NA)),
+            "header row"
+        )
     })
 
     it("merges runs of equal body cells vertically", {
@@ -353,7 +479,10 @@ describe("pub_table()", {
 
         empty <- pub_table(hx, caption = "Empty")
 
-        expect_identical(cell_text(ht)[, 1], c("a\u00b9", "\u00b9 N."))
+        expect_identical(
+            cell_text(ht)[, 1],
+            c("a\u207d\u00b9\u207e", "\u207d\u00b9\u207e N.")
+        )
         expect_identical(border(ht, "top")[1, 1], 0.8)
         expect_identical(border(ht, "bottom")[, 1], c(0.8, 0))
         expect_identical(dim(empty), c(0L, 1L))
@@ -369,10 +498,10 @@ describe("pub_table()", {
 
         relabelled <- pub_table(ht[1:3, ], labels = c(a = "A"))
 
-        expect_identical(cell_text(ht)[1:2, 2], c("S", "b\u00b9"))
+        expect_identical(cell_text(ht)[1:2, 2], c("S", "b\u207d\u00b9\u207e"))
         expect_identical(
             cell_text(relabelled)[1:2, ],
-            rbind(c("", "S"), c("A", "b\u00b9"))
+            rbind(c("", "S"), c("A", "b\u207d\u00b9\u207e"))
         )
     })
 
@@ -402,10 +531,10 @@ describe("pub_table()", {
         expect_identical(
             cell_text(ht),
             rbind(
-                c("g", "X\u00b9"),
+                c("g", "X\u207d\u00b9\u207e"),
                 c("a", "0.13"),
                 c("a", "2.00"),
-                c("\u00b9 Note.", "\u00b9 Note.")
+                c("\u207d\u00b9\u207e Note.", "\u207d\u00b9\u207e Note.")
             )
         )
         expect_identical(huxtable::caption(ht), "Finished")
@@ -425,7 +554,10 @@ describe("pub_table()", {
 
         ht <- pub_table(stacked, footnotes = c(site = "Sites."))
 
-        expect_identical(cell_text(ht)[, 1], c("site\u00b9", "A", "B", "\u00b9 Sites."))
+        expect_identical(
+            cell_text(ht)[, 1],
+            c("site\u207d\u00b9\u207e", "A", "B", "\u207d\u00b9\u207e Sites.")
+        )
         expect_identical(cell_text(ht)[2:3, 2], c("1.5", "2.3"))
         expect_identical(border(ht, "bottom")[, 1], c(0.4, 0, 0.8, 0))
         expect_identical(border(ht, "top")[1, 1], 0.8)
@@ -606,7 +738,7 @@ describe("pub_table_rows()", {
         )
 
         expect_identical(pub_table_rows(again), pub_table_rows(ht))
-        expect_identical(cell_text(again)[1, ], c("Site", "Slope\u00b9"))
+        expect_identical(cell_text(again)[1, ], c("Site", "Slope\u207d\u00b9\u207e"))
         expect_identical(cell_text(again)[2:3, 2], c("0.50", "1.50"))
         expect_identical(
             huxtable::number_format(again)[4, ],
@@ -620,6 +752,14 @@ describe("pub_table_rows()", {
         )
     })
 
+    it("records the label markers of footnotes given when finishing a table", {
+        ht <- pub_table(pub_table(df), footnotes = note)
+
+        again <- pub_table(ht, labels = c(slope = "Slope"))
+
+        expect_identical(cell_text(again)[1, 2], "Slope\u207d\u00b9\u207e")
+    })
+
     it("keeps only the footnote markers it set when labels change", {
         area <- data.frame(a = 1, b = 2)
         ht <- pub_table(
@@ -627,11 +767,14 @@ describe("pub_table_rows()", {
             labels = c(a = "Area m\u00b2", b = "R\u00b2"),
             footnotes = c(b = "Adjusted.")
         )
-        expect_identical(cell_text(ht)[1, ], c("Area m\u00b2", "R\u00b2\u00b9"))
+        expect_identical(
+            cell_text(ht)[1, ],
+            c("Area m\u00b2", "R\u00b2\u207d\u00b9\u207e")
+        )
 
         again <- pub_table(ht, labels = c(a = "Area", b = "R"))
 
-        expect_identical(cell_text(again)[1, ], c("Area", "R\u00b9"))
+        expect_identical(cell_text(again)[1, ], c("Area", "R\u207d\u00b9\u207e"))
     })
 
     it("validates its input", {
@@ -1050,7 +1193,7 @@ describe("report tables", {
             huxtable::set_bold(rows[[2L]], "status")
 
         text <- cell_text(ht)
-        expect_identical(text[2, 1], "Site ID\u00b9")
+        expect_identical(text[2, 1], "Site ID\u207d\u00b9\u207e")
         expect_identical(text[1, 3:4], c("Result", "Result"))
         expect_identical(unname(huxtable::colspan(ht)[1, 3]), 2)
         expect_identical(unname(huxtable::rowspan(ht)[3, 1]), 2)
@@ -1062,7 +1205,7 @@ describe("report tables", {
         expect_identical(text[3:4, 3], c("99.1", "7.1"))
         expect_true(all(huxtable::align(ht)[2:4, 2] == "center"))
         expect_identical(unname(huxtable::col_width(ht))[[5]], "auto")
-        expect_identical(text[5, 1], "\u00b9 Site footnote.")
+        expect_identical(text[5, 1], "\u207d\u00b9\u207e Site footnote.")
     })
 
     it("build the site summary from the stacked per-site data", {
@@ -1155,7 +1298,7 @@ describe("report tables", {
 
         expect_identical(
             cell_text(ht)[c(1, 4), 1],
-            c("Parameter\u00b9", "\u00b9 Site IDs: A, B, C")
+            c("Parameter\u207d\u00b9\u207e", "\u207d\u00b9\u207e Site IDs: A, B, C")
         )
     })
 })

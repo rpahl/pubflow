@@ -1,3 +1,12 @@
+# pubflow (development version)
+
+* `pub_table(footnotes = )` also takes footnotes on body cells: a data.frame with
+  the columns `row` (body row, `NA` for the label), `col` and `text`. pubflow numbers
+  the markers in reading order, lists equal texts once and keeps the borders and the
+  number format of the marked cells (#16, D59).
+* Footnote markers are superscript numbers in parentheses, e.g. `Ozone⁽¹⁾`, also on
+  labels (was `Ozone¹`), so that several markers in one cell stay apart.
+
 # pubflow 0.0.0.9058
 
 * New `pub_missing()` stands in for a part of a document that doesn't exist yet, e.g.
