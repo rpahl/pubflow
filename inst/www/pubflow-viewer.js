@@ -218,6 +218,7 @@
             timer = window.setTimeout(function() { refresh(viewer); }, 50);
         }).observe(viewer, { childList: true, subtree: true });
         watchRecalculating(viewer);
+        requestPending(viewer);
         refresh(viewer);
     }
 
@@ -278,6 +279,22 @@
 
     if (window.Shiny && typeof Shiny.addCustomMessageHandler === 'function') {
         Shiny.addCustomMessageHandler('pubflow:viewerPending', setPending);
+    }
+
+    /**
+     * A viewer inserted after the session started (e.g. by renderUI()) asks
+     * the server for its label (input <id>_ready): a label sent before this
+     * script was loaded is lost. Viewers of the page are watched before the
+     * session starts and need not ask.
+     */
+    function requestPending(viewer)
+    {
+        var shiny = window.Shiny;
+        if (shiny && shiny.shinyapp && shiny.shinyapp.isConnected() &&
+            typeof shiny.setInputValue === 'function') {
+            shiny.setInputValue(viewer.id + '_ready', true,
+                                { priority: 'event' });
+        }
     }
 
     // Viewers of the page, and viewers inserted later (e.g. by renderUI())

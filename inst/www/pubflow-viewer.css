@@ -81,9 +81,10 @@
   text-align: center;
 }
 
-/* Pending document (pub_viewer_server(pending =)): a status bar with the
-   label stays at the top of the document, which is dimmed (0.65 keeps
-   body text above the WCAG AA contrast of 4.5:1) */
+/* Pending document (pubflow-viewer.js): a status bar with the label stays
+   at the top of the document, which is shown in grey. Grey, not faded:
+   grayscale keeps the contrast of the text (WCAG AA), opacity would not;
+   so Shiny's fade of a recalculating output is undone too. */
 .pubflow-viewer-status {
   position: sticky;
   top: 0;
@@ -103,10 +104,11 @@
   border: 0;
 }
 .pubflow-viewer-doc {
-  transition: opacity 0.2s;
+  transition: filter 0.2s;
 }
 .pubflow-pending .pubflow-viewer-doc {
-  opacity: 0.65;
+  filter: grayscale(1);
+  opacity: 1;
 }
 /* sections reached from the table of contents stay below the bar */
 .pubflow-pending .pubflow-viewer-doc [id] {
@@ -139,6 +141,6 @@
     display: none;
   }
   .pubflow-pending .pubflow-viewer-doc {
-    opacity: 1;
+    filter: none;
   }
 }

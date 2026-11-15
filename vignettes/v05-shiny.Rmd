@@ -485,7 +485,7 @@ tables are not made again for that, they come from the render cache.
 ### Pending results
 
 While the document is made again, e.g. while `doc()` of the app above runs the
-pipeline, the viewer keeps showing the previous one, dims it and shows
+pipeline, the viewer keeps showing the previous one, in grey, and shows
 "Updating ..." in a bar at its top (if it takes longer than half a second).
 
 Runs outside of `doc()`, e.g. in a `shiny::ExtendedTask`, and params that changed
