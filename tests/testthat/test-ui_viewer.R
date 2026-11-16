@@ -237,41 +237,34 @@ describe("pub_viewer_server()", {
         expect_identical(second$doc, first$doc)
     })
 
-    it("marks a pending document with a label", {
+    it("gives the label of a pending document as an output", {
         pending <- shiny::reactiveVal(NULL)
         shiny::testServer(
             pub_viewer_server,
             args = list(doc = shiny::reactive(NULL), pending = pending),
             {
-                log <- capture_messages(session)
+                labels <- list()
                 for (value in list("Running", "Parameters changed", NULL)) {
                     pending(value)
                     session$flushReact()
+                    labels <- c(labels, output$pending)
                 }
-                sent <- log$of_type("pubflow:viewerPending")
-                expect_identical(
-                    lapply(sent, \(m) m$message$label),
-                    list("Running", "Parameters changed", NULL)
-                )
-                expect_identical(sent[[1L]]$message$id, session$ns("viewer"))
+                expect_identical(labels, list("Running", "Parameters changed", ""))
 
-                # a viewer inserted later asks for the label again
-                session$setInputs(viewer_ready = TRUE)
-                sent <- log$of_type("pubflow:viewerPending")
-                expect_length(sent, 4L)
-                expect_null(sent[[4L]]$message$label)
+                pending(1)
+                session$flushReact()
+                expect_error(output$pending, "`pending` must return")
             }
         )
     })
 
-    it("sends no pending marker without `pending`", {
+    it("has no pending output without `pending`", {
         shiny::testServer(
             pub_viewer_server,
             args = list(doc = shiny::reactive(NULL)),
             {
-                log <- capture_messages(session)
                 session$flushReact()
-                expect_length(log$of_type("pubflow:viewerPending"), 0L)
+                expect_error(output$pending, "hasn't been defined")
             }
         )
     })
@@ -292,16 +285,15 @@ describe("pub_viewer_server()", {
     })
 })
 
-describe(".viewer_pending_label()", {
-    it("gives the label, or NULL for no marker", {
-        expect_null(.viewer_pending_label(NULL))
-        expect_null(.viewer_pending_label(""))
-        expect_identical(.viewer_pending_label("Changed"), "Changed")
+describe(".check_pending_label()", {
+    it("accepts a string or NULL", {
+        expect_null(.check_pending_label(NULL))
+        expect_identical(.check_pending_label("Changed"), "Changed")
     })
 
     it("rejects other values", {
         for (x in list(TRUE, NA, 1, c("a", "b"), NA_character_)) {
-            expect_error(.viewer_pending_label(x), "`pending` must return")
+            expect_error(.check_pending_label(x), "`pending` must return")
         }
     })
 })

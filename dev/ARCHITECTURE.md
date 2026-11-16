@@ -574,11 +574,11 @@ condition (the layout step failed) one error box. The client side
 (`pubflow-viewer.js`) only does scrollspy and MathJax typesetting after
 updates, and sets the marker of a pending document (class `pubflow-pending`
 and a label in a `role="status"` bar): "Updating ..." while Shiny marks the
-document output `recalculating`, else the label of message
-`pubflow:viewerPending`, sent by an observer on the optional `pending`
-reactive. There are no
-per-item modules or observers: a changed document is
-rendered again as a whole, with figures and tables from the cache.
+document output `recalculating`, else the label of `output$pending` (from
+the optional `pending` reactive; the status bar is that output, with the
+binding `pubflow.viewerPending`). There are no per-item modules or
+observers: a changed document is rendered again as a whole, with figures
+and tables from the cache.
 
 ### 6.7 The Markdown dialect and the formats (`render_markdown.R`, `render.R`)
 
