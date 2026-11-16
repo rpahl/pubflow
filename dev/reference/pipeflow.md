@@ -2,9 +2,8 @@
 
 Checked 2026-11-15 against **pipeflow 0.6.0** (tag `v0.6.0`, `d0ceae1`; GitHub
 `rpahl/pipeflow`, public; source in `~/coding/rlang/pipeflow`, bare repo
-`pipeflow.git` with worktrees). pubflow is still pinned to 0.5.0.9040 (`31427ca`, D9),
-which differs from 0.6.0 only by an internal refactor. The API is in pipeflow's help
-pages, its `NEWS.md` (with the changes of each version) and its vignettes; its
+`pipeflow.git` with worktrees). pubflow requires 0.6.0 from CRAN (D9). The API is in pipeflow's
+help pages, its `NEWS.md` (with the changes of each version) and its vignettes; its
 `dev/pipeflow.md` maps the code, the run flow and the invariants. This file keeps only
 what shapes pubflow and is easy to get wrong. pipeflow's maintainer is the pubflow
 maintainer: a problem that is better solved in pipeflow may be solved there if the
