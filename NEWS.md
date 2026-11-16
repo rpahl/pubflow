@@ -1,3 +1,11 @@
+# pubflow 0.0.0.9062
+
+* New test helpers for apps: `inst/testhelpers/helper-pubflow.R` (find it with
+  `system.file("testhelpers", "helper-pubflow.R", package = "pubflow")`) reads table
+  cells, labels, spanners, footnotes, styles and decimals, document sections, child
+  types and items, checks that items are locked and reads Word files. Copy it into
+  `tests/testthat/` (#27).
+
 # pubflow 0.0.0.9061
 
 * Internal: the roxygen headers of internal helpers are kept only where they explain

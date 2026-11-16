@@ -1,3 +1,6 @@
+# The test helpers apps copy (inst/testhelpers/), also used by the tests here
+source(system.file("testhelpers", "helper-pubflow.R", package = "pubflow"))
+
 # Register an as_pub_output() method for the current test only. Registering from a
 # non-namespace environment leaves pubflow's namespace info alone.
 local_as_pub_output_method <- function(cls, fun, frame = parent.frame()) {
@@ -126,14 +129,6 @@ pdf_landscape <- function(path) {
         },
         logical(1)
     )
-}
-
-# Parts of a DOCX file as xml2 documents (word/document.xml by default)
-docx_xml <- function(path, part = "word/document.xml") {
-    dir <- tempfile("docx-")
-    on.exit(unlink(dir, recursive = TRUE), add = TRUE)
-    zip::unzip(path, files = part, exdir = dir)
-    xml2::read_xml(file.path(dir, part))
 }
 
 # REF fields of DOCX XML: instruction, result text and if the result is bold
