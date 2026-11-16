@@ -7,7 +7,8 @@
  * - typesets math with MathJax after each update of the document (MathJax
  *   typesets the page itself when it is loaded for the first time);
  * - marks a pending document: "Updating ..." while the document output
- *   recalculates, else the label of message pubflow:viewerPending.
+ *   recalculates, else the label of the viewer's output <id>-pending
+ *   (output binding pubflow.viewerPending on its status bar).
  * A MutationObserver per viewer notices the updates.
  * Independent of Bootstrap.
  */
@@ -23,10 +24,6 @@
     // (ms), so that fast updates don't flash it
     var UPDATING_LABEL = 'Updating ...';
     var UPDATING_DELAY = 500;
-
-    // Pending labels by viewer id (message pubflow:viewerPending), kept so
-    // that a viewer inserted after the message still gets its marker
-    var pendingLabels = {};
 
     function viewerOf(el)
     {
@@ -218,7 +215,6 @@
             timer = window.setTimeout(function() { refresh(viewer); }, 50);
         }).observe(viewer, { childList: true, subtree: true });
         watchRecalculating(viewer);
-        requestPending(viewer);
         refresh(viewer);
     }
 
@@ -260,7 +256,7 @@
     function applyPending(viewer)
     {
         var label = viewer.pubflowUpdating ? UPDATING_LABEL :
-            pendingLabels[viewer.id] || '';
+            viewer.pubflowPendingLabel || '';
         viewer.classList.toggle('pubflow-pending', label !== '');
         var status = viewer.querySelector('.pubflow-viewer-status');
         if (status && status.textContent !== label) {
@@ -268,33 +264,41 @@
         }
     }
 
-    function setPending(msg)
+    /**
+     * The status bar of a viewer is the output of its pending label. Shiny
+     * keeps the last value of an output and gives it to an output bound
+     * later (a viewer inserted by renderUI()), suspends the output while the
+     * viewer is hidden and applies the current value when it is shown again.
+     * An unchanged value doesn't reach the binding.
+     */
+    function setPendingLabel(el, label)
     {
-        pendingLabels[msg.id] = msg.label || '';
-        var viewer = document.getElementById(msg.id);
+        var viewer = viewerOf(el);
         if (viewer) {
+            watch(viewer);  // also when bound with a value Shiny kept
+            viewer.pubflowPendingLabel = label;
             applyPending(viewer);
         }
     }
 
-    if (window.Shiny && typeof Shiny.addCustomMessageHandler === 'function') {
-        Shiny.addCustomMessageHandler('pubflow:viewerPending', setPending);
-    }
-
-    /**
-     * A viewer inserted after the session started (e.g. by renderUI()) asks
-     * the server for its label (input <id>_ready): a label sent before this
-     * script was loaded is lost. Viewers of the page are watched before the
-     * session starts and need not ask.
-     */
-    function requestPending(viewer)
-    {
-        var shiny = window.Shiny;
-        if (shiny && shiny.shinyapp && shiny.shinyapp.isConnected() &&
-            typeof shiny.setInputValue === 'function') {
-            shiny.setInputValue(viewer.id + '_ready', true,
-                                { priority: 'event' });
-        }
+    if (window.Shiny && Shiny.OutputBinding) {
+        var pendingBinding = new Shiny.OutputBinding();
+        $.extend(pendingBinding, {
+            find: function(scope) {
+                return $(scope).find('.pubflow-viewer-status[id]');
+            },
+            renderValue: setPendingLabel,
+            // a failed label shows its error as the label (not silently no
+            // marker); a silent error (req()) shows no marker
+            renderError: function(el, err) {
+                setPendingLabel(el, err.message);
+            },
+            clearError: function() {},
+            // the bar is not faded or marked busy while the label recalculates
+            showProgress: function() {}
+        });
+        Shiny.outputBindings.register(pendingBinding,
+                                      'pubflow.viewerPending');
     }
 
     // Viewers of the page, and viewers inserted later (e.g. by renderUI())

@@ -1,9 +1,10 @@
 # Viewer module: shows a document as one scrollable page with a sticky table of
 # contents. The server renders the document with the HTML renderer (figures and tables
 # from the render cache) into one output and the table of contents, from the same
-# outline, into another; the client side (inst/www/pubflow-viewer.js) only highlights
-# the current section (scrollspy) and typesets math after each update. No per-item
-# modules or observers: a changed document is rendered again as a whole.
+# outline, into another, and an optional pending label into a third; the client side
+# (inst/www/pubflow-viewer.js) only highlights the current section (scrollspy),
+# typesets math after each update and shows the pending marker. No per-item modules or
+# observers: a changed document is rendered again as a whole.
 
 # ------
 # Module
@@ -42,7 +43,10 @@
 #' Shiny can't see runs outside of `doc`, e.g. in a [shiny::ExtendedTask], or params
 #' that changed but are applied only by a button. For these, pass a `pending` reactive
 #' returning the label to show (e.g. `"Parameters changed: click 'Update' to update the
-#' results."`), or `NULL` for no marker.
+#' results."`), or `NULL` for no marker. The label is an output of the viewer: like
+#' the document, it is computed only while the viewer is visible (not in a hidden tab,
+#' see [shiny::outputOptions()]), and it goes away with the viewer's other outputs.
+#' "Updating ..." takes precedence over it.
 #'
 #' @param id Module id.
 #' @param toc `TRUE`: show the table of contents (sections up to level 3) next to the
@@ -123,9 +127,11 @@ pub_viewer_ui <- function(id, toc = TRUE, height = NULL) {
                 role = if (fixed) "region",
                 `aria-label` = if (fixed) "Document",
                 tabindex = if (fixed) "0",
-                # label of a pending document (pubflow-viewer.js); a live region
-                # must exist before its text changes to be announced
+                # label of a pending document: an output (binding in
+                # pubflow-viewer.js) that is always there, as a live region must
+                # exist before its text changes to be announced
                 htmltools::div(
+                    id = ns("pending"),
                     class = "pubflow-viewer-status",
                     role = "status",
                     `aria-live` = "polite"
@@ -152,32 +158,20 @@ pub_viewer_server <- function(id, doc, cache = pub_cache(), pending = NULL) {
         })
         output$doc <- shiny::renderUI(rendered()$doc)
         output$toc <- shiny::renderUI(rendered()$toc)
+        # an output, not an observer: suspended while the viewer is hidden and
+        # removed with the module's other outputs
         if (!is.null(pending)) {
-            shiny::observe({
-                input$viewer_ready
-                .send_custom_message(
-                    "pubflow:viewerPending",
-                    list(
-                        id = session$ns("viewer"),
-                        label = .viewer_pending_label(pending())
-                    ),
-                    session = session
-                )
-            })
+            output$pending <- shiny::renderText(.check_pending_label(pending()))
         }
         invisible(NULL)
     })
 }
 
-#' Label of the pending marker
-#' @param x the value of the viewer's `pending` reactive.
-#' @return the label, or `NULL` for no marker.
-#' @noRd
-.viewer_pending_label <- function(x) {
+.check_pending_label <- function(x) {
     if (!is.null(x) && !rlang::is_string(x)) {
         rlang::abort("`pending` must return `NULL` or a string.")
     }
-    if (identical(x, "")) NULL else x
+    x
 }
 
 

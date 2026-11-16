@@ -63,7 +63,10 @@ wait on).
 
 Shiny can't see runs outside of \code{doc}, e.g. in a \link[shiny:ExtendedTask]{shiny::ExtendedTask}, or params
 that changed but are applied only by a button. For these, pass a \code{pending} reactive
-returning the label to show (e.g. \code{"Parameters changed: click 'Update' to update the results."}), or \code{NULL} for no marker.
+returning the label to show (e.g. \code{"Parameters changed: click 'Update' to update the results."}), or \code{NULL} for no marker. The label is an output of the viewer: like
+the document, it is computed only while the viewer is visible (not in a hidden tab,
+see \code{\link[shiny:outputOptions]{shiny::outputOptions()}}), and it goes away with the viewer's other outputs.
+"Updating ..." takes precedence over it.
 }
 }
 \examples{
