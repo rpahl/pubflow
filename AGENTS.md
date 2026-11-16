@@ -6,7 +6,7 @@ parameter UIs, result viewers and reports ("publishing workflow").
 This is the single source of agent instructions. `CLAUDE.md` (for Claude Code) and
 `.github/copilot-instructions.md` only point here, so add new instructions to this file.
 Keep it to instructions agents can't get from the code or the docs: overviews, file maps
-and module descriptions belong in `dev/ARCHITECTURE.md` and `dev/reference/README.md`.
+and module descriptions belong in `dev/ARCHITECTURE.md`.
 
 ## Start here
 
@@ -18,15 +18,14 @@ The development documents live in `dev/` (excluded from the build).
 - `dev/DESIGN.md` — the agreed design (source of truth): principles and the decision
   log (D1, D2, ...) with the reasons. Add a decision there when a change settles a
   design question.
-- `dev/PLAN.md` — the open work of v0.1 with acceptance criteria. Work on one PR per
-  session/branch. Its last section lists open problems of building documents in layout
-  steps (D19); check them before starting work. "Later" → "Parked" holds deferred
-  ideas: mention the ones that touch the current work. Remove done items and settled
-  problems (DESIGN keeps the decisions, NEWS the history).
-- `dev/reference/` — research you should not need to redo; its `README.md` lists the
-  files. Read `pipeflow.md` (pipeflow 0.5.0.9040 API facts and quirks) before any
-  pipeline code; add new pipeflow findings to its §9, which also holds the IDs (B1, F7,
-  Q15, ...) that DESIGN and PLAN cite.
+- The open work is in GitHub issues: the release checklist (#40) and the deferred
+  ideas (label `maybe`, e.g. `gh issue list --label maybe`); mention the ones that
+  touch the current work. Work on one PR per session/branch.
+- `dev/reference/` — research you should not need to redo: `pipeflow.md` and
+  `benchmarks.md` (measurements behind the engine, cache and table decisions). Read
+  `pipeflow.md` (pipeflow 0.6.0 facts and quirks that shape pubflow; the API itself is
+  in pipeflow's help pages and NEWS) before any pipeline code; add new pipeflow
+  findings to its "Open issues".
 - If DESIGN and reality disagree (pipeflow, huxtable, pandoc behave differently than
   described), stop and ask; then update DESIGN in the same branch.
 - Before designing a new abstraction (a framework-like layer: tagging, dependency
@@ -70,10 +69,10 @@ The development documents live in `dev/` (excluded from the build).
   The snap `/snap/bin/typst` is still installed but can't start inside the sandbox and
   has a private `/tmp`; make sure `typst` resolves to `~/.local/bin`.
 - Git layout: bare repository `~/coding/rlang/pubflow/pubflow.git` with worktrees;
-  `main` is checked out at `~/coding/rlang/pubflow/main`. Milestone worktree example:
-  `git -C ~/coding/rlang/pubflow/pubflow.git worktree add ../m2-params -b m2-params main`.
+  `main` is checked out at `~/coding/rlang/pubflow/main`. Worktree example:
+  `git -C ~/coding/rlang/pubflow/pubflow.git worktree add ../my-branch -b my-branch main`.
   Remote `origin` = `rpahl/pubflow`. Commit when the user asks (or as agreed for the
-  milestone); never push without asking.
+  branch); never push without asking.
 
 ## Commands (from the package root)
 
@@ -147,9 +146,15 @@ $R -q -e "covr::report(covr::package_coverage(), 'check/coverage.html', browse =
   exported non-param functions start with `pub_`; param functions are named after the
   param concepts (`param()`, `param_value()`, ...); S3 classes `pub_*`; error classes
   `pubflow_*`; CSS/JS prefix `pubflow`.
-- roxygen2 for every function: exported ones with full docs and runnable examples,
-  internal ones with `@noRd`.
-- Keep functions short (ideally <= 50 lines).
+- roxygen2 for every exported function, with full docs and runnable examples. An
+  internal helper (`.name`) gets a roxygen header (ending in `@noRd`) only if it tells
+  the reader something that the name, the signature and the body don't: an invariant,
+  the reason for a design choice, a side effect or ordering constraint, an edge case,
+  or the shape of a returned structure or condition (class and fields). Then the
+  description carries that, and `@param`/`@return` are kept only for the non-obvious
+  ones. A title plus `@param`s that restate the argument names, or a description that
+  retells the body, is noise: leave the header out. When in doubt, ask whether a reader
+  of the body would miss the header; if not, drop it.
 - Source files are split into sections: a full-width `# ====` banner opens a block, a
   short `# ---` rule as long as its title a section within it (small files have
   sections only). In a section the exported function comes first, then its helpers in

@@ -131,7 +131,7 @@ Warm DOCX parts: `pub_markdown()` 0.87 s, pandoc 1.97 s, section breaks
 0.10 s, header/footer 0.16 s, lock 0.24 s. HTML without cache: tables 0.79 s,
 texts 17 ms. The cold times include the first call of the session (package
 and font loading) and the 45 figures; the Typst warm time is dominated by
-`huxtable::to_typst()` (`pub_markdown()` 4.3 s, see PLAN.md, Parked).
+`huxtable::to_typst()` (`pub_markdown()` 4.3 s, see issue #35).
 
 ## Outputs that reach their pipeline (D20)
 
@@ -155,7 +155,7 @@ pipeline (class `pipeflow`), per ggplot:
 | chains of `plot_env` and mapping quosures, bindings only | 0.14 ms | 0.09 ms |
 
 => no run-time check (D20); the targeted check is parked as an
-opt-in diagnostic (PLAN.md).
+opt-in diagnostic (issue #38).
 
 ## Figures across processes (D43)
 

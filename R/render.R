@@ -390,13 +390,6 @@ pub_output_filename <- function(meta, ext) {
 # ---------------
 # Post-processors
 # ---------------
-#' Apply the post-processors of a spec to a rendered file
-#' @param path path of the rendered file.
-#' @param doc the `pub_doc` (with the render-time metadata).
-#' @param spec the `pub_report_spec`.
-#' @param call the environment of the caller, for the error message.
-#' @return `path`, invisibly.
-#' @noRd
 .post_process <- function(path, doc, spec, call = rlang::caller_env()) {
     pp <- .post_processors(spec)
     for (i in seq_along(pp)) {
@@ -448,14 +441,6 @@ pub_output_filename <- function(meta, ext) {
 # ---------------
 # Standalone HTML
 # ---------------
-#' Write a standalone HTML file into a work directory
-#' @param doc a `pub_doc`.
-#' @param settings render settings of the spec (`.render_settings()`).
-#' @param cache a `pub_cache` or `NULL`.
-#' @param work the work directory.
-#' @param front list of front matter nodes.
-#' @return its path.
-#' @noRd
 .render_html_file <- function(doc, settings, cache, work, front) {
     out <- file.path(work, "document.html")
     html <- .standalone_html(doc, settings, cache, front)

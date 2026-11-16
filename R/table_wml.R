@@ -127,10 +127,6 @@
     res
 }
 
-#' Logical matrix with `NA` replaced
-#' @param x logical matrix.
-#' @param na the value for `NA`.
-#' @noRd
 .true <- function(x, na = FALSE) {
     res <- x
     res[is.na(res)] <- na
@@ -172,9 +168,6 @@
     res
 }
 
-#' Vertical alignment of the cells
-#' @param valign character matrix of huxtable vertical alignments.
-#' @noRd
 .wml_valign <- function(valign) {
     res <- ifelse(valign %in% c("middle", "bottom"), valign, "top")
     res[res == "middle"] <- "center"
@@ -264,9 +257,6 @@
     )
 }
 
-#' Escape text for an XML attribute in double quotes
-#' @param x `character`.
-#' @noRd
 .xml_attr <- function(x) {
     gsub("\"", "&quot;", .xml_text(x), fixed = TRUE)
 }
@@ -366,12 +356,6 @@
     )
 }
 
-#' Runs of the inline nodes below `node`
-#' @param node a commonmark XML node.
-#' @param props cell properties from `.wml_props()`.
-#' @param k index of the cell (column-major).
-#' @param flags `list` of the active formats (`bold`, `italic`, `strike`).
-#' @noRd
 .wml_inlines <- function(node, props, k, flags) {
     unlist(lapply(xml2::xml_children(node), \(x) {
         name <- xml2::xml_name(x)
@@ -661,11 +645,6 @@
     )
 }
 
-#' Preferred widths of cells starting in column `j` and spanning `span` columns
-#' @param widths column widths from `.wml_widths()`.
-#' @param j,span `integer`: the first column and the number of columns of each cell.
-#' @return `character`: `<w:tcW>` elements.
-#' @noRd
 .wml_cell_widths <- function(widths, j, span) {
     grid <- c(0, cumsum(widths$grid))
     auto <- c(0L, cumsum(widths$auto))

@@ -292,11 +292,6 @@
 # -----
 # Files
 # -----
-#' Is a path an executable file?
-#'
-#' @param path `character` paths.
-#' @return `logical` of the same length.
-#' @noRd
 .is_executable <- function(path) {
     vapply(
         path,

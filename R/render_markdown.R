@@ -260,18 +260,10 @@ pub_markdown <- function(
     )
 }
 
-#' Time of a document as shown in its header
-#' @param time `POSIXct` time.
-#' @return `character` time in UTC.
-#' @noRd
 .format_utc <- function(time) {
     format(time, "%Y-%m-%d %H:%M:%S UTC", tz = "UTC")
 }
 
-#' YAML double-quoted strings
-#' @param x `character` strings.
-#' @return `character` quoted and escaped strings.
-#' @noRd
 .yaml_string <- function(x) {
     x <- gsub("\\", "\\\\", x, fixed = TRUE)
     x <- gsub("\"", "\\\"", x, fixed = TRUE)
@@ -441,9 +433,6 @@ pub_markdown <- function(
     .md_raw_block(content, .raw_format(ctx$target))
 }
 
-#' Pandoc's name of the raw format of a target
-#' @param target `"docx"`, `"latex"` or `"typst"`.
-#' @noRd
 .raw_format <- function(target) {
     if (target == "docx") "openxml" else target
 }
@@ -907,10 +896,6 @@ pub_markdown <- function(
     .md_figure(fallback, meta, ctx)
 }
 
-#' Content between raw lines of the target that centre it
-#' @param content `character` blocks.
-#' @param ctx the render context (LaTeX or Typst target).
-#' @noRd
 .md_centered <- function(content, ctx) {
     switch(
         ctx$target,
@@ -1006,10 +991,6 @@ pub_markdown <- function(
     paste(c(sprintf("%s{=%s}", fence, format), content, fence), collapse = "\n")
 }
 
-#' Raw inline content of a format
-#' @param content `character(1)` content.
-#' @param format pandoc's raw format (e.g. `"openxml"`).
-#' @noRd
 .md_raw_inline <- function(content, format) {
     ticks <- strrep("`", .longest_backtick_run(content) + 1L)
     sprintf("%s%s%s{=%s}", ticks, content, ticks, format)

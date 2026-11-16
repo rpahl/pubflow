@@ -628,10 +628,6 @@ pub_pipeline_params_server <- function(
     invisible(NULL)
 }
 
-#' Plain value in the form its widget reports it
-#' @param x a param (not a group).
-#' @param value plain value of `x`.
-#' @noRd
 .input_form <- function(x, value) {
     if (is.factor(value)) as.character(value) else value
 }
@@ -821,10 +817,6 @@ pub_pipeline_params_server <- function(
     NULL
 }
 
-#' The param `x` with the value of its raw input(s)
-#' @param raw list of raw input values (one per input id, children order).
-#' @param x a param or param group.
-#' @noRd
 .input_to_param <- function(raw, x) {
     value <- if (inherits(x, "param_group")) {
         rlang::set_names(
@@ -1036,10 +1028,6 @@ pub_pipeline_params_server <- function(
 # ----------------------
 # Emitting and resetting
 # ----------------------
-#' Emit valid changes in `changed` and `values`
-#' @param m module state.
-#' @param changed named list of the changed valid plain values.
-#' @noRd
 .emit <- function(m, changed) {
     m$validValues[names(changed)] <- changed
     m$values(m$validValues)

@@ -111,10 +111,6 @@ pub_format_num <- function(x, format) {
     res
 }
 
-#' Signal an error unless `x` is numeric
-#' @param x the argument to check.
-#' @param call the environment of the call to report in the error.
-#' @noRd
 .check_numbers <- function(x, call = rlang::caller_env()) {
     if (!is.numeric(x)) {
         rlang::abort("`x` must be a numeric vector.", call = call)

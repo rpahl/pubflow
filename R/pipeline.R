@@ -492,10 +492,6 @@ pub_out <- function(x, step, on_error = c("stop", "item")) {
     out
 }
 
-#' The full pipeline of a pipeline or view
-#' @param x a pipeflow pipeline or view.
-#' @return `x` without its view.
-#' @noRd
 .full_pipeline <- function(x) {
     x[["view"]] <- NULL
     x
@@ -743,10 +739,6 @@ pub_layout_sections <- function(sections) {
     fun
 }
 
-#' Names quoted for an error message
-#' @param x `character` names.
-#' @return `string`, e.g. `"'a', 'b'"`.
-#' @noRd
 .quote_names <- function(x) {
     toString(encodeString(x, quote = "'"))
 }
@@ -770,11 +762,6 @@ pub_layout_sections <- function(sections) {
     }
 }
 
-#' Document with one section per view
-#' @param steps named list (by section title) of the step names of each section.
-#' @param values named list (by step) of the step outputs.
-#' @return A `pub_doc`.
-#' @noRd
 .sections_doc <- function(steps, values) {
     pub_doc(lapply(names(steps), \(title) {
         tryCatch(

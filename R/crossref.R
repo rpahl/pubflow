@@ -92,12 +92,6 @@
     if (!is.null(.ref_anchor(ctx$refs, meta, type))) meta[["id"]]
 }
 
-#' Record the caption number of an item that is a target
-#' @param state the cross-reference state (`NULL`: none).
-#' @param meta the item's metadata.
-#' @param type `"table"` or `"figure"`.
-#' @param number `integer(1)` the caption number.
-#' @noRd
 .ref_number <- function(state, meta, type, number) {
     if (!is.null(.ref_anchor(state, meta, type))) {
         state$numbers[[meta[["id"]]]] <- number
@@ -257,9 +251,6 @@
     }
 }
 
-#' Marker of a reference whose number is filled in after the walk
-#' @param id `character(1)` the target's id.
-#' @noRd
 .ref_marker <- function(id) {
     paste0(.token_mark(), "pubflow-ref:", id, .token_mark())
 }
@@ -339,9 +330,6 @@
     paste(prefix, type, id, sep = "-")
 }
 
-#' Name of the Word bookmark around a target's caption number
-#' @param index `integer(1)` position of the target among the document's ids.
-#' @noRd
 .ref_bookmark <- function(index) {
     sprintf("_Ref_pubflow_%d", index)
 }

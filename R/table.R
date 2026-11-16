@@ -217,11 +217,6 @@ pub_table <- function(
     .record_rows(ht, rows, marks)
 }
 
-#' Validate the scalar arguments of pub_table()
-#' @param caption,na,font_size,theme the arguments of pub_table().
-#' @param call the environment of the caller, for the error message.
-#' @return `TRUE`, invisibly.
-#' @noRd
 .check_table_args <- function(
     caption,
     na,
@@ -839,22 +834,12 @@ pub_table_rows <- function(ht) {
     ht
 }
 
-#' NA text of the body cells
-#' @param ht a huxtable.
-#' @param rows the rows from .table_rows().
-#' @param na `character(1)` text of missing body values.
-#' @noRd
 .apply_na <- function(ht, rows, na) {
     huxtable::na_string(ht) <- ""
     huxtable::na_string(ht)[rows$body, ] <- na
     ht
 }
 
-#' Merge runs of equal body cells in the given columns
-#' @param ht a huxtable.
-#' @param body the table rows of the body.
-#' @param merge names of the columns to merge.
-#' @noRd
 .merge_body <- function(ht, body, merge) {
     for (col in merge) {
         j <- match(col, names(ht))
@@ -979,13 +964,6 @@ pub_table_rows <- function(ht) {
     ht
 }
 
-#' Run the theme's style function on the finished table
-#' @param ht a huxtable.
-#' @param rows the rows from .table_rows().
-#' @param style the theme's `style`: `NULL` or a function(ht, rows).
-#' @param call the environment of the caller, for the error message.
-#' @return the styled `ht`.
-#' @noRd
 .apply_style <- function(ht, rows, style, call = rlang::caller_env()) {
     if (is.null(style)) {
         return(ht)
@@ -1071,12 +1049,6 @@ pub_table_rows <- function(ht) {
     res
 }
 
-#' Validate merge columns
-#' @param merge `NULL` or column names.
-#' @param cols the column names.
-#' @param call the environment of the caller, for the error message.
-#' @return character vector of column names.
-#' @noRd
 .check_merge <- function(merge, cols, call = rlang::caller_env()) {
     if (is.null(merge)) {
         return(character(0))
@@ -1084,13 +1056,6 @@ pub_table_rows <- function(ht) {
     .check_columns(merge, cols, "merge", call)
 }
 
-#' Validate column names
-#' @param x the names to check.
-#' @param cols the column names.
-#' @param arg the name of the argument, for the error message.
-#' @param call the environment of the caller, for the error message.
-#' @return `x`.
-#' @noRd
 .check_columns <- function(x, cols, arg, call) {
     if (!is.character(x) || anyNA(x)) {
         rlang::abort(
@@ -1280,9 +1245,6 @@ pub_strikeout <- function(ht, row, col) {
     paste0("~~", gsub("(?<!\\\\)~~", "", text, perl = TRUE), "~~")
 }
 
-#' TRUE if Markdown text is one paragraph struck through as a whole
-#' @param text `character(1)` Markdown text.
-#' @noRd
 .is_struck <- function(text) {
     xml <- commonmark::markdown_xml(text, extensions = "strikethrough") |>
         xml2::read_xml() |>
@@ -1294,10 +1256,6 @@ pub_strikeout <- function(ht, row, col) {
     identical(xml2::xml_name(xml2::xml_children(blocks[[1L]])), "strikethrough")
 }
 
-#' Check that `ht` is a huxtable
-#' @param ht the value to check.
-#' @param call the environment of the caller, for the error message.
-#' @noRd
 .assert_huxtable <- function(ht, call = rlang::caller_env()) {
     if (!huxtable::is_huxtable(ht)) {
         rlang::abort("`ht` must be a huxtable.", call = call)
@@ -1436,10 +1394,6 @@ pub_table_theme <- function(
     )
 }
 
-#' Check the border colour and width of a theme
-#' @param color,width the arguments of pub_table_theme().
-#' @param call the environment of the caller, for the error message.
-#' @noRd
 .check_theme_borders <- function(color, width, call = rlang::caller_env()) {
     if (!is.null(color) && !(rlang::is_string(color) && nzchar(color))) {
         rlang::abort("`border_color` must be a colour string or `NULL`.", call = call)

@@ -197,12 +197,6 @@ pub_section <- function(
     )
 }
 
-#' Document node
-#' @param children unnamed `list` of sections and items (see `.as_children()`).
-#' @param meta named `list` of checked document metadata.
-#' @param front_matter unnamed `list` of sections and items before the body, or `NULL`.
-#' @return a `pub_doc`.
-#' @noRd
 .new_doc <- function(children, meta, front_matter = NULL) {
     structure(
         list(meta = meta, children = children, front_matter = front_matter),
@@ -210,15 +204,6 @@ pub_section <- function(
     )
 }
 
-#' Section node
-#' @param title `character(1)` title of the section.
-#' @param children unnamed `list` of sections and items (see `.as_children()`).
-#' @param numbered `TRUE` if the section is numbered.
-#' @param landscape `TRUE` if the section is placed on landscape pages.
-#' @param page_break `NULL`, `TRUE` or `FALSE` (see `pub_section()`).
-#' @param on_empty `"drop"`, `"keep"` or `"stop"` (see `pub_section()`).
-#' @return a `pub_section`.
-#' @noRd
 .new_section <- function(
     title,
     children,
@@ -256,11 +241,6 @@ pub_section <- function(
 # ------
 # Checks
 # ------
-#' Check that `doc` is a document made by `pub_doc()`
-#' @param doc the value to check.
-#' @param call the environment of the caller, for the error message.
-#' @return `doc`, invisibly.
-#' @noRd
 .check_doc <- function(doc, call = rlang::caller_env()) {
     if (!inherits(doc, "pub_doc")) {
         rlang::abort("`doc` must be a document made by `pub_doc()`.", call = call)

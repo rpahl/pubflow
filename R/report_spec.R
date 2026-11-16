@@ -496,11 +496,6 @@ print.pub_page <- function(x, ...) {
     utils::modifyList(default, labels)
 }
 
-#' Validate the values of a spec's fields
-#' @param spec the list of a spec's fields (before the class is set).
-#' @param call the environment of the caller, for the error message.
-#' @return `spec`, invisibly.
-#' @noRd
 .check_spec_values <- function(spec, call = rlang::caller_env()) {
     abort <- \(msg) rlang::abort(msg, call = call)
     if (!rlang::is_string(spec$problems, c("refuse", "show"))) {
@@ -599,11 +594,6 @@ print.pub_page <- function(x, ...) {
     md = c("png", "svg")
 )
 
-#' Refuse fields that the spec's format can't use
-#' @param spec the list of a spec's fields.
-#' @param call the environment of the caller, for the error message.
-#' @return `spec`, invisibly.
-#' @noRd
 .check_spec_formats <- function(spec, call = rlang::caller_env()) {
     used <- list(
         reference_docx = "docx",
@@ -824,9 +814,6 @@ print.pub_page <- function(x, ...) {
     settings
 }
 
-#' Path of a file in inst/templates
-#' @param name file name, e.g. `"reference.docx"`.
-#' @noRd
 .template_file <- function(name) {
     system.file("templates", name, package = "pubflow", mustWork = TRUE)
 }

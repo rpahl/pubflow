@@ -252,10 +252,6 @@
     ht
 }
 
-#' Typst markup of the Markdown of one cell
-#' @param text `character(1)`: the Markdown of the cell.
-#' @param cell `integer(2)`: row and column of the cell, for errors.
-#' @noRd
 .typst_markdown <- function(text, cell) {
     if (is.na(text)) {
         return(text)

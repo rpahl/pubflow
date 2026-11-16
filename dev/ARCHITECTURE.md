@@ -3,8 +3,8 @@
 Audience: developers (human or agent) who want to understand how pubflow's
 parts fit together before working on it.
 Companion documents: `DESIGN.md` is the agreed design with the reasons
-(decision log D1, D2, ...); `PLAN.md` the open work; `reference/` the research
-behind both. This document is the map: what the parts are, how data flows
+(decision log D1, D2, ...); `reference/` the research
+behind it. This document is the map: what the parts are, how data flows
 between them and where to look in the code. It cites decisions (D) instead
 of repeating them; "§n below" refers to this document.
 The exported functions, grouped by task, are listed in the reference index
@@ -165,7 +165,7 @@ Other parts of the repository:
 | `inst/examples/report-app/` | report app: param UI in the sidebar, viewer with a short and a long report of one pipeline selected by tags (`pub_layout_inputs()`), download as DOCX/PDF/HTML with `pub_render()` (Bootstrap 3, `?bs=5` for Bootstrap 5) |
 | `inst/examples/modules-app/` | modules app: the param modules' return values as raw R output, refresh, locked steps, a standalone module (Bootstrap 3, `?bs=5` for Bootstrap 5) |
 | `inst/bench/` | benchmark scripts behind (workload R15 from `r15.R`) |
-| `vignettes/` | user guides `vNN-*.Rmd` (knitr, built by R CMD check and pkgdown; the plan of the series is in `PLAN.md`) |
+| `vignettes/` | user guides `vNN-*.Rmd` (knitr, built by R CMD check and pkgdown) |
 | `tests/testthat/helper-*.R` | shared fixtures: demo pipelines of every pattern, report-like tables, Shiny message capture (see §10 below) |
 
 ---

@@ -29,7 +29,7 @@ or a report.
 ## Status
 
 Under development towards v0.1. The design is in [dev/DESIGN.md](dev/DESIGN.md),
-the open work in [dev/PLAN.md](dev/PLAN.md).
+the open work in the [issues](https://github.com/rpahl/pubflow/issues).
 
 ## Installation
 
