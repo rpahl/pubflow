@@ -164,6 +164,7 @@ Other parts of the repository:
 | `inst/templates/` | `reference.docx` (styles and header/footer bookmarks; built by `data-raw/reference_docx.R`), `pubflow-header.tex` (LaTeX packages, error frame, footer), `pubflow.typ` (Typst template) |
 | `inst/examples/report-app/` | report app: param UI in the sidebar, viewer with a short and a long report of one pipeline selected by tags (`pub_layout_inputs()`), download as DOCX/PDF/HTML with `pub_render()` (Bootstrap 3, `?bs=5` for Bootstrap 5) |
 | `inst/examples/modules-app/` | modules app: the param modules' return values as raw R output, refresh, locked steps, a standalone module (Bootstrap 3, `?bs=5` for Bootstrap 5) |
+| `inst/testhelpers/` | `helper-pubflow.R`: test helpers for apps to copy into `tests/testthat/` (tables by row role, document nodes, `docx_xml()`; D61) |
 | `inst/bench/` | benchmark scripts behind (workload R15 from `r15.R`) |
 | `vignettes/` | user guides `vNN-*.Rmd` (knitr, built by R CMD check and pkgdown) |
 | `tests/testthat/helper-*.R` | shared fixtures: demo pipelines of every pattern, report-like tables, Shiny message capture (see §10 below) |
