@@ -1,5 +1,13 @@
 # Changelog
 
+## pubflow 0.0.0.9061
+
+- Internal: the roxygen headers of internal helpers are kept only where
+  they explain more than the name, the signature and the body do.
+- Internal: the open work moved from `dev/PLAN.md` into GitHub issues,
+  and `dev/reference/pipeflow.md` now covers pipeflow 0.6.0 and only
+  what shapes pubflow.
+
 ## pubflow 0.0.0.9060
 
 - pubflow requires pipeflow 0.5.0.9040, whose `pip_clone(out = )` copies

@@ -26,7 +26,7 @@ a viewer or a report.
 
 Under development towards v0.1. The design is in
 [dev/DESIGN.md](https://rpahl.github.io/pubflow/dev/DESIGN.md), the open
-work in [dev/PLAN.md](https://rpahl.github.io/pubflow/dev/PLAN.md).
+work in the [issues](https://github.com/rpahl/pubflow/issues).
 
 ## Installation
 
