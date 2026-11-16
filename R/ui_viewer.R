@@ -127,9 +127,7 @@ pub_viewer_ui <- function(id, toc = TRUE, height = NULL) {
                 role = if (fixed) "region",
                 `aria-label` = if (fixed) "Document",
                 tabindex = if (fixed) "0",
-                # label of a pending document: an output (binding in
-                # pubflow-viewer.js) that is always there, as a live region must
-                # exist before its text changes to be announced
+                # label of a pending document (binding in pubflow-viewer.js)
                 htmltools::div(
                     id = ns("pending"),
                     class = "pubflow-viewer-status",
@@ -158,8 +156,6 @@ pub_viewer_server <- function(id, doc, cache = pub_cache(), pending = NULL) {
         })
         output$doc <- shiny::renderUI(rendered()$doc)
         output$toc <- shiny::renderUI(rendered()$toc)
-        # an output, not an observer: suspended while the viewer is hidden and
-        # removed with the module's other outputs
         if (!is.null(pending)) {
             output$pending <- shiny::renderText(.check_pending_label(pending()))
         }
