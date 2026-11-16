@@ -11,7 +11,7 @@ read."><meta property="og:image" content="https://rpahl.github.io/pubflow/logo.p
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9063</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9064</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -136,7 +136,10 @@ is shown, the viewer has the class <code>pubflow-pending</code> (e.g. for end-to
 wait on).</p>
 <p>Shiny can't see runs outside of <code>doc</code>, e.g. in a <a href="https://rdrr.io/pkg/shiny/man/ExtendedTask.html" class="external-link">shiny::ExtendedTask</a>, or params
 that changed but are applied only by a button. For these, pass a <code>pending</code> reactive
-returning the label to show (e.g. <code>"Parameters changed: click 'Update' to update the results."</code>), or <code>NULL</code> for no marker.</p>
+returning the label to show (e.g. <code>"Parameters changed: click 'Update' to update the results."</code>), or <code>NULL</code> for no marker. The label is an output of the viewer: like
+the document, it is computed only while the viewer is visible (not in a hidden tab,
+see <code><a href="https://rdrr.io/pkg/shiny/man/outputOptions.html" class="external-link">shiny::outputOptions()</a></code>), and it goes away with the viewer's other outputs.
+"Updating ..." takes precedence over it.</p>
 </div>
 
     </div>

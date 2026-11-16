@@ -85,7 +85,12 @@ Shiny can't see runs outside of `doc`, e.g. in a
 or params that changed but are applied only by a button. For these, pass
 a `pending` reactive returning the label to show (e.g.
 `"Parameters changed: click 'Update' to update the results."`), or
-`NULL` for no marker.
+`NULL` for no marker. The label is an output of the viewer: like the
+document, it is computed only while the viewer is visible (not in a
+hidden tab, see
+[`shiny::outputOptions()`](https://rdrr.io/pkg/shiny/man/outputOptions.html)),
+and it goes away with the viewer's other outputs. "Updating ..." takes
+precedence over it.
 
 ## See also
 

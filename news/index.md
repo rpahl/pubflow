@@ -1,5 +1,14 @@
 # Changelog
 
+## pubflow 0.0.0.9064
+
+- `pub_viewer_server(pending =)` delivers its label as an output of the
+  viewer instead of an observer sending a message: the label of a hidden
+  viewer (e.g. in another tab) is not computed until it is shown, an
+  unchanged label is not applied again, and the label goes away with the
+  viewer’s other outputs (e.g. when a tool removes the module by its
+  ids).
+
 ## pubflow 0.0.0.9063
 
 - pubflow requires pipeflow 0.6.0 from CRAN; the `Remotes` pin on a

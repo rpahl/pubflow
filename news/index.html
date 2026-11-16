@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pubflow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9063</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9064</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,11 @@
       <small>Source: <a href="https://github.com/rpahl/pubflow/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.0.9064" id="pubflow-0009064">pubflow 0.0.0.9064<a class="anchor" aria-label="anchor" href="#pubflow-0009064"></a></h2>
+<ul><li>
+<code>pub_viewer_server(pending =)</code> delivers its label as an output of the viewer instead of an observer sending a message: the label of a hidden viewer (e.g. in another tab) is not computed until it is shown, an unchanged label is not applied again, and the label goes away with the viewer’s other outputs (e.g. when a tool removes the module by its ids).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9063" id="pubflow-0009063">pubflow 0.0.0.9063<a class="anchor" aria-label="anchor" href="#pubflow-0009063"></a></h2>
 <ul><li>pubflow requires pipeflow 0.6.0 from CRAN; the <code>Remotes</code> pin on a pipeflow commit is gone.</li>
