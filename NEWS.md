@@ -1,3 +1,8 @@
+# pubflow 0.0.0.9063
+
+* pubflow requires pipeflow 0.6.0 from CRAN; the `Remotes` pin on a pipeflow commit
+  is gone.
+
 # pubflow 0.0.0.9062
 
 * New test helpers for apps: `inst/testhelpers/helper-pubflow.R` (find it with

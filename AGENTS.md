@@ -195,8 +195,7 @@ $R -q -e "covr::report(covr::package_coverage(), 'check/coverage.html', browse =
 
 ## Related repositories (read-only)
 
-- pipeflow 0.5.0.9040 (GitHub commit 31427ca, pinned in `Remotes` and `renv.lock`;
-  required since pubflow 0.0.0.9060). pipeflow development source:
+- pipeflow 0.6.0 (CRAN; required in `DESCRIPTION`, locked in `renv.lock`). pipeflow development source:
   `~/coding/rlang/pipeflow` (bare repo `pipeflow.git` with worktrees; GitHub
   `rpahl/pipeflow`; the local `main` worktree may lag behind GitHub, so check
   `gh api repos/rpahl/pipeflow/commits` or ask)

@@ -2560,8 +2560,8 @@
     },
     "pipeflow": {
       "Package": "pipeflow",
-      "Version": "0.5.0.9040",
-      "Source": "GitHub",
+      "Version": "0.6.0",
+      "Source": "Repository",
       "Title": "Fast Interactive Data Analysis Pipelines",
       "Authors@R": "person(\"Roman\", \"Pahl\", , \"roman.pahl@gmail.com\", role = c(\"aut\", \"cre\"))",
       "Maintainer": "Roman Pahl <roman.pahl@gmail.com>",
@@ -2601,14 +2601,8 @@
       "Encoding": "UTF-8",
       "Language": "en-US",
       "NeedsCompilation": "yes",
-      "Roxygen": "list(markdown = TRUE)",
       "Author": "Roman Pahl [aut, cre]",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteUsername": "rpahl",
-      "RemoteRepo": "pipeflow",
-      "RemoteRef": "31427ca518bc160f8470f9fb873668b7f0116f70",
-      "RemoteSha": "31427ca518bc160f8470f9fb873668b7f0116f70"
+      "Repository": "CRAN"
     },
     "pkgbuild": {
       "Package": "pkgbuild",
