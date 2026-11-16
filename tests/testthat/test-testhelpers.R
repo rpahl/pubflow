@@ -32,6 +32,14 @@ describe("table helpers", {
         expect_identical(h$table_decimals(ht, "n"), 0L)
     })
 
+    it("ignore footnote markers on body cells when counting decimals", {
+        notes <- data.frame(row = 1, col = "slope", text = "Rounded.")
+        marked <- pub_table(df, digits = c(slope = 2), footnotes = notes)
+        expect_match(h$table_cells(marked)$slope[[1L]], "^0.12")
+        expect_false(identical(h$table_cells(marked)$slope[[1L]], "0.12"))
+        expect_identical(h$table_decimals(marked, "slope"), 2L)
+    })
+
     it("return a style of the body cells named by column", {
         style <- h$table_style(huxtable::set_bold(ht, 3, "site"), huxtable::bold)
         expect_identical(colnames(style), names(df))
@@ -62,6 +70,14 @@ describe("document helpers", {
     it("collect the items of all levels, optionally by type", {
         expect_length(h$doc_items(doc), 3L)
         expect_length(h$doc_items(doc, "table"), 1L)
+    })
+
+    it("include the front matter first", {
+        front <- pub_doc(pub_section("S", tab), front_matter = pub_text("cover"))
+        expect_identical(
+            vapply(h$doc_items(front), \(x) x$type, ""),
+            c("text", "table")
+        )
     })
 
     it("expect all items to be locked", {

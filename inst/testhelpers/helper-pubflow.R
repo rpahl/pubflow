@@ -48,9 +48,10 @@ table_style <- function(ht, fun = huxtable::text_color) {
 }
 
 # The distinct numbers of decimal places in the body cells of a column, ignoring
-# cells without a number (NA marks, text)
+# cells without a number (NA marks, text); footnote markers on cells are ignored
 table_decimals <- function(ht, col) {
-    cells <- table_cells(ht)[[col]]
+    marks <- "(\u207d[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+\u207e)+$"
+    cells <- sub(marks, "", table_cells(ht)[[col]])
     numbers <- cells[grepl("^[-+\u2212]?[0-9]*[.,]?[0-9]+$", cells)]
     unique(nchar(sub("^[^.,]*[.,]?", "", numbers)))
 }
@@ -90,10 +91,12 @@ section_of <- function(node, ...) {
     node
 }
 
-# The items (outputs) of a document or section, in order, also those of subsections,
+# The items (outputs) of a document or section, in order: front matter first, also
+# those of subsections,
 # optionally only of the given types (e.g. c("table", "figure"))
 doc_items <- function(node, types = NULL) {
-    items <- lapply(node[["children"]], \(child) {
+    nodes <- c(node[["front_matter"]], node[["children"]])
+    items <- lapply(nodes, \(child) {
         if (inherits(child, "pub_section")) {
             doc_items(child, types)
         } else if (is.null(types) || pubflow::pub_type(child[["object"]]) %in% types) {
